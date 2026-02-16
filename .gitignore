@@ -1,0 +1,25 @@
+# General macOS junk
+.DS_Store
+
+# Swift / Xcode build artifacts
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Xcode workspace settings
+*.xcworkspace/xcuserdata/
+project.xcworkspace/xcuserdata/
+
+# Logs generated locally (Xcode, swiftpm)
+*.xcactivitylog
+
+# Fastlane / tooling
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
