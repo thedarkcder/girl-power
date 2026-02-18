@@ -44,6 +44,9 @@ struct DemoCTAView: View {
     }
 
     private var hint: String {
+        if viewModel.isProUser {
+            return "Start a coaching session without limits."
+        }
         switch viewModel.demoQuotaState {
         case .gatePending:
             return "Waiting for eligibility decision"
@@ -68,8 +71,26 @@ struct DemoCTAView_Previews: PreviewProvider {
     static var previews: some View {
         DemoCTAView(viewModel: AppFlowViewModel(
             repository: UserDefaultsOnboardingCompletionRepository(),
-            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: PreviewEntitlementService()
         ))
             .background(Color.black)
     }
 }
+
+#if DEBUG
+@MainActor
+private final class PreviewEntitlementService: ObservableObject, EntitlementServicing {
+    @Published var state: EntitlementState = .loading
+    var isPro: Bool = false
+
+    func load() async {}
+    func purchase() async {}
+    func restore() async {}
+    func observeStates() -> AsyncStream<EntitlementState> {
+        AsyncStream { continuation in
+            continuation.yield(state)
+        }
+    }
+}
+#endif

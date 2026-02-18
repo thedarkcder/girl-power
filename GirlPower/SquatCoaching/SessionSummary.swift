@@ -67,6 +67,7 @@ enum SummaryCTAState: Equatable {
     case awaitingDecision
     case secondAttemptEligible
     case locked(message: String)
+    case proUnlocked
 
     var primaryButtonTitle: String {
         switch self {
@@ -76,6 +77,8 @@ enum SummaryCTAState: Equatable {
             return "One more go"
         case .locked:
             return "Continue to Paywall"
+        case .proUnlocked:
+            return "Start Coaching"
         }
     }
 }

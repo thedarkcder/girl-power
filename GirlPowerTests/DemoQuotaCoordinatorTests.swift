@@ -155,7 +155,11 @@ final class DemoQuotaViewModelBindingTests: XCTestCase {
     func testButtonTitleSwitchesToOneMoreGoWhenEligible() async throws {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
         let repository = InMemoryOnboardingRepository(hasCompleted: true)
-        let viewModel = AppFlowViewModel(repository: repository, demoQuotaCoordinator: coordinator)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
+        )
 
         let expectation = expectation(description: "second attempt eligible")
         viewModel.$demoQuotaState
@@ -176,7 +180,11 @@ final class DemoQuotaViewModelBindingTests: XCTestCase {
     func testGatePendingDisablesButtonAndShowsStatus() async throws {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
         let repository = InMemoryOnboardingRepository(hasCompleted: true)
-        let viewModel = AppFlowViewModel(repository: repository, demoQuotaCoordinator: coordinator)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
+        )
 
         let expectation = expectation(description: "gate pending")
         viewModel.$demoQuotaState
@@ -197,7 +205,11 @@ final class DemoQuotaViewModelBindingTests: XCTestCase {
     func testLockedStateSurfacesUserFacingReason() async throws {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
         let repository = InMemoryOnboardingRepository(hasCompleted: true)
-        let viewModel = AppFlowViewModel(repository: repository, demoQuotaCoordinator: coordinator)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
+        )
         let reason = DemoQuotaStateMachine.LockReason.evaluationDenied(message: "Need subscription")
 
         let expectation = expectation(description: "locked")

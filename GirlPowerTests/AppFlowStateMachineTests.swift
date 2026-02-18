@@ -87,7 +87,8 @@ final class AppFlowViewModelTests: XCTestCase {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
         let viewModel = AppFlowViewModel(
             repository: repository,
-            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: EntitlementServiceStub()
         )
 
         viewModel.handleSplashFinished()
@@ -105,7 +106,8 @@ final class AppFlowViewModelTests: XCTestCase {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let viewModel = AppFlowViewModel(
             repository: repository,
-            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: EntitlementServiceStub()
         )
 
         XCTAssertEqual(viewModel.state, .splash)
@@ -143,7 +145,8 @@ final class AppFlowViewModelTests: XCTestCase {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let viewModel = AppFlowViewModel(
             repository: repository,
-            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: EntitlementServiceStub()
         )
 
         viewModel.handleSplashFinished()
@@ -180,7 +183,8 @@ final class AppFlowViewModelTests: XCTestCase {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .gatePending)
         let viewModel = AppFlowViewModel(
             repository: repository,
-            demoQuotaCoordinator: coordinator
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
         )
 
         await waitForCondition { viewModel.demoQuotaState == .gatePending }
@@ -200,7 +204,8 @@ final class AppFlowViewModelTests: XCTestCase {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .secondAttemptEligible)
         let viewModel = AppFlowViewModel(
             repository: repository,
-            demoQuotaCoordinator: coordinator
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
         )
 
         await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
@@ -222,6 +227,7 @@ final class AppFlowViewModelTests: XCTestCase {
         let viewModel = AppFlowViewModel(
             repository: repository,
             demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub(),
             paywallRouter: router
         )
 

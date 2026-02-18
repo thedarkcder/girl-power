@@ -7,6 +7,7 @@
 	objects = {
 
 	/* Begin PBXBuildFile section */
+		E3D7F4B71F1D4A7A94A7F75C /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = E3D7F4B61F1D4A7A94A7F75C /* Products.storekit */; };
 		8971EB270CA744F0905D93B9 /* CameraSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB2AA22229D429C9DF2070E /* CameraSessionManager.swift */; };
 		4426D4BE3AC74552B2650BEA /* CoachingSpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D98072B85F5487C91147C4E /* CoachingSpeechManager.swift */; };
 		2AD24750250B44AAB0690772 /* CoachingSpeechThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECE0A59181D400D8A84A105 /* CoachingSpeechThrottle.swift */; };
@@ -55,6 +56,12 @@
 		B1C9B3592BB9E8B100B8B310 /* OnboardingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3582BB9E8B100B8B310 /* OnboardingCarouselView.swift */; };
 		B1C9B35B2BB9E8B100B8B310 /* DemoCTAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B35A2BB9E8B100B8B310 /* DemoCTAView.swift */; };
 		B1C9B35D2BB9E8B100B8B310 /* DemoAttemptFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */; };
+		E3D7F4C51F1D4A7A94A7F75C /* EntitlementModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C11F1D4A7A94A7F75C /* EntitlementModels.swift */; };
+		E3D7F4C61F1D4A7A94A7F75C /* EntitlementStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */; };
+		E3D7F4C71F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */; };
+		E3D7F4C81F1D4A7A94A7F75C /* StoreKitEntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */; };
+		E3E1EF931F1D4CC7A2D80111 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF911F1D4CC7A2D80111 /* PaywallView.swift */; };
+		E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */; };
 		18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */; };
 		5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */; };
 		2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */; };
@@ -64,6 +71,10 @@
 		B1C9B36E2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B36D2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift */; };
 		B1C9B3712BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3702BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift */; };
 		B1C9B3742BB9E8B100B8B310 /* GirlPowerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3732BB9E8B100B8B310 /* GirlPowerUITests.swift */; };
+		E3F4C0A21F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */; };
+		E3F4C0A41F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */; };
+		E3F4C0A61F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */; };
+		E3F4C0A81F1D51F8F72AB0D1 /* EntitlementServiceStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +96,7 @@
 
 /* Begin PBXFileReference section */
 		CDB2AA22229D429C9DF2070E /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
+		E3D7F4B61F1D4A7A94A7F75C /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = Products.storekit; sourceTree = "<group>"; };
 		9D98072B85F5487C91147C4E /* CoachingSpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechManager.swift; sourceTree = "<group>"; };
 		0ECE0A59181D400D8A84A105 /* CoachingSpeechThrottle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechThrottle.swift; sourceTree = "<group>"; };
 		DC15B85B7324470C8801F860 /* LandmarkOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarkOverlayView.swift; sourceTree = "<group>"; };
@@ -147,6 +159,16 @@
 		B1C9B3722BB9E8B100B8B310 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1C9B3732BB9E8B100B8B310 /* GirlPowerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GirlPowerUITests.swift; sourceTree = "<group>"; };
 		B1C9B3752BB9E8B100B8B310 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E3D7F4C11F1D4A7A94A7F75C /* EntitlementModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementModels.swift; sourceTree = "<group>"; };
+		E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementStateMachine.swift; sourceTree = "<group>"; };
+		E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementSnapshotStore.swift; sourceTree = "<group>"; };
+		E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitEntitlementService.swift; sourceTree = "<group>"; };
+		E3E1EF911F1D4CC7A2D80111 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallViewModel.swift; sourceTree = "<group>"; };
+		E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementStateMachineTests.swift; sourceTree = "<group>"; };
+		E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallViewModelTests.swift; sourceTree = "<group>"; };
+		E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFlowViewModelProTests.swift; sourceTree = "<group>"; };
+		E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementServiceStub.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,11 +213,32 @@
 				B1C9B3472BB9E8B100B8B310 /* Features */,
 				0A78BC64ECA3406D9CD0E4C4 /* DemoQuota */,
 				F1923253D4F244E8B187318C /* SquatCoaching */,
+				E3D7F4C01F1D4A7A94A7F75C /* Subscriptions */,
+				E3D7F4B51F1D4A7A94A7F75C /* StoreKit */,
 				B1C9B35E2BB9E8B100B8B310 /* Assets */,
 				B1C9B3612BB9E8B100B8B310 /* Preview Content */,
 				B1C9B3672BB9E8B100B8B310 /* Supporting Files */,
 			);
 			path = GirlPower;
+			sourceTree = "<group>";
+		};
+		E3D7F4C01F1D4A7A94A7F75C /* Subscriptions */ = {
+			isa = PBXGroup;
+			children = (
+				E3D7F4C11F1D4A7A94A7F75C /* EntitlementModels.swift */,
+				E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */,
+				E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */,
+				E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */,
+			);
+			path = Subscriptions;
+			sourceTree = "<group>";
+		};
+		E3D7F4B51F1D4A7A94A7F75C /* StoreKit */ = {
+			isa = PBXGroup;
+			children = (
+				E3D7F4B61F1D4A7A94A7F75C /* Products.storekit */,
+			);
+			path = StoreKit;
 			sourceTree = "<group>";
 		};
 		B1C9B3402BB9E8B100B8B310 /* App */ = {
@@ -216,8 +259,18 @@
 				B1C9B3482BB9E8B100B8B310 /* Splash */,
 				B1C9B34A2BB9E8B100B8B310 /* Onboarding */,
 				B1C9B34B2BB9E8B100B8B310 /* Demo */,
+				E3E1EF901F1D4CC7A2D80111 /* Paywall */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		E3E1EF901F1D4CC7A2D80111 /* Paywall */ = {
+			isa = PBXGroup;
+			children = (
+				E3E1EF911F1D4CC7A2D80111 /* PaywallView.swift */,
+				E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */,
+			);
+			path = Paywall;
 			sourceTree = "<group>";
 		};
 		F1923253D4F244E8B187318C /* SquatCoaching */ = {
@@ -331,6 +384,10 @@
 				A29D1F6F5E2F4EB1B84CB5B1 /* SquatSessionCoordinatorSummaryTests.swift */,
 				228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */,
 				077A9F4F859D4CB4B9CFA6C4 /* SquatPostSetSummaryViewModelTests.swift */,
+				E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */,
+				E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */,
+				E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */,
+				E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */,
 				B1C9B3722BB9E8B100B8B310 /* Info.plist */,
 			);
 			path = GirlPowerTests;
@@ -458,6 +515,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E3D7F4B71F1D4A7A94A7F75C /* Products.storekit in Resources */,
 				B1C9B3602BB9E8B100B8B310 /* Assets.xcassets in Resources */,
 				B1C9B3662BB9E8B100B8B310 /* LaunchScreen.storyboard in Resources */,
 				B1C9B3632BB9E8B100B8B310 /* Preview Assets.xcassets in Resources */,
@@ -520,6 +578,12 @@
 				B1C9B3592BB9E8B100B8B310 /* OnboardingCarouselView.swift in Sources */,
 				B1C9B35B2BB9E8B100B8B310 /* DemoCTAView.swift in Sources */,
 				B1C9B35D2BB9E8B100B8B310 /* DemoAttemptFlowView.swift in Sources */,
+				E3D7F4C51F1D4A7A94A7F75C /* EntitlementModels.swift in Sources */,
+				E3D7F4C61F1D4A7A94A7F75C /* EntitlementStateMachine.swift in Sources */,
+				E3D7F4C71F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift in Sources */,
+				E3D7F4C81F1D4A7A94A7F75C /* StoreKitEntitlementService.swift in Sources */,
+				E3E1EF931F1D4CC7A2D80111 /* PaywallView.swift in Sources */,
+				E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */,
 				18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */,
 				5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */,
 				2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */,
@@ -545,6 +609,10 @@
 				7F6B5E34A21A4770B6F9069A /* SquatSessionCoordinatorSummaryTests.swift in Sources */,
 				ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */,
 				B0F1A0CA0E6B4D7D94464033 /* SquatPostSetSummaryViewModelTests.swift in Sources */,
+				E3F4C0A21F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift in Sources */,
+				E3F4C0A41F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift in Sources */,
+				E3F4C0A61F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift in Sources */,
+				E3F4C0A81F1D51F8F72AB0D1 /* EntitlementServiceStub.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

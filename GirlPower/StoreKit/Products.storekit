@@ -1,0 +1,42 @@
+{
+  "identifier": "GirlPowerStoreKitConfig",
+  "metadata": {
+    "version": 1,
+    "displayName": "Girl Power StoreKit"
+  },
+  "products": [
+    {
+      "displayName": "Girl Power Coaching",
+      "productIdentifier": "com.girlpower.app.pro.monthly",
+      "type": "Auto-Renewable Subscription",
+      "subscription": {
+        "duration": "P1M",
+        "groupIdentifier": "girlpower.pro",
+        "groupLevel": 1,
+        "billingRecurrence": "Auto",
+        "introductoryOffer": null,
+        "promotionalOffers": []
+      },
+      "prices": {
+        "base": {
+          "currencyCode": "USD",
+          "value": 19.99
+        }
+      }
+    }
+  ],
+  "subscriptionGroups": [
+    {
+      "displayName": "Girl Power Pro",
+      "identifier": "girlpower.pro"
+    }
+  ],
+  "localizations": [
+    {
+      "locale": "en_US",
+      "displayName": "Girl Power Coaching",
+      "description": "Unlock unlimited AI coaching sessions and personalized squat guidance.",
+      "promotionalTexts": []
+    }
+  ]
+}

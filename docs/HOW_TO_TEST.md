@@ -60,3 +60,30 @@
 5. Relaunch the app; ensure the summary cache is cleared, DemoCTA respects the locked quota state, and the user cannot start a third attempt.
 6. Force a denied/timeout path (e.g., return `{ allowAnotherDemo: false, message: "custom message" }` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
 7. During both flows, tail `supabase functions logs --function demo-session-log` (or watch Xcode os_log output) to ensure attempt start/completion and evaluation events emit exactly once; any duplication indicates a routing race that must be investigated.
+
+## GP-117 StoreKit Paywall + Entitlements
+
+1. Associate the StoreKit configuration with the GirlPower scheme:
+   - In Xcode > **Product** > **Scheme** > **Edit Scheme** > **Run** > **Options**, set *StoreKit Configuration* to `GirlPower/StoreKit/Products.storekit`.
+   - The config defines `com.girlpower.app.pro.monthly`; Sandbox testers must be signed in under Settings → App Store → Sandbox Account.
+2. Run the new targeted entitlement + paywall tests prior to manual QA:
+   ```sh
+   xcodebuild test \
+     -scheme GirlPower \
+     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -only-testing:GirlPowerTests/EntitlementStateMachineTests \
+     -only-testing:GirlPowerTests/PaywallViewModelTests \
+     -only-testing:GirlPowerTests/AppFlowViewModelProTests
+   ```
+3. Launch the app fresh (no subscription) and route to the paywall via the demo summary.
+   - Confirm the price string matches the localized value from StoreKit (no hard-coded currency), feature bullets render, and Privacy/Terms links open in Safari.
+4. Tap **Subscribe** while logged into the sandbox account, complete the subscription sheet, and verify within the same run:
+   - The paywall shows the success banner momentarily then dismisses automatically.
+   - `DemoCTAView` button text switches to “Start Coaching” and remains enabled across repeated sessions without DemoQuota blocking.
+   - Post-set summary CTA becomes “Start Coaching” (no paywall secondary action) and locked states never reappear while the entitlement stays active.
+5. Test the **Restore Purchases** flow:
+   - With an active sandbox subscription, delete/reinstall the app, sign back into the sandbox account, and tap Restore to regain `isPro` without hitting the paywall.
+   - Sign out (or use a fresh simulator) without an active subscription and tap Restore; expect an inline error message and no crashes.
+6. Validate non-subscribed behavior:
+   - Without a subscription, complete two demo attempts to confirm DemoQuota still locks at two and routes to the paywall.
+   - Ensure tapping **Subscribe** while offline/error triggers the inline error banner but leaves buttons usable after hitting **Try again** or reloading.

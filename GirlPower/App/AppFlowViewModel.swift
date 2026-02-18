@@ -12,8 +12,13 @@ final class AppFlowViewModel: ObservableObject {
     @Published var navigationPath = NavigationPath()
     @Published private(set) var demoQuotaState: DemoQuotaStateMachine.State = .fresh
     @Published private(set) var summaryViewModel: SquatPostSetSummaryViewModel?
+    @Published private(set) var entitlementState: EntitlementState
+    @Published private(set) var isProUser: Bool
 
     var demoButtonTitle: String {
+        if isProUser {
+            return "Start Coaching"
+        }
         switch (demoQuotaState, state) {
         case (.gatePending, _):
             return "Checking eligibility…"
@@ -25,7 +30,10 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     var isDemoButtonDisabled: Bool {
-        demoQuotaState.isLocked || demoQuotaState == .gatePending
+        if isProUser {
+            return false
+        }
+        return demoQuotaState.isLocked || demoQuotaState == .gatePending
     }
 
     var activeAttemptIndex: Int {
@@ -33,6 +41,9 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     var demoStatusMessage: String? {
+        if isProUser {
+            return "Unlimited coaching unlocked."
+        }
         switch demoQuotaState {
         case .gatePending:
             return "Checking eligibility…"
@@ -48,36 +59,48 @@ final class AppFlowViewModel: ObservableObject {
         slides.indices.last
     }
 
+    var paywallEntitlementService: EntitlementServicing {
+        entitlementService
+    }
+
     private let stateMachine: AppFlowStateMachine
     private let repository: OnboardingCompletionRepository
     private let demoQuotaCoordinator: DemoQuotaCoordinating
+    private let entitlementService: EntitlementServicing
     private let paywallRouter: PaywallRouting
     private var stateTask: Task<Void, Never>?
+    private var entitlementTask: Task<Void, Never>?
     private var currentAttemptIndex: Int = 1
     private let logger = Logger(subsystem: "com.girlpower.app", category: "AppFlow")
 
     init(
         repository: OnboardingCompletionRepository,
         demoQuotaCoordinator: DemoQuotaCoordinating,
+        entitlementService: EntitlementServicing,
         paywallRouter: PaywallRouting = PaywallRouter(),
         slides: [OnboardingSlide] = OnboardingSlide.defaultSlides,
         stateMachine: AppFlowStateMachine? = nil
     ) {
         self.repository = repository
         self.demoQuotaCoordinator = demoQuotaCoordinator
+        self.entitlementService = entitlementService
         self.slides = slides
         self.stateMachine = stateMachine ?? AppFlowStateMachine(
             slideCount: slides.count,
             skipOnboardingAfterSplash: repository.hasCompletedOnboarding
         )
         self.state = self.stateMachine.initialState()
+        self.entitlementState = entitlementService.state
+        self.isProUser = entitlementService.isPro
         self.paywallRouter = paywallRouter
         syncNavigation(for: state)
         observeDemoQuota()
+        observeEntitlements()
     }
 
     deinit {
         stateTask?.cancel()
+        entitlementTask?.cancel()
     }
 
     func handleSplashFinished() {
@@ -105,6 +128,10 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     func startDemo(reason: String = "cta_tap") {
+        if isProUser {
+            startUnlimitedSession(reason: reason)
+            return
+        }
         guard isDemoButtonDisabled == false else { return }
         summaryViewModel = nil
         let metadata: [String: Any] = [
@@ -132,6 +159,12 @@ final class AppFlowViewModel: ObservableObject {
         }
     }
 
+    private func startUnlimitedSession(reason: String) {
+        summaryViewModel = nil
+        logger.log("Starting unlimited coaching session (\(reason))")
+        apply(event: .startDemo)
+    }
+
     func finishDemo(reason: String = "user_exit") {
         let metadata: [String: Any] = [
             "reason": reason,
@@ -146,11 +179,16 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     func completeAttempt(with input: SessionSummaryInput) async -> SummaryContext {
-        let metadata = summaryMetadata(from: input)
-        let newState = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
         let summary = SessionSummaryFactory.make(from: input)
-        let resolvedState = newState ?? demoQuotaState
-        demoQuotaState = resolvedState
+        let resolvedState: DemoQuotaStateMachine.State
+        if isProUser {
+            resolvedState = demoQuotaState
+        } else {
+            let metadata = summaryMetadata(from: input)
+            let newState = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
+            resolvedState = newState ?? demoQuotaState
+            demoQuotaState = resolvedState
+        }
         currentAttemptIndex = min(summary.attemptIndex + 1, 2)
         navigationPath = NavigationPath()
         let context = SummaryContext(summary: summary, ctaState: summaryCTAState(for: resolvedState, attemptIndex: summary.attemptIndex))
@@ -165,16 +203,24 @@ final class AppFlowViewModel: ObservableObject {
         apply(event: .showSummary)
     }
 
-    func startSecondAttemptFromSummary() {
+    func startNextAttemptFromSummary() {
         guard summaryViewModel != nil else {
-            logger.notice("Ignoring One More Go tap because summary is no longer active")
+            logger.notice("Ignoring summary primary action because summary is no longer active")
             return
         }
         summaryViewModel = nil
-        startDemo(reason: "summary_one_more_go")
+        if isProUser {
+            startUnlimitedSession(reason: "summary_pro_start")
+        } else {
+            startDemo(reason: "summary_one_more_go")
+        }
     }
 
     func continueToPaywall() {
+        guard isProUser == false else {
+            logger.notice("Skipping paywall routing because entitlement already unlocked")
+            return
+        }
         guard state != .paywall else {
             logger.notice("Ignoring duplicate paywall navigation request while already presenting")
             return
@@ -231,7 +277,38 @@ final class AppFlowViewModel: ObservableObject {
         }
     }
 
+    private func observeEntitlements() {
+        entitlementTask = Task {
+            let stream = entitlementService.observeStates()
+            for await newState in stream {
+                await MainActor.run {
+                    entitlementState = newState
+                    let previouslyPro = isProUser
+                    isProUser = entitlementService.isPro
+                    if let summaryVM = summaryViewModel {
+                        let attempt = summaryVM.context.summary.attemptIndex
+                        let ctaState = summaryCTAState(for: demoQuotaState, attemptIndex: attempt)
+                        summaryVM.updateCTAState(ctaState)
+                    }
+                    if isProUser && !previouslyPro {
+                        handleProUnlocked()
+                    }
+                }
+            }
+        }
+    }
+
+    private func handleProUnlocked() {
+        logger.log("Entitlement unlocked; dismissing paywall if needed")
+        if state == .paywall {
+            finishDemo(reason: "paywall_purchase_success")
+        }
+    }
+
     private func summaryCTAState(for quotaState: DemoQuotaStateMachine.State, attemptIndex: Int) -> SummaryCTAState {
+        if isProUser {
+            return .proUnlocked
+        }
         switch quotaState {
         case .gatePending:
             if attemptIndex > 1 {
