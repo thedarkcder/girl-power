@@ -26,5 +26,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to analyze your squat form and provide coaching feedback.</string>
 </dict>
 </plist>

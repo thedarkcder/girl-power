@@ -8,6 +8,33 @@ final class AppFlowViewModel: ObservableObject {
 
     @Published private(set) var state: AppFlowStateMachine.State
     @Published var navigationPath = NavigationPath()
+    @Published private(set) var demoQuotaState: DemoQuotaStateMachine.State = .fresh
+
+    var demoButtonTitle: String {
+        switch (demoQuotaState, state) {
+        case (.gatePending, _):
+            return "Checking eligibility…"
+        case (.secondAttemptEligible, _):
+            return "One more go"
+        default:
+            return "Start Free Demo"
+        }
+    }
+
+    var isDemoButtonDisabled: Bool {
+        demoQuotaState.isLocked || demoQuotaState == .gatePending
+    }
+
+    var demoStatusMessage: String? {
+        switch demoQuotaState {
+        case .gatePending:
+            return "Checking eligibility…"
+        case .locked(let reason):
+            return reason.userFacingMessage
+        default:
+            return nil
+        }
+    }
 
     let slides: [OnboardingSlide]
     private var lastSlideIndex: Int? {
@@ -16,13 +43,17 @@ final class AppFlowViewModel: ObservableObject {
 
     private let stateMachine: AppFlowStateMachine
     private let repository: OnboardingCompletionRepository
+    private let demoQuotaCoordinator: DemoQuotaCoordinating
+    private var stateTask: Task<Void, Never>?
 
     init(
         repository: OnboardingCompletionRepository,
+        demoQuotaCoordinator: DemoQuotaCoordinating,
         slides: [OnboardingSlide] = OnboardingSlide.defaultSlides,
         stateMachine: AppFlowStateMachine? = nil
     ) {
         self.repository = repository
+        self.demoQuotaCoordinator = demoQuotaCoordinator
         self.slides = slides
         self.stateMachine = stateMachine ?? AppFlowStateMachine(
             slideCount: slides.count,
@@ -30,6 +61,11 @@ final class AppFlowViewModel: ObservableObject {
         )
         self.state = self.stateMachine.initialState()
         syncNavigation(for: state)
+        observeDemoQuota()
+    }
+
+    deinit {
+        stateTask?.cancel()
     }
 
     func handleSplashFinished() {
@@ -56,12 +92,37 @@ final class AppFlowViewModel: ObservableObject {
         apply(event: .onboardingCompleted)
     }
 
-    func startDemo() {
-        apply(event: .startDemo)
+    func startDemo(reason: String = "cta_tap") {
+        guard isDemoButtonDisabled == false else { return }
+        let metadata: [String: Any] = [
+            "reason": reason,
+            "cta_label": demoButtonTitle,
+            "timestamp": isoFormatter.string(from: Date())
+        ]
+        Task {
+            let newState = try? await demoQuotaCoordinator.markAttemptStarted(startMetadata: metadata)
+            await MainActor.run {
+                switch newState {
+                case .firstAttemptActive?, .secondAttemptActive?:
+                    apply(event: .startDemo)
+                default:
+                    break
+                }
+            }
+        }
     }
 
-    func finishDemo() {
-        apply(event: .finishDemo)
+    func finishDemo(reason: String = "user_exit") {
+        let metadata: [String: Any] = [
+            "reason": reason,
+            "timestamp": isoFormatter.string(from: Date())
+        ]
+        Task {
+            _ = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
+            await MainActor.run {
+                apply(event: .finishDemo)
+            }
+        }
     }
 
     private func handleSlideIndexChange(to index: Int) {
@@ -87,4 +148,22 @@ final class AppFlowViewModel: ObservableObject {
             }
         }
     }
+
+    private func observeDemoQuota() {
+        stateTask = Task {
+            await demoQuotaCoordinator.prepareForDemoStart()
+            let stream = await demoQuotaCoordinator.observeStates()
+            for await newState in stream {
+                await MainActor.run {
+                    demoQuotaState = newState
+                }
+            }
+        }
+    }
+
+    private let isoFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
 }
