@@ -57,4 +57,25 @@ final class SquatSessionStateMachineTests: XCTestCase {
         let state = machine.transition(from: running, event: .fatalError(error))
         XCTAssertEqual(state, .endingError(error))
     }
+
+    func testSummaryReadyMovesToSummaryState() {
+        let machine = SquatSessionStateMachine()
+        let running = SquatSessionStateMachine.State.running(.idleWithinSet)
+        let summary = SessionSummary(
+            attemptIndex: 1,
+            totalReps: 5,
+            tempoInsight: .steady,
+            averageTempoSeconds: 1.3,
+            coachingNotes: [],
+            duration: 12,
+            generatedAt: Date()
+        )
+        let context = SummaryContext(summary: summary, ctaState: .awaitingDecision)
+
+        let summaryState = machine.transition(from: running, event: .summaryReady(context))
+        XCTAssertEqual(summaryState, .summary(context))
+
+        let reset = machine.transition(from: summaryState, event: .sessionEnded)
+        XCTAssertEqual(reset, .idle)
+    }
 }

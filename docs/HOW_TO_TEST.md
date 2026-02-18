@@ -49,3 +49,14 @@
    - After attempt #1 completion the CTA should immediately show the deny/timeout copy and never present a second attempt.
 6. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
 7. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
+
+## GP-116 Summary + Paywall Flow
+
+1. Launch the demo and complete at least one valid rep, then tap **Complete Set**.
+   - Expect the Squat Post-Set Summary view to appear automatically with reps, tempo insight, and any coaching notes populated.
+2. While DemoQuotaStateMachine = `.gatePending`, verify the summary CTA shows “Checking eligibility…” and the primary CTA is disabled.
+3. Simulate `.secondAttemptEligible` (allow response) and confirm the primary CTA switches to “One more go”, secondary CTA reads “Continue to Paywall”, and tapping One more go starts attempt #2 with a fresh SquatSessionCoordinator.
+4. Complete attempt #2 and confirm the summary only shows “Continue to Paywall” (no secondary button). Tapping it should clear the navigation stack and display the paywall placeholder without exposing any path back into SquatSessionView.
+5. Relaunch the app; ensure the summary cache is cleared, DemoCTA respects the locked quota state, and the user cannot start a third attempt.
+6. Force a denied/timeout path (e.g., return `{ allowAnotherDemo: false, message: "custom message" }` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
+7. During both flows, tail `supabase functions logs --function demo-session-log` (or watch Xcode os_log output) to ensure attempt start/completion and evaluation events emit exactly once; any duplication indicates a routing race that must be investigated.

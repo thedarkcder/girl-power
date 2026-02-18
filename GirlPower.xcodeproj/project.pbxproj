@@ -20,12 +20,15 @@
 		45DE2F1D6F0A4933BDDD1E25 /* SquatSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */; };
 		A3BF6B35D32B40D6B9722375 /* SquatSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC0FEC851504B9083184BD2 /* SquatSessionViewController.swift */; };
 		432820BE16094AF9A475D40D /* SquatSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7297BF80AB284485AFA1CB9A /* SquatSessionViewModel.swift */; };
+		1CBA1A9C57BD4D3D878A33AC /* SessionSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A16C2B7C3424E2393A3D8C1 /* SessionSummary.swift */; };
 		4568B8C8A6AC455DB1F2FECB0818E474 /* PoseGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */; };
 		69A937D9C9E6441D8941163993485F5C /* SquatSessionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */; };
 		7CFB10C5914441858E82ED204461FA36 /* CoachingSpeechThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */; };
 		96FA92B42CED42BCA9A58904657155CE /* RepCounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E115C73EC84499C817AC06701A51783 /* RepCounterTests.swift */; };
 		2029E28DBCA643E7903FF5FC /* SquatSessionCoordinatorOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */; };
+		7F6B5E34A21A4770B6F9069A /* SquatSessionCoordinatorSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29D1F6F5E2F4EB1B84CB5B1 /* SquatSessionCoordinatorSummaryTests.swift */; };
 		ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */; };
+		B0F1A0CA0E6B4D7D94464033 /* SquatPostSetSummaryViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077A9F4F859D4CB4B9CFA6C4 /* SquatPostSetSummaryViewModelTests.swift */; };
 		84D179FD71174F79B9122E09 /* DemoQuotaStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */; };
 		3F1E1E0CE56C45809A00D66C /* DemoQuotaCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */; };
 		7A11711922064ECB8424CCA1 /* DemoAttemptRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BD69C251564F778EF8B6D2 /* DemoAttemptRepository.swift */; };
@@ -52,6 +55,9 @@
 		B1C9B3592BB9E8B100B8B310 /* OnboardingCarouselView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3582BB9E8B100B8B310 /* OnboardingCarouselView.swift */; };
 		B1C9B35B2BB9E8B100B8B310 /* DemoCTAView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B35A2BB9E8B100B8B310 /* DemoCTAView.swift */; };
 		B1C9B35D2BB9E8B100B8B310 /* DemoAttemptFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */; };
+		18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */; };
+		5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */; };
+		2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */; };
 		B1C9B3602BB9E8B100B8B310 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */; };
 		B1C9B3632BB9E8B100B8B310 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */; };
 		B1C9B3662BB9E8B100B8B310 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */; };
@@ -86,6 +92,7 @@
 		E2E28160D28B406C97E20204 /* PoseGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseGeometry.swift; sourceTree = "<group>"; };
 		B4749FD99CE4422D83035810 /* RepCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepCounter.swift; sourceTree = "<group>"; };
 		FB7EBDB78EB14CEA93D0DFA0 /* SquatPoseTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPoseTypes.swift; sourceTree = "<group>"; };
+		6A16C2B7C3424E2393A3D8C1 /* SessionSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionSummary.swift; sourceTree = "<group>"; };
 		2F6662D357FF4153AF986E39 /* SquatSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinator.swift; sourceTree = "<group>"; };
 		B0729D88461C4161B11764BA /* SquatSessionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionStateMachine.swift; sourceTree = "<group>"; };
 		1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionView.swift; sourceTree = "<group>"; };
@@ -95,8 +102,10 @@
 		6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionStateMachineTests.swift; sourceTree = "<group>"; };
 		7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechThrottleTests.swift; sourceTree = "<group>"; };
 		79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseGeometryTests.swift; sourceTree = "<group>"; };
+		A29D1F6F5E2F4EB1B84CB5B1 /* SquatSessionCoordinatorSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinatorSummaryTests.swift; sourceTree = "<group>"; };
 		F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinatorOverlayTests.swift; sourceTree = "<group>"; };
 		228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinatorSpeechTests.swift; sourceTree = "<group>"; };
+		077A9F4F859D4CB4B9CFA6C4 /* SquatPostSetSummaryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryViewModelTests.swift; sourceTree = "<group>"; };
 		48BD69C251564F778EF8B6D2 /* DemoAttemptRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAttemptRepository.swift; sourceTree = "<group>"; };
 		D2AED75BE9CB4F51A7C37236 /* DemoQuotaConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaConfiguration.swift; sourceTree = "<group>"; };
 		EA744404F71B4B2E9CBF658F /* DemoQuotaCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinator.swift; sourceTree = "<group>"; };
@@ -126,6 +135,9 @@
 		B1C9B3582BB9E8B100B8B310 /* OnboardingCarouselView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCarouselView.swift; sourceTree = "<group>"; };
 		B1C9B35A2BB9E8B100B8B310 /* DemoCTAView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCTAView.swift; sourceTree = "<group>"; };
 		B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAttemptFlowView.swift; sourceTree = "<group>"; };
+		6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryViewModel.swift; sourceTree = "<group>"; };
+		4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryView.swift; sourceTree = "<group>"; };
+		5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSummaryNavigation.swift; sourceTree = "<group>"; };
 		B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -219,6 +231,7 @@
 				E2E28160D28B406C97E20204 /* PoseGeometry.swift */,
 				B4749FD99CE4422D83035810 /* RepCounter.swift */,
 				FB7EBDB78EB14CEA93D0DFA0 /* SquatPoseTypes.swift */,
+				6A16C2B7C3424E2393A3D8C1 /* SessionSummary.swift */,
 				2F6662D357FF4153AF986E39 /* SquatSessionCoordinator.swift */,
 				B0729D88461C4161B11764BA /* SquatSessionStateMachine.swift */,
 				1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */,
@@ -271,6 +284,9 @@
 			children = (
 				B1C9B35A2BB9E8B100B8B310 /* DemoCTAView.swift */,
 				B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */,
+				6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */,
+				4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */,
+				5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -312,7 +328,9 @@
 				79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */,
 				7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */,
 				F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */,
+				A29D1F6F5E2F4EB1B84CB5B1 /* SquatSessionCoordinatorSummaryTests.swift */,
 				228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */,
+				077A9F4F859D4CB4B9CFA6C4 /* SquatPostSetSummaryViewModelTests.swift */,
 				B1C9B3722BB9E8B100B8B310 /* Info.plist */,
 			);
 			path = GirlPowerTests;
@@ -485,6 +503,7 @@
 				4526F8AF88744534A2A35123 /* PoseGeometry.swift in Sources */,
 				212FC77C91174245935716B8 /* RepCounter.swift in Sources */,
 				2C98148DF0284673BB38EEE7 /* SquatPoseTypes.swift in Sources */,
+				1CBA1A9C57BD4D3D878A33AC /* SessionSummary.swift in Sources */,
 				58568953AEE84E3ABB4C3FB4 /* SquatSessionCoordinator.swift in Sources */,
 				5AB537B87A574639BF63EA74 /* SquatSessionStateMachine.swift in Sources */,
 				45DE2F1D6F0A4933BDDD1E25 /* SquatSessionView.swift in Sources */,
@@ -501,6 +520,9 @@
 				B1C9B3592BB9E8B100B8B310 /* OnboardingCarouselView.swift in Sources */,
 				B1C9B35B2BB9E8B100B8B310 /* DemoCTAView.swift in Sources */,
 				B1C9B35D2BB9E8B100B8B310 /* DemoAttemptFlowView.swift in Sources */,
+				18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */,
+				5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */,
+				2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */,
 				A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */,
 				CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */,
 				D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */,
@@ -520,7 +542,9 @@
 				4568B8C8A6AC455DB1F2FECB0818E474 /* PoseGeometryTests.swift in Sources */,
 				7CFB10C5914441858E82ED204461FA36 /* CoachingSpeechThrottleTests.swift in Sources */,
 				2029E28DBCA643E7903FF5FC /* SquatSessionCoordinatorOverlayTests.swift in Sources */,
+				7F6B5E34A21A4770B6F9069A /* SquatSessionCoordinatorSummaryTests.swift in Sources */,
 				ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */,
+				B0F1A0CA0E6B4D7D94464033 /* SquatPostSetSummaryViewModelTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -4,6 +4,8 @@ struct AppFlowStateMachine {
         case onboarding(index: Int)
         case demoCTA
         case demoStub
+        case sessionSummary
+        case paywall
     }
 
     enum Event: Equatable {
@@ -12,6 +14,8 @@ struct AppFlowStateMachine {
         case onboardingCompleted
         case startDemo
         case finishDemo
+        case showSummary
+        case showPaywall
     }
 
     private let onboardingRange: ClosedRange<Int>
@@ -51,10 +55,23 @@ struct AppFlowStateMachine {
             guard index == onboardingRange.upperBound else { return state }
             return .demoCTA
 
-        case (.demoCTA, .startDemo):
+        case (.demoCTA, .startDemo),
+             (.sessionSummary, .startDemo):
             return .demoStub
 
         case (.demoStub, .finishDemo):
+            return .demoCTA
+
+        case (.demoStub, .showSummary):
+            return .sessionSummary
+
+        case (.sessionSummary, .finishDemo):
+            return .demoCTA
+
+        case (.sessionSummary, .showPaywall):
+            return .paywall
+
+        case (.paywall, .finishDemo):
             return .demoCTA
 
         default:

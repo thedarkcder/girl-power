@@ -51,6 +51,7 @@ final class SquatSessionCoordinator: NSObject {
     }
 
     func start() {
+        repCounter.reset()
         apply(event: .requestPermissions)
         cameraManager.requestPermissions { [weak self] granted in
             guard let self else { return }
@@ -73,6 +74,19 @@ final class SquatSessionCoordinator: NSObject {
         speechManager.stop()
         repCounter.reset()
         apply(event: .sessionEnded)
+    }
+
+    func captureSummarySnapshot() -> RepCounter.Snapshot {
+        cameraManager.stopSession()
+        posePipeline.cancel()
+        speechManager.stop()
+        let snapshot = repCounter.snapshot()
+        repCounter.reset()
+        return snapshot
+    }
+
+    func presentSummary(_ context: SummaryContext) {
+        apply(event: .summaryReady(context))
     }
 
     func attachPreview(to view: UIView) {

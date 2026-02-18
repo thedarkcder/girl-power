@@ -2,15 +2,29 @@ import SwiftUI
 
 struct SquatSessionView: View {
     @StateObject private var viewModel: SquatSessionViewModel
+    private let attemptIndex: Int
+    private let onAttemptComplete: (SessionSummaryInput) -> Void
+    @State private var isCompletingSet = false
 
     @MainActor
     init() {
         _viewModel = StateObject(wrappedValue: SquatSessionViewModel())
+        self.attemptIndex = 1
+        self.onAttemptComplete = { _ in }
     }
 
     @MainActor
-    init(viewModel: SquatSessionViewModel) {
+    init(viewModel: SquatSessionViewModel, attemptIndex: Int, onAttemptComplete: @escaping (SessionSummaryInput) -> Void) {
         _viewModel = StateObject(wrappedValue: viewModel)
+        self.attemptIndex = attemptIndex
+        self.onAttemptComplete = onAttemptComplete
+    }
+
+    @MainActor
+    init(attemptIndex: Int, onAttemptComplete: @escaping (SessionSummaryInput) -> Void) {
+        _viewModel = StateObject(wrappedValue: SquatSessionViewModel())
+        self.attemptIndex = attemptIndex
+        self.onAttemptComplete = onAttemptComplete
     }
 
     var body: some View {
@@ -52,9 +66,27 @@ struct SquatSessionView: View {
                     .font(.headline)
                     .foregroundColor(.white.opacity(0.8))
             }
+            Button(action: handleCompleteTapped) {
+                Text(isCompletingSet ? "Preparing summary…" : "Complete Set")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .clipShape(Capsule())
+                    .opacity(isCompletingSet ? 0.6 : 1)
+            }
+            .disabled(isCompletingSet)
             Spacer()
         }
         .padding(24)
+    }
+
+    private func handleCompleteTapped() {
+        guard isCompletingSet == false else { return }
+        isCompletingSet = true
+        let input = viewModel.makeSummaryInput(attemptIndex: attemptIndex)
+        onAttemptComplete(input)
     }
 
     private var phaseLabel: String? {

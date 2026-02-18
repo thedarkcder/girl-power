@@ -64,6 +64,21 @@ final class AppFlowStateMachineTests: XCTestCase {
         let next = stateMachine.transition(from: .demoStub, event: .finishDemo)
         XCTAssertEqual(next, .demoCTA)
     }
+
+    func testShowSummaryFromDemoStub() {
+        let summary = stateMachine.transition(from: .demoStub, event: .showSummary)
+        XCTAssertEqual(summary, .sessionSummary)
+    }
+
+    func testSummaryStartDemoRoutesBackToStub() {
+        let next = stateMachine.transition(from: .sessionSummary, event: .startDemo)
+        XCTAssertEqual(next, .demoStub)
+    }
+
+    func testSummaryShowPaywallRoutesToPaywall() {
+        let next = stateMachine.transition(from: .sessionSummary, event: .showPaywall)
+        XCTAssertEqual(next, .paywall)
+    }
 }
 
 @MainActor
@@ -123,6 +138,136 @@ final class AppFlowViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .demoCTA)
         XCTAssertTrue(viewModel.navigationPath.isEmpty)
     }
+
+    func testCompleteAttemptShowsSummary() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+        )
+
+        viewModel.handleSplashFinished()
+        viewModel.startDemo()
+        let stubExpectation = expectation(description: "demo stub ready")
+        let stubMonitor = Task {
+            while viewModel.state != .demoStub {
+                await Task.yield()
+            }
+            stubExpectation.fulfill()
+        }
+        await fulfillment(of: [stubExpectation], timeout: 1.0)
+        stubMonitor.cancel()
+
+        let input = SessionSummaryInput(
+            attemptIndex: 1,
+            snapshot: RepCounter.Snapshot(
+                repetitionCount: 3,
+                tempoSamples: [1.2, 1.3],
+                correctionCounts: [:]
+            ),
+            duration: 10,
+            generatedAt: Date()
+        )
+
+        let context = await viewModel.completeAttempt(with: input)
+        XCTAssertEqual(context.summary.totalReps, 3)
+        XCTAssertEqual(viewModel.state, .sessionSummary)
+        XCTAssertNotNil(viewModel.summaryViewModel)
+    }
+
+    func testSummaryCTARespondsToQuotaStateChanges() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .gatePending)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator
+        )
+
+        await waitForCondition { viewModel.demoQuotaState == .gatePending }
+
+        let context = SummaryContext(summary: makeSummary(attemptIndex: 1), ctaState: .awaitingDecision)
+        viewModel.presentSummary(context)
+        XCTAssertEqual(viewModel.summaryViewModel?.primaryButtonTitle, "Checking eligibility…")
+
+        await coordinator.updateState(.secondAttemptEligible)
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        await waitForCondition { viewModel.summaryViewModel?.primaryButtonTitle == "One more go" }
+        XCTAssertTrue(viewModel.summaryViewModel?.isSecondaryButtonVisible ?? false)
+    }
+
+    func testAttemptTwoSummaryAlwaysLocks() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .secondAttemptEligible)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator
+        )
+
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+
+        let context = SummaryContext(summary: makeSummary(attemptIndex: 2), ctaState: .secondAttemptEligible)
+        viewModel.presentSummary(context)
+        XCTAssertEqual(viewModel.summaryViewModel?.primaryButtonTitle, "Continue to Paywall")
+        XCTAssertFalse(viewModel.summaryViewModel?.isSecondaryButtonVisible ?? true)
+        XCTAssertEqual(
+            viewModel.summaryViewModel?.statusMessage,
+            DemoQuotaStateMachine.LockReason.quotaExhausted.userFacingMessage
+        )
+    }
+
+    func testContinueToPaywallClearsSummaryAndRoutes() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
+        let router = PaywallRouterSpy()
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator,
+            paywallRouter: router
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.state == .demoCTA }
+        viewModel.startDemo()
+        await waitForCondition { viewModel.state == .demoStub }
+
+        let context = SummaryContext(summary: makeSummary(attemptIndex: 2), ctaState: .locked(message: "Denied"))
+        viewModel.presentSummary(context)
+        await waitForCondition { viewModel.state == .sessionSummary }
+
+        viewModel.continueToPaywall()
+
+        XCTAssertNil(viewModel.summaryViewModel)
+        XCTAssertEqual(viewModel.state, .paywall)
+        XCTAssertEqual(viewModel.navigationPath.count, 1)
+        XCTAssertEqual(router.presentCallCount, 1)
+    }
+
+    private func makeSummary(attemptIndex: Int) -> SessionSummary {
+        SessionSummary(
+            attemptIndex: attemptIndex,
+            totalReps: 5,
+            tempoInsight: .steady,
+            averageTempoSeconds: 1.1,
+            coachingNotes: [],
+            duration: 15,
+            generatedAt: Date()
+        )
+    }
+
+    private func waitForCondition(
+        timeout: TimeInterval = 1.0,
+        condition: @escaping () -> Bool
+    ) async {
+        let conditionExpectation = expectation(description: "condition met")
+        let monitor = Task {
+            while !condition() {
+                await Task.yield()
+            }
+            conditionExpectation.fulfill()
+        }
+        await fulfillment(of: [conditionExpectation], timeout: timeout)
+        monitor.cancel()
+    }
 }
 
 private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepository {
@@ -140,5 +285,13 @@ private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepo
     func markCompleted() {
         markCompletedCallCount += 1
         completed = true
+    }
+}
+
+private final class PaywallRouterSpy: PaywallRouting {
+    private(set) var presentCallCount = 0
+
+    func presentPaywall() {
+        presentCallCount += 1
     }
 }

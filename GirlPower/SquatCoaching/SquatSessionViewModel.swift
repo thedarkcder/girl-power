@@ -10,6 +10,7 @@ final class SquatSessionViewModel: ObservableObject {
     @Published var error: SquatSessionError?
 
     let coordinator: SquatSessionCoordinator
+    private var sessionStartDate: Date?
 
     init(coordinator: SquatSessionCoordinator = SquatSessionCoordinator()) {
         self.coordinator = coordinator
@@ -18,15 +19,34 @@ final class SquatSessionViewModel: ObservableObject {
 
     func start() {
         error = nil
+        sessionStartDate = Date()
         coordinator.start()
     }
 
     func stop() {
         coordinator.stop()
+        sessionStartDate = nil
     }
 
     func bindOverlay(to controller: SquatSessionViewController) {
         coordinator.overlayOutput = controller
+    }
+
+    func makeSummaryInput(attemptIndex: Int) -> SessionSummaryInput {
+        let snapshot = coordinator.captureSummarySnapshot()
+        let now = Date()
+        let duration = now.timeIntervalSince(sessionStartDate ?? now)
+        sessionStartDate = nil
+        return SessionSummaryInput(
+            attemptIndex: attemptIndex,
+            snapshot: snapshot,
+            duration: duration,
+            generatedAt: now
+        )
+    }
+
+    func presentSummary(_ context: SummaryContext) {
+        coordinator.presentSummary(context)
     }
 }
 
@@ -70,6 +90,8 @@ extension SquatSessionViewModel: SquatSessionCoordinatorOutput {
             return "Camera interrupted"
         case .endingError(_):
             return "Session ended"
+        case .summary:
+            return "Summary ready"
         }
     }
 }

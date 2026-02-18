@@ -9,6 +9,7 @@ struct SquatSessionStateMachine {
         case backgroundSuspended(previousPhase: PosePhase?)
         case interrupted(reason: SquatSessionInterruption, previousPhase: PosePhase?)
         case endingError(SquatSessionError)
+        case summary(SummaryContext)
     }
 
     enum Event: Equatable {
@@ -25,6 +26,7 @@ struct SquatSessionStateMachine {
         case interruptionEnded
         case fatalError(SquatSessionError)
         case sessionEnded
+        case summaryReady(SummaryContext)
     }
 
     func initialState() -> State {
@@ -63,6 +65,9 @@ struct SquatSessionStateMachine {
         case (.running, .posePhaseChanged(let phase)):
             return .running(phase)
 
+        case (.running, .summaryReady(let context)):
+            return .summary(context)
+
         case (.running(let phase), .enteredBackground):
             return .backgroundSuspended(previousPhase: phase)
 
@@ -95,6 +100,9 @@ struct SquatSessionStateMachine {
 
         case (.idle, .posePhaseChanged(let phase)):
             return .running(phase)
+
+        case (.summary, .sessionEnded):
+            return .idle
 
         default:
             return state
