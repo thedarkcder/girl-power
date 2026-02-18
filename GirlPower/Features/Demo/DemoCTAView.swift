@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DemoCTAView: View {
-    let onStartDemo: () -> Void
+    @ObservedObject var viewModel: AppFlowViewModel
 
     var body: some View {
         VStack(spacing: 32) {
@@ -16,8 +16,8 @@ struct DemoCTAView: View {
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 16)
             }
-            Button(action: onStartDemo) {
-                Text("Start Free Demo")
+            Button(action: { viewModel.startDemo() }) {
+                Text(viewModel.demoButtonTitle)
                     .font(.headline)
                     .foregroundColor(.black)
                     .frame(maxWidth: .infinity)
@@ -29,16 +29,47 @@ struct DemoCTAView: View {
             .padding(.horizontal, 32)
             .accessibilityIdentifier("start_demo_button")
             .accessibilityAddTraits(.isButton)
-            .accessibilityHint("Routes to the Girl Power demo experience")
+            .accessibilityHint(hint)
+            .disabled(viewModel.isDemoButtonDisabled)
+            if let status = viewModel.demoStatusMessage {
+                Text(status)
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.horizontal, 24)
+                    .multilineTextAlignment(.center)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var hint: String {
+        switch viewModel.demoQuotaState {
+        case .gatePending:
+            return "Waiting for eligibility decision"
+        case .locked(let reason):
+            switch reason {
+            case .quotaExhausted:
+                return "Quota exhausted"
+            case .evaluationDenied(let message):
+                return message ?? "Quota denied"
+            case .evaluationTimeout:
+                return "Evaluation timed out"
+            case .serverSync:
+                return "Server sync required"
+            }
+        default:
+            return "Routes to the Girl Power demo experience"
+        }
     }
 }
 
 struct DemoCTAView_Previews: PreviewProvider {
     static var previews: some View {
-        DemoCTAView(onStartDemo: {})
+        DemoCTAView(viewModel: AppFlowViewModel(
+            repository: UserDefaultsOnboardingCompletionRepository(),
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+        ))
             .background(Color.black)
     }
 }

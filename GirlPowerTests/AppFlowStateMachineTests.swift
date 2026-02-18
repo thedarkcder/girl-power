@@ -70,7 +70,10 @@ final class AppFlowStateMachineTests: XCTestCase {
 final class AppFlowViewModelTests: XCTestCase {
     func testCompleteOnboardingPersistsFlagAndMovesToCTA() {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
-        let viewModel = AppFlowViewModel(repository: repository)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+        )
 
         viewModel.handleSplashFinished()
         let indexBinding = viewModel.bindingForOnboardingIndex()
@@ -85,17 +88,38 @@ final class AppFlowViewModelTests: XCTestCase {
 
     func testStartDemoRoutesToStubAndFinishReturnsToCTA() {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
-        let viewModel = AppFlowViewModel(repository: repository)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled()
+        )
 
         XCTAssertEqual(viewModel.state, .splash)
         viewModel.handleSplashFinished()
         XCTAssertEqual(viewModel.state, .demoCTA)
 
+        let toStub = expectation(description: "routes to demo stub")
+        let stubMonitor = Task {
+            while viewModel.state != .demoStub {
+                await Task.yield()
+            }
+            toStub.fulfill()
+        }
         viewModel.startDemo()
+        wait(for: [toStub], timeout: 1.0)
+        stubMonitor.cancel()
         XCTAssertEqual(viewModel.state, .demoStub)
         XCTAssertFalse(viewModel.navigationPath.isEmpty)
 
+        let backToCTA = expectation(description: "returns to CTA")
+        let ctaMonitor = Task {
+            while viewModel.state != .demoCTA {
+                await Task.yield()
+            }
+            backToCTA.fulfill()
+        }
         viewModel.finishDemo()
+        wait(for: [backToCTA], timeout: 1.0)
+        ctaMonitor.cancel()
         XCTAssertEqual(viewModel.state, .demoCTA)
         XCTAssertTrue(viewModel.navigationPath.isEmpty)
     }

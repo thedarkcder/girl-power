@@ -6,7 +6,43 @@
 	objectVersion = 56;
 	objects = {
 
-/* Begin PBXBuildFile section */
+	/* Begin PBXBuildFile section */
+		8971EB270CA744F0905D93B9 /* CameraSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDB2AA22229D429C9DF2070E /* CameraSessionManager.swift */; };
+		4426D4BE3AC74552B2650BEA /* CoachingSpeechManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D98072B85F5487C91147C4E /* CoachingSpeechManager.swift */; };
+		2AD24750250B44AAB0690772 /* CoachingSpeechThrottle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECE0A59181D400D8A84A105 /* CoachingSpeechThrottle.swift */; };
+		00730AE682BF4245B2F6BE54 /* LandmarkOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC15B85B7324470C8801F860 /* LandmarkOverlayView.swift */; };
+		51416F3C2DC24E13977498F7 /* PoseDetectionPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0830CB9F74EF4C5B8AB2802A /* PoseDetectionPipeline.swift */; };
+		4526F8AF88744534A2A35123 /* PoseGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E28160D28B406C97E20204 /* PoseGeometry.swift */; };
+		212FC77C91174245935716B8 /* RepCounter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4749FD99CE4422D83035810 /* RepCounter.swift */; };
+		2C98148DF0284673BB38EEE7 /* SquatPoseTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB7EBDB78EB14CEA93D0DFA0 /* SquatPoseTypes.swift */; };
+		58568953AEE84E3ABB4C3FB4 /* SquatSessionCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F6662D357FF4153AF986E39 /* SquatSessionCoordinator.swift */; };
+		5AB537B87A574639BF63EA74 /* SquatSessionStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0729D88461C4161B11764BA /* SquatSessionStateMachine.swift */; };
+		45DE2F1D6F0A4933BDDD1E25 /* SquatSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */; };
+		A3BF6B35D32B40D6B9722375 /* SquatSessionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAC0FEC851504B9083184BD2 /* SquatSessionViewController.swift */; };
+		432820BE16094AF9A475D40D /* SquatSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7297BF80AB284485AFA1CB9A /* SquatSessionViewModel.swift */; };
+		4568B8C8A6AC455DB1F2FECB0818E474 /* PoseGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */; };
+		69A937D9C9E6441D8941163993485F5C /* SquatSessionStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */; };
+		7CFB10C5914441858E82ED204461FA36 /* CoachingSpeechThrottleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */; };
+		96FA92B42CED42BCA9A58904657155CE /* RepCounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E115C73EC84499C817AC06701A51783 /* RepCounterTests.swift */; };
+		2029E28DBCA643E7903FF5FC /* SquatSessionCoordinatorOverlayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */; };
+		ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */; };
+		84D179FD71174F79B9122E09 /* DemoQuotaStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */; };
+		3F1E1E0CE56C45809A00D66C /* DemoQuotaCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */; };
+		7A11711922064ECB8424CCA1 /* DemoAttemptRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48BD69C251564F778EF8B6D2 /* DemoAttemptRepository.swift */; };
+		8DF6323DF256415E9F04984D /* DemoQuotaConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AED75BE9CB4F51A7C37236 /* DemoQuotaConfiguration.swift */; };
+		EE9E62477C6C4DB2B5F4BA83 /* DemoQuotaCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA744404F71B4B2E9CBF658F /* DemoQuotaCoordinator.swift */; };
+		F96DB168B2C44304BC8F75E7 /* DemoQuotaDependenciesFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2770974B9944F78858BEBC0 /* DemoQuotaDependenciesFactory.swift */; };
+		5C1ABBDD6CE64E299D3B9314 /* DemoQuotaLockReason+Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E823FBB560848E98D2FF36B /* DemoQuotaLockReason+Storage.swift */; };
+		50FE6ADFB1604999B9A155BA /* DemoQuotaMockSnapshotSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F93F0D7FBC84C3180ED6B80 /* DemoQuotaMockSnapshotSync.swift */; };
+		9F15500DDB0040B1AB41A270 /* DemoQuotaMocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C79CF644418B4B7E91053EAC /* DemoQuotaMocks.swift */; };
+		9AF408413C14495F9E9D7E2E /* DemoQuotaSnapshotSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49E2B66DE6124AF2B38C905F /* DemoQuotaSnapshotSync.swift */; };
+		F4B65198567544F09B9679B7 /* DemoQuotaStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA585FCFE204F46805CAAC3 /* DemoQuotaStateMachine.swift */; };
+		43EB8F13B26A4678B8CF4CA8 /* DeviceIdentityProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E36398174ED4D6E9B3BEFFA /* DeviceIdentityProvider.swift */; };
+		C25E543A243D45D390F52340 /* EvaluateSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */; };
+		7C637DEC9B9A40A1990B60B1 /* KeychainDeviceIdentityStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */; };
+		A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */; };
+		CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */; };
+		D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */; };
 		B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34C2BB9E8B100B8B310 /* GirlPowerApp.swift */; };
 		B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34E2BB9E8B100B8B310 /* AppFlowStateMachine.swift */; };
 		B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3502BB9E8B100B8B310 /* AppFlowViewModel.swift */; };
@@ -42,6 +78,42 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		CDB2AA22229D429C9DF2070E /* CameraSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraSessionManager.swift; sourceTree = "<group>"; };
+		9D98072B85F5487C91147C4E /* CoachingSpeechManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechManager.swift; sourceTree = "<group>"; };
+		0ECE0A59181D400D8A84A105 /* CoachingSpeechThrottle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechThrottle.swift; sourceTree = "<group>"; };
+		DC15B85B7324470C8801F860 /* LandmarkOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LandmarkOverlayView.swift; sourceTree = "<group>"; };
+		0830CB9F74EF4C5B8AB2802A /* PoseDetectionPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseDetectionPipeline.swift; sourceTree = "<group>"; };
+		E2E28160D28B406C97E20204 /* PoseGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseGeometry.swift; sourceTree = "<group>"; };
+		B4749FD99CE4422D83035810 /* RepCounter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepCounter.swift; sourceTree = "<group>"; };
+		FB7EBDB78EB14CEA93D0DFA0 /* SquatPoseTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPoseTypes.swift; sourceTree = "<group>"; };
+		2F6662D357FF4153AF986E39 /* SquatSessionCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinator.swift; sourceTree = "<group>"; };
+		B0729D88461C4161B11764BA /* SquatSessionStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionStateMachine.swift; sourceTree = "<group>"; };
+		1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionView.swift; sourceTree = "<group>"; };
+		BAC0FEC851504B9083184BD2 /* SquatSessionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionViewController.swift; sourceTree = "<group>"; };
+		7297BF80AB284485AFA1CB9A /* SquatSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionViewModel.swift; sourceTree = "<group>"; };
+		3E115C73EC84499C817AC06701A51783 /* RepCounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepCounterTests.swift; sourceTree = "<group>"; };
+		6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionStateMachineTests.swift; sourceTree = "<group>"; };
+		7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingSpeechThrottleTests.swift; sourceTree = "<group>"; };
+		79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PoseGeometryTests.swift; sourceTree = "<group>"; };
+		F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinatorOverlayTests.swift; sourceTree = "<group>"; };
+		228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatSessionCoordinatorSpeechTests.swift; sourceTree = "<group>"; };
+		48BD69C251564F778EF8B6D2 /* DemoAttemptRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAttemptRepository.swift; sourceTree = "<group>"; };
+		D2AED75BE9CB4F51A7C37236 /* DemoQuotaConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaConfiguration.swift; sourceTree = "<group>"; };
+		EA744404F71B4B2E9CBF658F /* DemoQuotaCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinator.swift; sourceTree = "<group>"; };
+		C2770974B9944F78858BEBC0 /* DemoQuotaDependenciesFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaDependenciesFactory.swift; sourceTree = "<group>"; };
+		2E823FBB560848E98D2FF36B /* DemoQuotaLockReason+Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoQuotaLockReason+Storage.swift"; sourceTree = "<group>"; };
+		2F93F0D7FBC84C3180ED6B80 /* DemoQuotaMockSnapshotSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaMockSnapshotSync.swift; sourceTree = "<group>"; };
+		C79CF644418B4B7E91053EAC /* DemoQuotaMocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaMocks.swift; sourceTree = "<group>"; };
+		49E2B66DE6124AF2B38C905F /* DemoQuotaSnapshotSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaSnapshotSync.swift; sourceTree = "<group>"; };
+		FCA585FCFE204F46805CAAC3 /* DemoQuotaStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaStateMachine.swift; sourceTree = "<group>"; };
+		2E36398174ED4D6E9B3BEFFA /* DeviceIdentityProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceIdentityProvider.swift; sourceTree = "<group>"; };
+		4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluateSessionService.swift; sourceTree = "<group>"; };
+		1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDeviceIdentityStorage.swift; sourceTree = "<group>"; };
+		9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDemoQuotaSnapshotSync.swift; sourceTree = "<group>"; };
+		33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDeviceIdentityMirror.swift; sourceTree = "<group>"; };
+		95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSessionLogger.swift; sourceTree = "<group>"; };
+		8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaStateMachineTests.swift; sourceTree = "<group>"; };
+		F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinatorTests.swift; sourceTree = "<group>"; };
 		B1C9B3052BB9E8AB00B8B310 /* GirlPower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GirlPower.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1C9B3142BB9E8AB00B8B310 /* GirlPowerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GirlPowerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1C9B31E2BB9E8AB00B8B310 /* GirlPowerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GirlPowerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -105,6 +177,8 @@
 			children = (
 				B1C9B3402BB9E8B100B8B310 /* App */,
 				B1C9B3472BB9E8B100B8B310 /* Features */,
+				0A78BC64ECA3406D9CD0E4C4 /* DemoQuota */,
+				F1923253D4F244E8B187318C /* SquatCoaching */,
 				B1C9B35E2BB9E8B100B8B310 /* Assets */,
 				B1C9B3612BB9E8B100B8B310 /* Preview Content */,
 				B1C9B3672BB9E8B100B8B310 /* Supporting Files */,
@@ -132,6 +206,48 @@
 				B1C9B34B2BB9E8B100B8B310 /* Demo */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		F1923253D4F244E8B187318C /* SquatCoaching */ = {
+			isa = PBXGroup;
+			children = (
+				CDB2AA22229D429C9DF2070E /* CameraSessionManager.swift */,
+				9D98072B85F5487C91147C4E /* CoachingSpeechManager.swift */,
+				0ECE0A59181D400D8A84A105 /* CoachingSpeechThrottle.swift */,
+				DC15B85B7324470C8801F860 /* LandmarkOverlayView.swift */,
+				0830CB9F74EF4C5B8AB2802A /* PoseDetectionPipeline.swift */,
+				E2E28160D28B406C97E20204 /* PoseGeometry.swift */,
+				B4749FD99CE4422D83035810 /* RepCounter.swift */,
+				FB7EBDB78EB14CEA93D0DFA0 /* SquatPoseTypes.swift */,
+				2F6662D357FF4153AF986E39 /* SquatSessionCoordinator.swift */,
+				B0729D88461C4161B11764BA /* SquatSessionStateMachine.swift */,
+				1BF95EE797A94A1983A63F90 /* SquatSessionView.swift */,
+				BAC0FEC851504B9083184BD2 /* SquatSessionViewController.swift */,
+				7297BF80AB284485AFA1CB9A /* SquatSessionViewModel.swift */,
+			);
+			path = SquatCoaching;
+			sourceTree = "<group>";
+		};
+		0A78BC64ECA3406D9CD0E4C4 /* DemoQuota */ = {
+			isa = PBXGroup;
+			children = (
+				48BD69C251564F778EF8B6D2 /* DemoAttemptRepository.swift */,
+				D2AED75BE9CB4F51A7C37236 /* DemoQuotaConfiguration.swift */,
+				EA744404F71B4B2E9CBF658F /* DemoQuotaCoordinator.swift */,
+				C2770974B9944F78858BEBC0 /* DemoQuotaDependenciesFactory.swift */,
+				2E823FBB560848E98D2FF36B /* DemoQuotaLockReason+Storage.swift */,
+				2F93F0D7FBC84C3180ED6B80 /* DemoQuotaMockSnapshotSync.swift */,
+				C79CF644418B4B7E91053EAC /* DemoQuotaMocks.swift */,
+				49E2B66DE6124AF2B38C905F /* DemoQuotaSnapshotSync.swift */,
+				FCA585FCFE204F46805CAAC3 /* DemoQuotaStateMachine.swift */,
+				2E36398174ED4D6E9B3BEFFA /* DeviceIdentityProvider.swift */,
+				4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */,
+				1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */,
+				9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */,
+				33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */,
+				95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */,
+			);
+			path = DemoQuota;
 			sourceTree = "<group>";
 		};
 		B1C9B3482BB9E8B100B8B310 /* Splash */ = {
@@ -187,8 +303,16 @@
 		B1C9B36A2BB9E8B100B8B310 /* GirlPowerTests */ = {
 			isa = PBXGroup;
 			children = (
+				8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */,
 				B1C9B36D2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift */,
 				B1C9B3702BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift */,
+				F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */,
+				6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */,
+				3E115C73EC84499C817AC06701A51783 /* RepCounterTests.swift */,
+				79920F81DA4544919913C68A6E6414CF /* PoseGeometryTests.swift */,
+				7433E97366114785A2F6FCF3B128A3BD /* CoachingSpeechThrottleTests.swift */,
+				F16113263D844006A06EDEF7 /* SquatSessionCoordinatorOverlayTests.swift */,
+				228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */,
 				B1C9B3722BB9E8B100B8B310 /* Info.plist */,
 			);
 			path = GirlPowerTests;
@@ -343,6 +467,31 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7A11711922064ECB8424CCA1 /* DemoAttemptRepository.swift in Sources */,
+				8DF6323DF256415E9F04984D /* DemoQuotaConfiguration.swift in Sources */,
+				EE9E62477C6C4DB2B5F4BA83 /* DemoQuotaCoordinator.swift in Sources */,
+				F96DB168B2C44304BC8F75E7 /* DemoQuotaDependenciesFactory.swift in Sources */,
+				5C1ABBDD6CE64E299D3B9314 /* DemoQuotaLockReason+Storage.swift in Sources */,
+				50FE6ADFB1604999B9A155BA /* DemoQuotaMockSnapshotSync.swift in Sources */,
+				9F15500DDB0040B1AB41A270 /* DemoQuotaMocks.swift in Sources */,
+				9AF408413C14495F9E9D7E2E /* DemoQuotaSnapshotSync.swift in Sources */,
+				F4B65198567544F09B9679B7 /* DemoQuotaStateMachine.swift in Sources */,
+				43EB8F13B26A4678B8CF4CA8 /* DeviceIdentityProvider.swift in Sources */,
+				8971EB270CA744F0905D93B9 /* CameraSessionManager.swift in Sources */,
+				4426D4BE3AC74552B2650BEA /* CoachingSpeechManager.swift in Sources */,
+				2AD24750250B44AAB0690772 /* CoachingSpeechThrottle.swift in Sources */,
+				00730AE682BF4245B2F6BE54 /* LandmarkOverlayView.swift in Sources */,
+				51416F3C2DC24E13977498F7 /* PoseDetectionPipeline.swift in Sources */,
+				4526F8AF88744534A2A35123 /* PoseGeometry.swift in Sources */,
+				212FC77C91174245935716B8 /* RepCounter.swift in Sources */,
+				2C98148DF0284673BB38EEE7 /* SquatPoseTypes.swift in Sources */,
+				58568953AEE84E3ABB4C3FB4 /* SquatSessionCoordinator.swift in Sources */,
+				5AB537B87A574639BF63EA74 /* SquatSessionStateMachine.swift in Sources */,
+				45DE2F1D6F0A4933BDDD1E25 /* SquatSessionView.swift in Sources */,
+				A3BF6B35D32B40D6B9722375 /* SquatSessionViewController.swift in Sources */,
+				432820BE16094AF9A475D40D /* SquatSessionViewModel.swift in Sources */,
+				C25E543A243D45D390F52340 /* EvaluateSessionService.swift in Sources */,
+				7C637DEC9B9A40A1990B60B1 /* KeychainDeviceIdentityStorage.swift in Sources */,
 				B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */,
 				B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */,
 				B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */,
@@ -352,6 +501,9 @@
 				B1C9B3592BB9E8B100B8B310 /* OnboardingCarouselView.swift in Sources */,
 				B1C9B35B2BB9E8B100B8B310 /* DemoCTAView.swift in Sources */,
 				B1C9B35D2BB9E8B100B8B310 /* DemoAttemptFlowView.swift in Sources */,
+				A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */,
+				CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */,
+				D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,7 +512,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				B1C9B3712BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift in Sources */,
+				84D179FD71174F79B9122E09 /* DemoQuotaStateMachineTests.swift in Sources */,
+				3F1E1E0CE56C45809A00D66C /* DemoQuotaCoordinatorTests.swift in Sources */,
 				B1C9B36E2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift in Sources */,
+				69A937D9C9E6441D8941163993485F5C /* SquatSessionStateMachineTests.swift in Sources */,
+				96FA92B42CED42BCA9A58904657155CE /* RepCounterTests.swift in Sources */,
+				4568B8C8A6AC455DB1F2FECB0818E474 /* PoseGeometryTests.swift in Sources */,
+				7CFB10C5914441858E82ED204461FA36 /* CoachingSpeechThrottleTests.swift in Sources */,
+				2029E28DBCA643E7903FF5FC /* SquatSessionCoordinatorOverlayTests.swift in Sources */,
+				ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

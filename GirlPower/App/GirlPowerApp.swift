@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct GirlPowerApp: App {
     @StateObject private var viewModel: AppFlowViewModel
+    private let quotaCoordinator: DemoQuotaCoordinating
 
     init() {
         let repository = UserDefaultsOnboardingCompletionRepository()
@@ -13,18 +14,26 @@ struct GirlPowerApp: App {
         if arguments.contains("-returningUser") {
             repository.markCompleted()
         }
-        _viewModel = StateObject(wrappedValue: AppFlowViewModel(repository: repository))
+        let coordinator: DemoQuotaCoordinating
+        if arguments.contains("-uiTesting") {
+            coordinator = DemoQuotaCoordinatorDisabled()
+        } else {
+            coordinator = DemoQuotaDependenciesFactory.makeCoordinator()
+        }
+        self.quotaCoordinator = coordinator
+        _viewModel = StateObject(wrappedValue: AppFlowViewModel(repository: repository, demoQuotaCoordinator: coordinator))
     }
 
     var body: some Scene {
         WindowGroup {
-            AppFlowRootView(viewModel: viewModel)
+            AppFlowRootView(viewModel: viewModel, quotaCoordinator: quotaCoordinator)
         }
     }
 }
 
 struct AppFlowRootView: View {
     @ObservedObject var viewModel: AppFlowViewModel
+    let quotaCoordinator: DemoQuotaCoordinating
 
     var body: some View {
         NavigationStack(path: $viewModel.navigationPath) {
@@ -34,7 +43,9 @@ struct AppFlowRootView: View {
                 .navigationDestination(for: AppFlowViewModel.Route.self) { route in
                     switch route {
                     case .demoStub:
-                        DemoAttemptFlowView(onExit: viewModel.finishDemo)
+                        DemoAttemptFlowView(
+                            onExit: { viewModel.finishDemo(reason: "toolbar_exit") }
+                        )
                     }
                 }
         }
@@ -52,7 +63,7 @@ struct AppFlowRootView: View {
                 onComplete: viewModel.completeOnboarding
             )
         case .demoCTA, .demoStub:
-            DemoCTAView(onStartDemo: viewModel.startDemo)
+            DemoCTAView(viewModel: viewModel)
         }
     }
 
