@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SquatPostSetSummaryView: View {
     @ObservedObject var viewModel: SquatPostSetSummaryViewModel
-    let onStartSecondAttempt: () -> Void
+    let onStartNextAttempt: () -> Void
     let onContinueToPaywall: () -> Void
 
     var body: some View {
@@ -153,8 +153,8 @@ struct SquatPostSetSummaryView: View {
 
     private func handlePrimaryAction() {
         switch viewModel.context.ctaState {
-        case .secondAttemptEligible:
-            onStartSecondAttempt()
+        case .secondAttemptEligible, .proUnlocked:
+            onStartNextAttempt()
         case .locked:
             onContinueToPaywall()
         case .awaitingDecision:
@@ -191,7 +191,7 @@ struct SquatPostSetSummaryView_Previews: PreviewProvider {
         let context = SummaryContext(summary: summary, ctaState: .secondAttemptEligible)
         return SquatPostSetSummaryView(
             viewModel: SquatPostSetSummaryViewModel(context: context),
-            onStartSecondAttempt: {},
+            onStartNextAttempt: {},
             onContinueToPaywall: {}
         )
         .background(Color.black)

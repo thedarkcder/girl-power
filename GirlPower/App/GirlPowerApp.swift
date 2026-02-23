@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct GirlPowerApp: App {
     @StateObject private var viewModel: AppFlowViewModel
+    @StateObject private var entitlementService: StoreKitEntitlementService
     private let quotaCoordinator: DemoQuotaCoordinating
 
     init() {
@@ -20,8 +21,19 @@ struct GirlPowerApp: App {
         } else {
             coordinator = DemoQuotaDependenciesFactory.makeCoordinator()
         }
+        let entitlementService = StoreKitEntitlementService(productIDs: ["com.girlpower.app.pro.monthly"])
         self.quotaCoordinator = coordinator
-        _viewModel = StateObject(wrappedValue: AppFlowViewModel(repository: repository, demoQuotaCoordinator: coordinator))
+        _entitlementService = StateObject(wrappedValue: entitlementService)
+        _viewModel = StateObject(
+            wrappedValue: AppFlowViewModel(
+                repository: repository,
+                demoQuotaCoordinator: coordinator,
+                entitlementService: entitlementService
+            )
+        )
+        Task {
+            await entitlementService.load()
+        }
     }
 
     var body: some Scene {
@@ -50,7 +62,10 @@ struct AppFlowRootView: View {
                             onExit: { viewModel.finishDemo(reason: "toolbar_exit") }
                         )
                     case .paywall:
-                        PaywallPlaceholderView(onClose: { viewModel.finishDemo(reason: "paywall_exit") })
+                        PaywallView(
+                            viewModel: PaywallViewModel(entitlementService: viewModel.paywallEntitlementService),
+                            onClose: { viewModel.finishDemo(reason: "paywall_exit") }
+                        )
                     }
                 }
         }
@@ -73,14 +88,17 @@ struct AppFlowRootView: View {
             if let summaryViewModel = viewModel.summaryViewModel {
                 SquatPostSetSummaryView(
                     viewModel: summaryViewModel,
-                    onStartSecondAttempt: viewModel.startSecondAttemptFromSummary,
+                    onStartNextAttempt: viewModel.startNextAttemptFromSummary,
                     onContinueToPaywall: viewModel.continueToPaywall
                 )
             } else {
                 DemoCTAView(viewModel: viewModel)
             }
         case .paywall:
-            PaywallPlaceholderView(onClose: { viewModel.finishDemo(reason: "paywall_exit") })
+            PaywallView(
+                viewModel: PaywallViewModel(entitlementService: viewModel.paywallEntitlementService),
+                onClose: { viewModel.finishDemo(reason: "paywall_exit") }
+            )
         }
     }
 
@@ -97,33 +115,5 @@ struct AppFlowRootView: View {
             }
         }
         .ignoresSafeArea()
-    }
-}
-
-struct PaywallPlaceholderView: View {
-    let onClose: () -> Void
-
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
-            Text("Paywall Placeholder")
-                .font(.largeTitle.bold())
-                .foregroundColor(.white)
-            Text("This is where the GP-117 paywall flow will appear.")
-                .foregroundColor(.white.opacity(0.8))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            Button(action: onClose) {
-                Text("Done")
-                    .font(.headline)
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(Capsule())
-            }
-            Spacer()
-        }
-        .padding(32)
     }
 }

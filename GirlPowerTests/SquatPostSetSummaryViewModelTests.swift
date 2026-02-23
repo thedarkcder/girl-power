@@ -51,4 +51,12 @@ final class SquatPostSetSummaryViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.primaryButtonTitle, "Continue to Paywall")
         XCTAssertFalse(viewModel.isSecondaryButtonVisible)
     }
+
+    func testProUnlockedStateShowsStartCoachingCopy() {
+        let context = SummaryContext(summary: makeSummary(), ctaState: .proUnlocked)
+        let viewModel = SquatPostSetSummaryViewModel(context: context)
+        XCTAssertEqual(viewModel.primaryButtonTitle, "Start Coaching")
+        XCTAssertNil(viewModel.secondaryButtonTitle)
+        XCTAssertEqual(viewModel.statusMessage, "Unlimited coaching unlocked.")
+    }
 }

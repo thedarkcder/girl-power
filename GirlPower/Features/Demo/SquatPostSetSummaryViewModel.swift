@@ -29,6 +29,8 @@ final class SquatPostSetSummaryViewModel: ObservableObject {
             return "Starts your second and final demo attempt."
         case .locked:
             return "Opens the paywall to continue."
+        case .proUnlocked:
+            return "Start another coaching session."
         }
     }
 
@@ -36,6 +38,8 @@ final class SquatPostSetSummaryViewModel: ObservableObject {
         switch context.ctaState {
         case .secondAttemptEligible:
             return "Continue to Paywall"
+        case .proUnlocked:
+            return nil
         default:
             return nil
         }
@@ -93,6 +97,8 @@ final class SquatPostSetSummaryViewModel: ObservableObject {
             return message
         case .secondAttemptEligible:
             return "You can take one more demo attempt."
+        case .proUnlocked:
+            return "Unlimited coaching unlocked."
         }
     }
 }
