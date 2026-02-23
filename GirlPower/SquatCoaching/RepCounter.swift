@@ -31,6 +31,12 @@ struct RepCounter {
         let confidence: CGFloat
     }
 
+    struct Snapshot: Equatable {
+        let repetitionCount: Int
+        let tempoSamples: [TimeInterval]
+        let correctionCounts: [CoachingCue.CorrectionReason: Int]
+    }
+
     private let configuration: Configuration
     private var currentPhase: PosePhase = .idleWithinSet
     private var repCount: Int = 0
@@ -40,6 +46,9 @@ struct RepCounter {
     private var lowConfidenceActive = false
     private var lastRepCompletionTimestamp: TimeInterval?
     private var lastSampleTimestamp: TimeInterval?
+    private var currentRepStartTimestamp: TimeInterval?
+    private var tempoSamples: [TimeInterval] = []
+    private var correctionCounts: [CoachingCue.CorrectionReason: Int] = [:]
 
     init(configuration: Configuration = .default) {
         self.configuration = configuration
@@ -54,6 +63,9 @@ struct RepCounter {
         lowConfidenceActive = false
         lastRepCompletionTimestamp = nil
         lastSampleTimestamp = nil
+        currentRepStartTimestamp = nil
+        tempoSamples.removeAll()
+        correctionCounts.removeAll()
     }
 
     mutating func suspendForTrackingLoss() -> Result {
@@ -112,6 +124,7 @@ struct RepCounter {
             bottomReached = false
             if normalizedDepth >= configuration.descentThreshold {
                 dwellStart = timestamp
+                currentRepStartTimestamp = timestamp
                 currentPhase = .descending(progress: progress)
             } else {
                 currentPhase = .idleWithinSet
@@ -165,10 +178,16 @@ struct RepCounter {
             currentPhase = .idleWithinSet
             dwellStart = nil
             bottomReached = false
+            currentRepStartTimestamp = nil
             if normalizedDepth >= configuration.descentThreshold {
                 currentPhase = .descending(progress: progress)
                 dwellStart = timestamp
+                currentRepStartTimestamp = timestamp
             }
+        }
+
+        if case .correction(let reason) = cue {
+            recordCorrection(reason)
         }
 
         return result(for: currentPhase, cue: cue, confidence: confidence)
@@ -179,12 +198,14 @@ struct RepCounter {
         guard !lowConfidenceActive else { return nil }
         resetDescendingState()
         currentPhase = .coachingPausedLowConfidence
+        recordCorrection(.lowConfidence)
         return .correction(.lowConfidence)
     }
 
     private mutating func resetDescendingState() {
         dwellStart = nil
         bottomReached = false
+        currentRepStartTimestamp = nil
     }
 
     private mutating func advanceAscendingPhase(
@@ -194,6 +215,9 @@ struct RepCounter {
     ) -> CoachingCue? {
         if normalizedDepth <= configuration.releaseThreshold {
             repCount += 1
+            if let start = currentRepStartTimestamp {
+                tempoSamples.append(max(timestamp - start, 0))
+            }
             currentPhase = .repCompleted(repetitionCount: repCount, timestamp: timestamp)
             lastRepCompletionTimestamp = timestamp
             resetDescendingState()
@@ -216,5 +240,17 @@ struct RepCounter {
 
     private func result(for phase: PosePhase, cue: CoachingCue?, confidence: CGFloat) -> Result {
         Result(phase: phase, repetitionCount: repCount, cue: cue, confidence: confidence)
+    }
+
+    mutating func snapshot() -> Snapshot {
+        Snapshot(
+            repetitionCount: repCount,
+            tempoSamples: tempoSamples,
+            correctionCounts: correctionCounts
+        )
+    }
+
+    private mutating func recordCorrection(_ reason: CoachingCue.CorrectionReason) {
+        correctionCounts[reason, default: 0] += 1
     }
 }

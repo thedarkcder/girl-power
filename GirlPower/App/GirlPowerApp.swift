@@ -26,14 +26,13 @@ struct GirlPowerApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppFlowRootView(viewModel: viewModel, quotaCoordinator: quotaCoordinator)
+            AppFlowRootView(viewModel: viewModel)
         }
     }
 }
 
 struct AppFlowRootView: View {
     @ObservedObject var viewModel: AppFlowViewModel
-    let quotaCoordinator: DemoQuotaCoordinating
 
     var body: some View {
         NavigationStack(path: $viewModel.navigationPath) {
@@ -44,8 +43,14 @@ struct AppFlowRootView: View {
                     switch route {
                     case .demoStub:
                         DemoAttemptFlowView(
+                            attemptIndex: viewModel.activeAttemptIndex,
+                            onAttemptCompletion: { input in
+                                await viewModel.completeAttempt(with: input)
+                            },
                             onExit: { viewModel.finishDemo(reason: "toolbar_exit") }
                         )
+                    case .paywall:
+                        PaywallPlaceholderView(onClose: { viewModel.finishDemo(reason: "paywall_exit") })
                     }
                 }
         }
@@ -64,6 +69,18 @@ struct AppFlowRootView: View {
             )
         case .demoCTA, .demoStub:
             DemoCTAView(viewModel: viewModel)
+        case .sessionSummary:
+            if let summaryViewModel = viewModel.summaryViewModel {
+                SquatPostSetSummaryView(
+                    viewModel: summaryViewModel,
+                    onStartSecondAttempt: viewModel.startSecondAttemptFromSummary,
+                    onContinueToPaywall: viewModel.continueToPaywall
+                )
+            } else {
+                DemoCTAView(viewModel: viewModel)
+            }
+        case .paywall:
+            PaywallPlaceholderView(onClose: { viewModel.finishDemo(reason: "paywall_exit") })
         }
     }
 
@@ -80,5 +97,33 @@ struct AppFlowRootView: View {
             }
         }
         .ignoresSafeArea()
+    }
+}
+
+struct PaywallPlaceholderView: View {
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+            Text("Paywall Placeholder")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+            Text("This is where the GP-117 paywall flow will appear.")
+                .foregroundColor(.white.opacity(0.8))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Button(action: onClose) {
+                Text("Done")
+                    .font(.headline)
+                    .foregroundColor(.black)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .clipShape(Capsule())
+            }
+            Spacer()
+        }
+        .padding(32)
     }
 }

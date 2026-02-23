@@ -38,8 +38,8 @@ final class GirlPowerUITests: XCTestCase {
         let startDemo = app.buttons["Start Free Demo"]
         XCTAssertTrue(startDemo.waitForExistence(timeout: 2))
         startDemo.tap()
-        let backButton = app.buttons["CTA"]
-        XCTAssertTrue(backButton.waitForExistence(timeout: 2))
+        let backButton = app.buttons["demo_toolbar_back_button"]
+        XCTAssertTrue(backButton.waitForExistence(timeout: 3))
         backButton.tap()
     }
 

@@ -34,6 +34,13 @@ final class DemoQuotaStateMachineTests: XCTestCase {
         XCTAssertEqual(result.state, .locked(reason: .evaluationDenied(message: "nope")))
     }
 
+    func testEvaluationTimeoutLocksMachine() {
+        let decision: DemoQuotaStateMachine.DemoEvaluationDecision = .timeout(timestamp: Date())
+        let result = machine.reduce(state: .gatePending, event: .evaluationTimeout(decision: decision))
+        XCTAssertEqual(result.state, .locked(reason: .evaluationTimeout))
+        XCTAssertEqual(result.sideEffects, [.persistEvaluationDecision(decision)])
+    }
+
     func testSecondAttemptFlowLocksAfterCompletion() {
         let startResult = machine.reduce(state: .secondAttemptEligible, event: .startAttempt)
         XCTAssertEqual(startResult.state, .secondAttemptActive)
