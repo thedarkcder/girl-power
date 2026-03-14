@@ -60,7 +60,15 @@ Deno.test('evaluate-session returns 409 duplicate response when the attempt was 
       payload_version: 'v1',
       fallback_used: false,
       request_payload: { attempt_index: 1 },
-      llm_response: { summary: 'approved' },
+      llm_response: {
+        summary: 'approved',
+        decision: {
+          type: 'allow',
+          allow_another_demo: true,
+          attempts_used: 1,
+          evaluated_at: '2026-03-14T00:00:00.000Z',
+        },
+      },
       moderation_payload: { flagged: false },
       reason: null,
     },
@@ -79,6 +87,85 @@ Deno.test('evaluate-session returns 409 duplicate response when the attempt was 
   assertEquals(response.status, 409);
   assertEquals(body.allow_another_demo, true);
   assertEquals(body.reason, 'duplicate_attempt');
+});
+
+Deno.test('evaluate-session duplicate response prefers the persisted decision payload when snapshot persistence drifted', async () => {
+  const handler = buildEvaluateSessionHandler(makeDependencies({
+    duplicateAttempt: {
+      id: 'attempt-1',
+      session_id: 'session-1',
+      state: 'FALLBACK_TIMEOUT',
+      payload_version: 'v1',
+      fallback_used: true,
+      request_payload: { attempt_index: 1 },
+      llm_response: {
+        summary: 'timed out',
+        decision: {
+          type: 'timeout',
+          allow_another_demo: false,
+          attempts_used: 1,
+          evaluated_at: '2026-03-14T01:02:03.000Z',
+          lock_reason: 'evaluation_timeout',
+        },
+      },
+      moderation_payload: { flagged: false },
+      reason: 'llm_timeout',
+    },
+    snapshot: {
+      attempts_used: 1,
+      active_attempt_index: null,
+      last_decision: { type: 'allow', ts: '2026-03-14T00:00:00.000Z' },
+      server_lock_reason: null,
+      last_sync_at: '2026-03-14T00:00:00.000Z',
+    },
+  }));
+
+  const response = await handler(makeRequest());
+  const body = await response.json();
+
+  assertEquals(response.status, 409);
+  assertEquals(body.allow_another_demo, false);
+  assertEquals(body.lock_reason, 'evaluation_timeout');
+  assertEquals(body.evaluated_at, '2026-03-14T01:02:03.000Z');
+  assertEquals(body.snapshot.last_decision.type, 'timeout');
+});
+
+Deno.test('evaluate-session duplicate response reconstructs snapshot from the persisted decision when snapshot write never landed', async () => {
+  const handler = buildEvaluateSessionHandler(makeDependencies({
+    duplicateAttempt: {
+      id: 'attempt-1',
+      session_id: 'session-1',
+      state: 'REJECTED',
+      payload_version: 'v1',
+      fallback_used: false,
+      request_payload: { attempt_index: 1 },
+      llm_response: {
+        summary: 'quota exhausted',
+        decision: {
+          type: 'deny',
+          allow_another_demo: false,
+          attempts_used: 2,
+          evaluated_at: '2026-03-14T02:00:00.000Z',
+          lock_reason: 'quota',
+          message: 'This device has already used its free demos.',
+        },
+      },
+      moderation_payload: { flagged: false },
+      reason: 'quota_rule',
+    },
+    snapshot: null,
+  }));
+
+  const response = await handler(makeRequest());
+  const body = await response.json();
+
+  assertEquals(response.status, 409);
+  assertEquals(body.allow_another_demo, false);
+  assertEquals(body.attempts_used, 2);
+  assertEquals(body.lock_reason, 'quota');
+  assertEquals(body.message, 'This device has already used its free demos.');
+  assertEquals(body.snapshot.server_lock_reason, 'quota');
+  assertEquals(body.snapshot.last_decision.type, 'deny');
 });
 
 Deno.test('evaluate-session fails closed when the LLM decision path times out', async () => {

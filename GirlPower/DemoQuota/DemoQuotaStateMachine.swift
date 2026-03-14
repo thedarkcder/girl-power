@@ -79,7 +79,7 @@ struct DemoQuotaStateMachine {
 
     enum DemoEvaluationDecision: Equatable {
         case allowSecondAttempt(timestamp: Date)
-        case deny(message: String?, timestamp: Date)
+        case deny(lockReason: LockReason, timestamp: Date)
         case timeout(timestamp: Date)
 
         var allowsSecondAttempt: Bool {
@@ -91,15 +91,15 @@ struct DemoQuotaStateMachine {
             switch self {
             case .allowSecondAttempt:
                 return nil
-            case .deny(let message, _):
-                return .evaluationDenied(message: message)
+            case .deny(let lockReason, _):
+                return lockReason
             case .timeout:
                 return .evaluationTimeout
             }
         }
 
         var denialMessage: String? {
-            if case let .deny(message, _) = self { return message }
+            if case let .deny(.evaluationDenied(message), _) = self { return message }
             return nil
         }
     }
@@ -141,7 +141,7 @@ struct DemoQuotaStateMachine {
 
         case (.gatePending, .evaluationDeny(let decision)):
             return Result(
-                state: .locked(reason: .evaluationDenied(message: decision.denialMessage)),
+                state: .locked(reason: decision.lockReason ?? .evaluationDenied(message: nil)),
                 sideEffects: [
                     .persistEvaluationDecision(decision)
                 ]
@@ -202,11 +202,25 @@ struct DemoQuotaStateMachine {
                 if decision.allowsSecondAttempt {
                     return .secondAttemptEligible
                 }
-                return .locked(reason: decision.lockReason ?? .serverSync)
+                return .locked(reason: resolvedLockReason(snapshot: snapshot, decision: decision) ?? .serverSync)
             }
             return .gatePending
         }
 
         return .fresh
+    }
+
+    private func resolvedLockReason(
+        snapshot: RemoteSnapshot,
+        decision: DemoEvaluationDecision?
+    ) -> LockReason? {
+        switch snapshot.serverLockReason {
+        case .evaluationDenied:
+            return .evaluationDenied(message: decision?.denialMessage)
+        case let reason?:
+            return reason
+        case nil:
+            return decision?.lockReason
+        }
     }
 }

@@ -14,6 +14,7 @@ struct DemoQuotaConfiguration {
         let identityFetchURL: URL
         let identityMirrorURL: URL
         let anonKey: String
+        let identityRecoveryLookupKey: String?
     }
 
     let mode: Mode
@@ -57,7 +58,13 @@ private extension DemoQuotaConfiguration.SupabaseEndpoints {
             snapshotMirrorURL: snapshotMirrorURL,
             identityFetchURL: identityFetchURL,
             identityMirrorURL: identityMirrorURL,
-            anonKey: anonKey
+            anonKey: anonKey,
+            identityRecoveryLookupKey: DemoQuotaConfiguration.value(
+                key: "DemoQuotaIdentityRecoveryLookupKey",
+                env: "DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY",
+                info: info,
+                environment: environment
+            )
         )
     }
 }

@@ -74,9 +74,49 @@ final class DemoQuotaCoordinatorTests: XCTestCase {
         _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
 
         await expectState(.locked(reason: .evaluationDenied(message: "no more")))
-        XCTAssertEqual(persistence.lastDecision, .deny(message: "no more", timestamp: evaluation.timestamp))
+        XCTAssertEqual(
+            persistence.lastDecision,
+            .deny(lockReason: .evaluationDenied(message: "no more"), timestamp: evaluation.timestamp)
+        )
         XCTAssertEqual(persistence.lockReason, .evaluationDenied(message: "no more"))
         XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .evaluationDenied(message: "no more"))
+    }
+
+    func testServerQuotaDenyLocksAndPersistsQuotaReason() async throws {
+        evaluation.responses = [.deny(message: "No more free demos", lockReason: "quota")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .quotaExhausted))
+        XCTAssertEqual(persistence.lockReason, .quotaExhausted)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .quotaExhausted)
+    }
+
+    func testServerSyncDenyLocksAndPersistsServerSyncReason() async throws {
+        evaluation.responses = [.deny(message: "Sync failed", lockReason: "server_sync")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .serverSync))
+        XCTAssertEqual(persistence.lockReason, .serverSync)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .serverSync)
+    }
+
+    func testServerTimeoutDenyLocksAsEvaluationTimeout() async throws {
+        evaluation.responses = [.deny(message: nil, lockReason: "evaluation_timeout")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .evaluationTimeout))
+        XCTAssertEqual(persistence.lastDecision, .timeout(timestamp: evaluation.timestamp))
+        XCTAssertEqual(persistence.lockReason, .evaluationTimeout)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .evaluationTimeout)
     }
 
     func testEvaluationTimeoutFailsClosed() async throws {
@@ -298,7 +338,7 @@ final class DemoQuotaTestSessionLogger: DemoSessionLogging {
 final class DemoQuotaTestEvaluationService: DemoEvaluationServicing {
     enum Response {
         case allow
-        case deny(message: String?)
+        case deny(message: String?, lockReason: String = "evaluation_denied")
         case timeout
         case networkFailure
     }
@@ -323,11 +363,11 @@ final class DemoQuotaTestEvaluationService: DemoEvaluationServicing {
                 attemptsUsed: 1,
                 timestamp: timestamp
             )
-        case .deny(let message):
+        case .deny(let message, let lockReason):
             return EvaluationResult(
                 allowAnotherDemo: false,
                 message: message,
-                lockReason: "evaluation_denied",
+                lockReason: lockReason,
                 attemptsUsed: 1,
                 timestamp: timestamp
             )
@@ -375,6 +415,30 @@ final class DeviceIdentityProviderTests: XCTestCase {
         XCTAssertEqual(keychain.storedUUID, expected)
         XCTAssertEqual(mirror.fetchLookupKeys, ["vendor-lookup"])
         XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+    }
+
+    func testSkipsRemoteRecoveryWhenLookupKeyIsNotConfigured() async throws {
+        let keychain = DemoQuotaTestKeychain()
+        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: UUID(uuidString: "00000000-0000-0000-0000-000000000777")!)
+        let provider = DeviceIdentityProvider(
+            keychain: keychain,
+            serverMirror: mirror,
+            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: nil)
+        )
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(keychain.storedUUID, deviceID)
+        XCTAssertTrue(mirror.fetchLookupKeys.isEmpty)
+        XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+    }
+
+    func testConfiguredLookupKeyProviderNormalizesBlankValuesToNil() {
+        XCTAssertNil(ConfiguredDeviceIdentityLookupKeyProvider(lookupKey: "   ").lookupKey())
+        XCTAssertEqual(
+            ConfiguredDeviceIdentityLookupKeyProvider(lookupKey: " gp-sim-1 ").lookupKey(),
+            "gp-sim-1"
+        )
     }
 }
 

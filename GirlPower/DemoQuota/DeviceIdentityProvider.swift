@@ -25,7 +25,7 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
     init(
         keychain: KeychainPersisting,
         serverMirror: DeviceIdentityMirroring,
-        lookupKeyProvider: DeviceIdentityLookupKeyProviding = VendorDeviceIdentityLookupKeyProvider()
+        lookupKeyProvider: DeviceIdentityLookupKeyProviding = ConfiguredDeviceIdentityLookupKeyProvider()
     ) {
         self.keychain = keychain
         self.serverMirror = serverMirror
@@ -64,12 +64,15 @@ protocol DeviceIdentityMirroring {
     func mirror(deviceID: UUID, lookupKey: String) async throws
 }
 
-struct VendorDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
+struct ConfiguredDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
+    private let configuredLookupKey: String?
+
+    init(lookupKey: String? = nil) {
+        let normalized = lookupKey?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.configuredLookupKey = normalized?.isEmpty == false ? normalized : nil
+    }
+
     func lookupKey() -> String? {
-#if canImport(UIKit)
-        return UIDevice.current.identifierForVendor?.uuidString
-#else
-        return nil
-#endif
+        configuredLookupKey
     }
 }

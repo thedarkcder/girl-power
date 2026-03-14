@@ -5,7 +5,7 @@ GP-115 uses a small Edge-function bundle:
 - `evaluate-session`: authoritative second-attempt decision path
 - `demo-session-log`: attempt start/completion audit logging
 - `demo-snapshot-fetch` / `demo-snapshot-mirror`: reinstall-safe quota snapshot hydration
-- `demo-identity-fetch` / `demo-identity-mirror`: lookup-key to `device_id` recovery for reinstall flows
+- `demo-identity-fetch` / `demo-identity-mirror`: explicit lookup-key to `device_id` recovery for supported reinstall flows
 
 ## API Contract
 
@@ -66,6 +66,12 @@ Example success body:
 - The mobile app uses the anon key solely to call the Edge endpoint; it can never talk to the tables directly.
 - Secrets (`SUPABASE_SERVICE_ROLE_KEY`, future LLM provider keys) live in `supabase/functions/.env.local` locally and Supabase Edge secrets remotely—never in source control.
 
+## Device Identity Recovery Contract
+
+- The iOS client no longer derives a recovery key from `UIDevice.identifierForVendor`.
+- Remote `device_id` recovery is supported only when the client is launched with an explicit stable lookup key via `DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY` or `DemoQuotaIdentityRecoveryLookupKey`.
+- If that lookup key is absent, the app skips the `demo-identity-*` mirror flow and relies on keychain persistence plus mirrored quota snapshots. A true delete/reinstall after keychain loss is intentionally treated as a new anonymous device unless an explicit recovery key is supplied.
+
 ## Retention / TTL
 
 - Both `sessions` and `demo_attempts` record an `expires_at` timestamp defaulting to **30 days**.
@@ -97,6 +103,7 @@ Example success body:
 
    ```bash
    export SUPABASE_ANON_KEY="$(supabase status --json | jq -r '.services | .[] | select(.service_name=="api") | .env | .SUPABASE_ANON_KEY')"
+   export DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY="gp-sim-1"
 
    curl -s \
      -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
@@ -117,7 +124,7 @@ Example success body:
    curl -s \
      -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
+     -d "{\"lookup_key\":\"$DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY\",\"device_id\":\"11111111-1111-1111-1111-111111111111\"}" \
      http://localhost:54321/functions/v1/demo-identity-mirror | jq
 
    curl -s \

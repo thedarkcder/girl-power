@@ -86,19 +86,24 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
     }
 
     private func makeSnapshot(from payload: SnapshotPayload) -> DemoQuotaStateMachine.RemoteSnapshot {
+        let lockReason = payload.serverLockReason.flatMap { DemoQuotaStateMachine.LockReason(storageValue: $0) }
         let decision = payload.lastDecision.flatMap { decisionPayload -> DemoQuotaStateMachine.DemoEvaluationDecision? in
             switch decisionPayload.type {
             case "allow":
                 return .allowSecondAttempt(timestamp: decisionPayload.timestamp)
             case "deny":
-                return .deny(message: decisionPayload.message, timestamp: decisionPayload.timestamp)
+                return .deny(
+                    lockReason: lockReason == .evaluationDenied(message: nil)
+                        ? .evaluationDenied(message: decisionPayload.message)
+                        : lockReason ?? .evaluationDenied(message: decisionPayload.message),
+                    timestamp: decisionPayload.timestamp
+                )
             case "timeout":
                 return .timeout(timestamp: decisionPayload.timestamp)
             default:
                 return nil
             }
         }
-        let lockReason = payload.serverLockReason.flatMap { DemoQuotaStateMachine.LockReason(storageValue: $0) }
         return DemoQuotaStateMachine.RemoteSnapshot(
             attemptsUsed: payload.attemptsUsed,
             activeAttemptIndex: payload.activeAttemptIndex,
@@ -114,8 +119,8 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             switch lastDecision {
             case .allowSecondAttempt(let timestamp):
                 decision = DecisionPayload(type: "allow", message: nil, timestamp: timestamp)
-            case .deny(let message, let timestamp):
-                decision = DecisionPayload(type: "deny", message: message, timestamp: timestamp)
+            case .deny(let lockReason, let timestamp):
+                decision = DecisionPayload(type: "deny", message: lockReason.denialMessage, timestamp: timestamp)
             case .timeout(let timestamp):
                 decision = DecisionPayload(type: "timeout", message: nil, timestamp: timestamp)
             }

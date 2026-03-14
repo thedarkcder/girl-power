@@ -42,14 +42,16 @@
    export DEMO_QUOTA_SNAPSHOT_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-snapshot-mirror"
    export DEMO_QUOTA_IDENTITY_FETCH_URL="http://127.0.0.1:54321/functions/v1/demo-identity-fetch"
    export DEMO_QUOTA_IDENTITY_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-identity-mirror"
+   export DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY="gp-sim-1"
    export DEMO_QUOTA_ANON_KEY="<your supabase anon key>"
    ```
+   - `DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY` is the only supported cross-reinstall lookup contract for `demo-identity-*`. If you omit it, the app does not attempt remote `device_id` recovery and instead relies on the keychain + mirrored snapshot path only.
 3. Validate the server contract before launching the app:
    ```sh
    curl -s \
      -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
+     -d "{\"lookup_key\":\"$DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY\",\"device_id\":\"11111111-1111-1111-1111-111111111111\"}" \
      http://127.0.0.1:54321/functions/v1/demo-identity-mirror | jq
 
    curl -s \
@@ -88,7 +90,7 @@
      http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch | jq
    ```
    - Expect `attempts_used=2`, `server_lock_reason="quota"`, and no path back to `secondAttemptEligible`.
-7. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
+7. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state. If you also clear the local keychain, reuse the same `DEMO_QUOTA_IDENTITY_RECOVERY_LOOKUP_KEY` to exercise explicit remote `device_id` recovery; without that key the app correctly treats the install as a new anonymous device.
 8. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
 
 ## GP-116 Summary + Paywall Flow

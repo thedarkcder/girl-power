@@ -195,8 +195,14 @@ actor DemoQuotaCoordinator: DemoQuotaCoordinating {
             if result.allowAnotherDemo {
                 let allowDecision = DemoQuotaStateMachine.DemoEvaluationDecision.allowSecondAttempt(timestamp: result.timestamp)
                 _ = try? await apply(.evaluationAllow(decision: allowDecision))
+            } else if mappedLockReason(from: result) == .evaluationTimeout {
+                let timeoutDecision = DemoQuotaStateMachine.DemoEvaluationDecision.timeout(timestamp: result.timestamp)
+                _ = try? await apply(.evaluationTimeout(decision: timeoutDecision))
             } else {
-                let denyDecision = DemoQuotaStateMachine.DemoEvaluationDecision.deny(message: result.message, timestamp: result.timestamp)
+                let denyDecision = DemoQuotaStateMachine.DemoEvaluationDecision.deny(
+                    lockReason: mappedLockReason(from: result) ?? .evaluationDenied(message: result.message),
+                    timestamp: result.timestamp
+                )
                 _ = try? await apply(.evaluationDeny(decision: denyDecision))
             }
         } catch DemoEvaluationError.timeout {
@@ -205,6 +211,21 @@ actor DemoQuotaCoordinator: DemoQuotaCoordinating {
         } catch {
             let timeoutDecision = DemoQuotaStateMachine.DemoEvaluationDecision.timeout(timestamp: clock())
             _ = try? await apply(.evaluationTimeout(decision: timeoutDecision))
+        }
+    }
+
+    private func mappedLockReason(from result: EvaluationResult) -> DemoQuotaStateMachine.LockReason? {
+        switch result.lockReason {
+        case "quota":
+            return .quotaExhausted
+        case "evaluation_denied":
+            return .evaluationDenied(message: result.message)
+        case "evaluation_timeout":
+            return .evaluationTimeout
+        case "server_sync":
+            return .serverSync
+        default:
+            return nil
         }
     }
 

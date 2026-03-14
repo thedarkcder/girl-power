@@ -1,4 +1,4 @@
-import type { DemoQuotaSnapshot } from '../demo-quota/types.ts';
+import type { DemoQuotaDecisionType, DemoQuotaLockReason, DemoQuotaSnapshot } from '../demo-quota/types.ts';
 
 export type EvaluateSessionInput = {
   prompt: string;
@@ -25,6 +25,16 @@ export type LLMResponse = {
   summary: string;
   guidance: string[];
   tokens_used: number;
+  decision?: PersistedDecisionPayload;
+};
+
+export type PersistedDecisionPayload = {
+  type: DemoQuotaDecisionType;
+  allow_another_demo: boolean;
+  attempts_used: number;
+  evaluated_at: string;
+  lock_reason?: DemoQuotaLockReason;
+  message?: string;
 };
 
 export type LLMResult = {

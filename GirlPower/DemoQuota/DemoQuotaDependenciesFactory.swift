@@ -21,7 +21,8 @@ enum DemoQuotaDependenciesFactory {
         let evaluationService = EvaluateSessionService(endpoint: config.evaluateSessionURL, anonKey: config.anonKey, timeoutInterval: 3, urlSession: urlSession)
         let deviceIdentityMirror = SupabaseDeviceIdentityMirror(fetchEndpoint: config.identityFetchURL, mirrorEndpoint: config.identityMirrorURL, anonKey: config.anonKey, urlSession: urlSession)
         let keychain = KeychainDeviceIdentityStorage()
-        let identityProvider = DeviceIdentityProvider(keychain: keychain, serverMirror: deviceIdentityMirror)
+        let lookupKeyProvider = ConfiguredDeviceIdentityLookupKeyProvider(lookupKey: config.identityRecoveryLookupKey)
+        let identityProvider = DeviceIdentityProvider(keychain: keychain, serverMirror: deviceIdentityMirror, lookupKeyProvider: lookupKeyProvider)
         let snapshotSync = SupabaseDemoQuotaSnapshotSync(fetchEndpoint: config.snapshotFetchURL, mirrorEndpoint: config.snapshotMirrorURL, anonKey: config.anonKey, urlSession: urlSession)
         return DemoQuotaCoordinator(
             persistence: persistence,
@@ -38,7 +39,7 @@ enum DemoQuotaDependenciesFactory {
         let evaluationService = MockDemoEvaluationService()
         let identityMirror = NoopDeviceIdentityMirror()
         let keychain = KeychainDeviceIdentityStorage(service: "com.route25.girlpower.deviceid.mock")
-        let identityProvider = DeviceIdentityProvider(keychain: keychain, serverMirror: identityMirror)
+        let identityProvider = DeviceIdentityProvider(keychain: keychain, serverMirror: identityMirror, lookupKeyProvider: ConfiguredDeviceIdentityLookupKeyProvider())
         return DemoQuotaCoordinator(
             persistence: persistence,
             sessionLogger: sessionLogger,
