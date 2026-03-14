@@ -38,7 +38,7 @@ final class EvaluateSessionService: DemoEvaluationServicing {
         request.addValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
 
         let prompt = """
-        Evaluate whether device \(deviceID.uuidString) is eligible for exactly one additional free Girl Power coaching demo after attempt \(attemptIndex). Use the structured context for audit only and fail closed if quota or validation checks fail.
+        Evaluate whether the caller is eligible for exactly one additional free Girl Power coaching demo after attempt \(attemptIndex). Use the structured context for audit only and fail closed if quota or validation checks fail.
         """
         let payload: [String: Any] = [
             "device_id": deviceID.uuidString,
@@ -54,33 +54,42 @@ final class EvaluateSessionService: DemoEvaluationServicing {
 
         do {
             let (data, response) = try await urlSession.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode else {
+            guard let httpResponse = response as? HTTPURLResponse else {
                 throw DemoEvaluationError.invalidResponse
             }
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let value = try container.decode(String.self)
-                if let date = Self.timestampFormatter.date(from: value) ?? Self.fallbackTimestampFormatter.date(from: value) {
-                    return date
-                }
-                throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 timestamp")
+            if [409, 429].contains(httpResponse.statusCode) {
+                return try decodeResult(from: data)
             }
-            let result = try decoder.decode(EvaluateResponse.self, from: data)
-            return EvaluationResult(
-                allowAnotherDemo: result.allowAnotherDemo,
-                message: result.message,
-                lockReason: result.lockReason,
-                attemptsUsed: result.attemptsUsed,
-                timestamp: result.evaluatedAt ?? Date()
-            )
+            guard 200..<300 ~= httpResponse.statusCode else {
+                throw DemoEvaluationError.invalidResponse
+            }
+            return try decodeResult(from: data)
         } catch let error as URLError {
             if error.code == .timedOut {
                 throw DemoEvaluationError.timeout
             }
             throw DemoEvaluationError.networkFailure
         }
+    }
+
+    private func decodeResult(from data: Data) throws -> EvaluationResult {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let value = try container.decode(String.self)
+            if let date = Self.timestampFormatter.date(from: value) ?? Self.fallbackTimestampFormatter.date(from: value) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 timestamp")
+        }
+        let result = try decoder.decode(EvaluateResponse.self, from: data)
+        return EvaluationResult(
+            allowAnotherDemo: result.allowAnotherDemo,
+            message: result.message,
+            lockReason: result.lockReason,
+            attemptsUsed: result.attemptsUsed,
+            timestamp: result.evaluatedAt ?? Date()
+        )
     }
 
     private struct EvaluateResponse: Decodable {

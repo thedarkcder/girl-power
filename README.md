@@ -21,6 +21,6 @@ This repo hosts the Girl Power iOS app plus supporting Supabase Edge Functions. 
 | --- | --- |
 | `scripts/supabase-start.sh` | Boots the Supabase Docker stack. Run once per terminal session. |
 | `scripts/supabase-reset.sh` | Applies the latest migrations + `supabase/seed.sql`. Requires the stack to be running and enforces RLS/TTL policies described in the docs. |
-| `scripts/serve-evaluate-session.sh` | Serves `evaluate-session` with hot reload using `supabase/functions/.env.local`. Start the companion `demo-session-log`, `demo-snapshot-*`, and `demo-identity-*` functions with `supabase functions serve ... --env-file supabase/functions/.env.local`. |
+| `scripts/serve-evaluate-session.sh` | Serves `evaluate-session` with hot reload using `supabase/functions/.env.local`. Start the companion `demo-session-log` function with `supabase functions serve ... --env-file supabase/functions/.env.local`. |
 
 See [`docs/evaluate-session.md`](docs/evaluate-session.md) for the API contract, curl examples, rate-limit expectations, and additional operational notes.

@@ -28,30 +28,16 @@
    supabase start
    supabase functions serve evaluate-session --env-file supabase/functions/.env.local
    supabase functions serve demo-session-log --env-file supabase/functions/.env.local
-   supabase functions serve demo-snapshot-fetch --env-file supabase/functions/.env.local
-   supabase functions serve demo-snapshot-mirror --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-fetch --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-mirror --env-file supabase/functions/.env.local
    ```
 2. Export environment variables so the app uses Supabase mode:
    ```sh
    export DEMO_QUOTA_MODE=supabase
    export DEMO_QUOTA_SESSION_LOGGER_URL="http://127.0.0.1:54321/functions/v1/demo-session-log"
    export DEMO_QUOTA_EVALUATE_SESSION_URL="http://127.0.0.1:54321/functions/v1/evaluate-session"
-   export DEMO_QUOTA_SNAPSHOT_FETCH_URL="http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch"
-   export DEMO_QUOTA_SNAPSHOT_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-snapshot-mirror"
-   export DEMO_QUOTA_IDENTITY_FETCH_URL="http://127.0.0.1:54321/functions/v1/demo-identity-fetch"
-   export DEMO_QUOTA_IDENTITY_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-identity-mirror"
    export DEMO_QUOTA_ANON_KEY="<your supabase anon key>"
    ```
 3. Validate the server contract before launching the app:
    ```sh
-   curl -s \
-     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
-     http://127.0.0.1:54321/functions/v1/demo-identity-mirror | jq
-
    curl -s \
      -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
      -H "Content-Type: application/json" \
@@ -64,11 +50,11 @@
      -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":1,"payload_version":"v1","input":{"prompt":"Decide whether a second demo is allowed.","context":{"source":"qa"}},"metadata":{"source":"qa"}}' \
      http://127.0.0.1:54321/functions/v1/evaluate-session | jq
    ```
-   - Expect `allow_another_demo=true`, `attempts_used=1`, and a mirrored snapshot whose `last_decision.type` is `allow`.
+   - Expect `allow_another_demo=true`, `attempts_used=1`, and an authoritative `snapshot.last_decision.type` of `allow`.
 3. Install/run the simulator build (clean install to exercise keychain provisioning). Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.
-   - Edge Function receives exactly one evaluate-session call with the device_id/metadata payload.
+   - Edge Function receives exactly one evaluate-session call with structured metadata; the free-form prompt must not include the stable device UUID.
 4. When evaluate-session returns `allow_another_demo=true`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
 5. Force a deny/timeout path:
    - Stop the `evaluate-session` function or have it return `{ "allow_another_demo": false, "message": "custom message" }`.
@@ -80,15 +66,9 @@
      -H "Content-Type: application/json" \
      -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"stage":"completion","metadata":{"source":"qa"}}' \
      http://127.0.0.1:54321/functions/v1/demo-session-log | jq
-
-   curl -s \
-     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"device_id":"11111111-1111-1111-1111-111111111111"}' \
-     http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch | jq
    ```
    - Expect `attempts_used=2`, `server_lock_reason="quota"`, and no path back to `secondAttemptEligible`.
-7. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
+7. Delete the app (or run on a new simulator), relaunch, and verify only the supported behavior: the app uses its local keychain device identity if it is still present, but it no longer claims anonymous reinstall-safe recovery via helper endpoints.
 8. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
 
 ## GP-116 Summary + Paywall Flow

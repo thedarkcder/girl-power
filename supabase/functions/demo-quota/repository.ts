@@ -45,14 +45,7 @@ export class DemoQuotaRepository {
   async logAttempt(request: DemoQuotaLogRequest): Promise<{ attempt: DemoQuotaAttemptLog; snapshot: DemoQuotaSnapshot }> {
     const existingAttempt = await this.fetchAttemptLog(request.device_id, request.attempt_index);
     const now = new Date().toISOString();
-    const payload = {
-      device_id: request.device_id,
-      attempt_index: request.attempt_index,
-      start_metadata: request.stage === 'start' ? request.metadata ?? {} : existingAttempt?.start_metadata ?? {},
-      completion_metadata: request.stage === 'completion' ? request.metadata ?? {} : existingAttempt?.completion_metadata ?? {},
-      started_at: request.stage === 'start' ? existingAttempt?.started_at ?? now : existingAttempt?.started_at ?? null,
-      completed_at: request.stage === 'completion' ? now : existingAttempt?.completed_at ?? null,
-    };
+    const payload = buildAttemptPayload(existingAttempt, request, now);
 
     const { data, error } = await this.client
       .from('demo_quota_attempt_logs')
@@ -249,6 +242,32 @@ export class DemoQuotaRepository {
       last_sync_at: lastSyncAt,
     };
   }
+}
+
+export function buildAttemptPayload(
+  existingAttempt: DemoQuotaAttemptLog | null,
+  request: DemoQuotaLogRequest,
+  now: string,
+) {
+  const isExistingStart = request.stage === 'start' && Boolean(existingAttempt?.started_at);
+  const isExistingCompletion = request.stage === 'completion' && Boolean(existingAttempt?.completed_at);
+
+  return {
+    device_id: request.device_id,
+    attempt_index: request.attempt_index,
+    start_metadata: request.stage === 'start'
+      ? (isExistingStart ? existingAttempt?.start_metadata ?? {} : request.metadata ?? {})
+      : existingAttempt?.start_metadata ?? {},
+    completion_metadata: request.stage === 'completion'
+      ? (isExistingCompletion ? existingAttempt?.completion_metadata ?? {} : request.metadata ?? {})
+      : existingAttempt?.completion_metadata ?? {},
+    started_at: request.stage === 'start'
+      ? existingAttempt?.started_at ?? now
+      : existingAttempt?.started_at ?? null,
+    completed_at: request.stage === 'completion'
+      ? existingAttempt?.completed_at ?? now
+      : existingAttempt?.completed_at ?? null,
+  };
 }
 
 function hasOwn<T extends object>(value: T | undefined, key: keyof T): boolean {

@@ -21,7 +21,7 @@ Enforce the two-attempt demo quota per device while keeping Supabase logging + L
 | `evaluationAllow` | Supabase Edge Function responded with `allowAnotherDemo=true`. |
 | `evaluationDeny` | Supabase Edge Function responded false or returned a validation error. |
 | `evaluationTimeout` | Evaluate call timed out (>3 s) or failed (network/server). This is treated as a deny. |
-| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs (during cold start or reinstall). Snapshot contains `{attemptsUsed, lastDecision}`. |
+| `resetFromServer(snapshot)` | Reserved for trusted server-owned backfills. The current app path does not rely on anonymous reinstall recovery and runs keychain-first locally. |
 
 ## Reducer signature
 ```swift
@@ -40,10 +40,10 @@ struct DemoQuotaStateMachine {
 | --- | --- |
 | `.logAttemptStart(index)` | `startAttempt` transitioning `Fresh → FirstAttemptActive` or `SecondAttemptEligible → SecondAttemptActive`. Coordinator sends Supabase session log (`stage=start`). |
 | `.logAttemptCompletion(index)` | `attemptCompleted` from active states. Coordinator sends completion log (`stage=complete`). |
-| `.persistAttemptsUsed(count)` | After completion events move the machine forward so attempt counts survive restarts. |
+| `.persistAttemptsUsed(count)` | After completion events move the machine forward so attempt counts survive restarts while local persistence remains available. |
 | `.requestEvaluation(attemptIndex: 1)` | `FirstAttemptActive → GatePending`. Coordinator invokes evaluate-session with device_id metadata. |
 | `.persistEvaluationDecision(decision)` | When `GatePending` resolves. Decision is `.allowSecondAttempt` or `.locked(reason)`. |
-| `.syncFromServer(snapshot)` | `resetFromServer` reduces directly to the server-reported state and persists it. |
+| `.syncFromServer(snapshot)` | `resetFromServer` reduces directly to the server-reported state and persists it when a trusted backfill is available. |
 
 ## Transition matrix (superset)
 | Current | Event | Next | Supabase call? | Persistence |

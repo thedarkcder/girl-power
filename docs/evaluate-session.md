@@ -4,8 +4,8 @@ GP-115 uses a small Edge-function bundle:
 
 - `evaluate-session`: authoritative second-attempt decision path
 - `demo-session-log`: attempt start/completion audit logging
-- `demo-snapshot-fetch` / `demo-snapshot-mirror`: reinstall-safe quota snapshot hydration
-- `demo-identity-fetch` / `demo-identity-mirror`: lookup-key to `device_id` recovery for reinstall flows
+- `demo-snapshot-fetch` / `demo-snapshot-mirror`: deprecated recovery endpoints, now hard-disabled with HTTP `410`
+- `demo-identity-fetch` / `demo-identity-mirror`: deprecated recovery endpoints, now hard-disabled with HTTP `410`
 
 ## API Contract
 
@@ -38,7 +38,7 @@ GP-115 uses a small Edge-function bundle:
 
 | Status | When | Body pieces |
 | --- | --- | --- |
-| `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, mirrored `snapshot`, plus persisted audit payloads |
+| `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, authoritative `snapshot`, plus persisted audit payloads |
 | `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted decision + audit payload with `reason="duplicate_attempt"` |
 | `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `allow_another_demo=false`, `reason="rate_limited"` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
@@ -64,6 +64,7 @@ Example success body:
 
 - Only the Edge functions run with the Supabase **service-role key**. New tables (`public.demo_quota_attempt_logs`, `public.demo_quota_snapshots`, `public.device_identity_mirrors`) and the earlier `users/sessions/demo_attempts` tables are all RLS-protected for service-role writes only.
 - The mobile app uses the anon key solely to call the Edge endpoint; it can never talk to the tables directly.
+- Anonymous clients no longer have any supported server-side reinstall recovery path. The app relies on its locally stored keychain device identity while it remains available and does not send caller-supplied `device_id` or `lookup_key` values to privileged helper endpoints.
 - Secrets (`SUPABASE_SERVICE_ROLE_KEY`, future LLM provider keys) live in `supabase/functions/.env.local` locally and Supabase Edge secrets remotely—never in source control.
 
 ## Retention / TTL
@@ -88,10 +89,6 @@ Example success body:
    ```bash
    scripts/serve-evaluate-session.sh
    supabase functions serve demo-session-log --env-file supabase/functions/.env.local
-   supabase functions serve demo-snapshot-fetch --env-file supabase/functions/.env.local
-   supabase functions serve demo-snapshot-mirror --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-fetch --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-mirror --env-file supabase/functions/.env.local
    ```
 6. **Call the endpoint** using the anon key printed by `supabase start`:
 
@@ -111,29 +108,17 @@ Example success body:
      http://localhost:54321/functions/v1/evaluate-session | jq
    ```
 
-7. **Seed + snapshot validation**:
+7. **Attempt-log validation**:
 
    ```bash
    curl -s \
      -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
      -H "Content-Type: application/json" \
-     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
-     http://localhost:54321/functions/v1/demo-identity-mirror | jq
-
-   curl -s \
-     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-     -H "Content-Type: application/json" \
      -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"stage":"completion","metadata":{"source":"curl"}}' \
      http://localhost:54321/functions/v1/demo-session-log | jq
-
-   curl -s \
-     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"device_id":"11111111-1111-1111-1111-111111111111"}' \
-     http://localhost:54321/functions/v1/demo-snapshot-fetch | jq
    ```
 
-   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"`; that is the reinstall-safe third-attempt block.
+   The response snapshot should report `attempts_used=2` and `server_lock_reason="quota"`.
 
 8. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
 

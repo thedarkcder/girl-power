@@ -39,14 +39,17 @@ create table if not exists public.device_identity_mirrors (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+drop trigger if exists demo_quota_attempt_logs_touch_updated on public.demo_quota_attempt_logs;
 create trigger demo_quota_attempt_logs_touch_updated
 before update on public.demo_quota_attempt_logs
 for each row execute function public.touch_updated_at();
 
+drop trigger if exists demo_quota_snapshots_touch_updated on public.demo_quota_snapshots;
 create trigger demo_quota_snapshots_touch_updated
 before update on public.demo_quota_snapshots
 for each row execute function public.touch_updated_at();
 
+drop trigger if exists device_identity_mirrors_touch_updated on public.device_identity_mirrors;
 create trigger device_identity_mirrors_touch_updated
 before update on public.device_identity_mirrors
 for each row execute function public.touch_updated_at();

@@ -199,6 +199,34 @@ final class AppFlowViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.summaryViewModel?.isSecondaryButtonVisible ?? false)
     }
 
+    func testCompleteAttemptPreservesExistingQuotaStateWhenCoordinatorReturnsNil() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .secondAttemptEligible)
+        await coordinator.setCompletionResult(nil)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: coordinator,
+            entitlementService: EntitlementServiceStub()
+        )
+
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        let input = SessionSummaryInput(
+            attemptIndex: 1,
+            snapshot: RepCounter.Snapshot(
+                repetitionCount: 3,
+                tempoSamples: [1.2, 1.3],
+                correctionCounts: [:]
+            ),
+            duration: 10,
+            generatedAt: Date()
+        )
+
+        _ = await viewModel.completeAttempt(with: input)
+
+        XCTAssertEqual(viewModel.demoQuotaState, .secondAttemptEligible)
+        XCTAssertEqual(viewModel.summaryViewModel?.primaryButtonTitle, "One more go")
+    }
+
     func testAttemptTwoSummaryAlwaysLocks() async {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .secondAttemptEligible)

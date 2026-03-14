@@ -186,7 +186,7 @@ final class AppFlowViewModel: ObservableObject {
         } else {
             let metadata = summaryMetadata(from: input)
             let newState = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
-            resolvedState = newState
+            resolvedState = newState ?? demoQuotaState
             demoQuotaState = resolvedState
         }
         currentAttemptIndex = min(summary.attemptIndex + 1, 2)

@@ -46,7 +46,7 @@ final class DemoQuotaCoordinatorTests: XCTestCase {
         XCTAssertEqual(firstState, .firstAttemptActive)
 
         let pendingState = await coordinator.markAttemptCompleted(resultMetadata: ["result": "complete"])
-        XCTAssertEqual(pendingState, .gatePending)
+        XCTAssertEqual(pendingState, .some(.gatePending))
         XCTAssertEqual(persistence.attemptsUsed, 1)
         XCTAssertEqual(logger.loggedStages, [
             DemoQuotaLogEntry(stage: .start, attemptIndex: 1),
@@ -60,7 +60,7 @@ final class DemoQuotaCoordinatorTests: XCTestCase {
         XCTAssertEqual(secondState, .secondAttemptActive)
 
         let lockedState = await coordinator.markAttemptCompleted(resultMetadata: [:])
-        XCTAssertEqual(lockedState, .locked(reason: .quotaExhausted))
+        XCTAssertEqual(lockedState, .some(.locked(reason: .quotaExhausted)))
         XCTAssertEqual(persistence.attemptsUsed, 2)
         XCTAssertEqual(logger.loggedStages.count, 4)
         XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.attemptsUsed, 2)
@@ -359,23 +359,130 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
 }
 
 final class DeviceIdentityProviderTests: XCTestCase {
-    func testFetchesMirroredDeviceIDUsingLookupKeyBeforeGenerating() async throws {
-        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+    func testGeneratesAndStoresDeviceIDWhenKeychainIsEmpty() async throws {
         let keychain = DemoQuotaTestKeychain()
-        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: expected)
-        let provider = DeviceIdentityProvider(
-            keychain: keychain,
-            serverMirror: mirror,
-            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: "vendor-lookup")
-        )
+        let provider = DeviceIdentityProvider(keychain: keychain)
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(keychain.storedUUID, deviceID)
+    }
+
+    func testReturnsExistingKeychainDeviceID() async throws {
+        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+        let keychain = DemoQuotaTestKeychain(storedUUID: expected)
+        let provider = DeviceIdentityProvider(keychain: keychain)
 
         let deviceID = try await provider.deviceID()
 
         XCTAssertEqual(deviceID, expected)
-        XCTAssertEqual(keychain.storedUUID, expected)
-        XCTAssertEqual(mirror.fetchLookupKeys, ["vendor-lookup"])
-        XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+        XCTAssertEqual(keychain.storeCallCount, 0)
     }
+}
+
+final class EvaluateSessionServiceTests: XCTestCase {
+    override func tearDown() {
+        super.tearDown()
+        EvaluateSessionURLProtocol.responseProvider = nil
+    }
+
+    func testEvaluateDecodesDuplicateResponse() async throws {
+        let expectedDate = Date(timeIntervalSince1970: 100)
+        let service = makeService(statusCode: 409, body: [
+            "allow_another_demo": true,
+            "message": "already decided",
+            "lock_reason": NSNull(),
+            "attempts_used": 1,
+            "evaluated_at": isoFormatter.string(from: expectedDate),
+        ])
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "00000000-0000-0000-0000-000000000123")!,
+            attemptIndex: 1,
+            context: ["source": "test"]
+        )
+
+        XCTAssertEqual(result.allowAnotherDemo, true)
+        XCTAssertEqual(result.message, "already decided")
+        XCTAssertEqual(result.attemptsUsed, 1)
+        XCTAssertEqual(result.timestamp, expectedDate)
+    }
+
+    func testEvaluateDecodesRateLimitedResponse() async throws {
+        let service = makeService(statusCode: 429, body: [
+            "allow_another_demo": false,
+            "message": "Rate limit exceeded",
+            "lock_reason": "evaluation_denied",
+            "attempts_used": 1,
+            "evaluated_at": isoFormatter.string(from: Date(timeIntervalSince1970: 200)),
+        ])
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "00000000-0000-0000-0000-000000000123")!,
+            attemptIndex: 1,
+            context: ["source": "test"]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertEqual(result.message, "Rate limit exceeded")
+        XCTAssertEqual(result.lockReason, "evaluation_denied")
+    }
+
+    func testEvaluatePromptDoesNotContainStableDeviceIdentifier() async throws {
+        let expectedDeviceID = UUID(uuidString: "00000000-0000-0000-0000-000000000123")!
+        let expectation = expectation(description: "request captured")
+        EvaluateSessionURLProtocol.responseProvider = { request in
+            defer { expectation.fulfill() }
+            let data = try XCTUnwrap(request.httpBody)
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            let input = try XCTUnwrap(body["input"] as? [String: Any])
+            let prompt = try XCTUnwrap(input["prompt"] as? String)
+            XCTAssertFalse(prompt.contains(expectedDeviceID.uuidString))
+            return HTTPResponseStub(
+                statusCode: 200,
+                body: [
+                    "allow_another_demo": true,
+                    "attempts_used": 1,
+                    "evaluated_at": self.isoFormatter.string(from: Date(timeIntervalSince1970: 300)),
+                ]
+            )
+        }
+        let service = makeService()
+
+        _ = try await service.evaluate(
+            deviceID: expectedDeviceID,
+            attemptIndex: 1,
+            context: ["source": "test"]
+        )
+
+        await fulfillment(of: [expectation], timeout: 1.0)
+    }
+
+    private func makeService(statusCode: Int = 200, body: [String: Any] = [
+        "allow_another_demo": true,
+        "attempts_used": 1,
+        "evaluated_at": ISO8601DateFormatter().string(from: Date(timeIntervalSince1970: 300)),
+    ]) -> EvaluateSessionService {
+        if EvaluateSessionURLProtocol.responseProvider == nil {
+            EvaluateSessionURLProtocol.responseProvider = { _ in
+                HTTPResponseStub(statusCode: statusCode, body: body)
+            }
+        }
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [EvaluateSessionURLProtocol.self]
+        return EvaluateSessionService(
+            endpoint: URL(string: "https://example.com/functions/v1/evaluate-session")!,
+            anonKey: "anon-test",
+            urlSession: URLSession(configuration: configuration)
+        )
+    }
+
+    private let isoFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+}
 }
 
 final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
@@ -405,40 +512,19 @@ final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
 
 final class DemoQuotaTestKeychain: KeychainPersisting {
     var storedUUID: UUID?
+    private(set) var storeCallCount = 0
+
+    init(storedUUID: UUID? = nil) {
+        self.storedUUID = storedUUID
+    }
 
     func readUUID() throws -> UUID? {
         storedUUID
     }
 
     func store(uuid: UUID) throws {
+        storeCallCount += 1
         storedUUID = uuid
-    }
-}
-
-final class DemoQuotaTestDeviceIdentityMirror: DeviceIdentityMirroring {
-    let fetchResult: UUID?
-    private(set) var fetchLookupKeys: [String] = []
-    private(set) var mirroredDeviceIDs: [UUID] = []
-
-    init(fetchResult: UUID?) {
-        self.fetchResult = fetchResult
-    }
-
-    func fetchDeviceID(lookupKey: String) async throws -> UUID? {
-        fetchLookupKeys.append(lookupKey)
-        return fetchResult
-    }
-
-    func mirror(deviceID: UUID, lookupKey: String) async throws {
-        mirroredDeviceIDs.append(deviceID)
-    }
-}
-
-struct StaticDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
-    let value: String?
-
-    func lookupKey() -> String? {
-        value
     }
 }
 
@@ -446,9 +532,11 @@ actor DemoQuotaCoordinatorStreamStub: DemoQuotaCoordinating {
     private var state: DemoQuotaStateMachine.State
     private var continuations: [UUID: AsyncStream<DemoQuotaStateMachine.State>.Continuation] = [:]
     private let machine = DemoQuotaStateMachine()
+    var completionResult: DemoQuotaStateMachine.State?
 
     init(initialState: DemoQuotaStateMachine.State) {
         self.state = initialState
+        self.completionResult = initialState
     }
 
     func prepareForDemoStart() async {}
@@ -471,8 +559,8 @@ actor DemoQuotaCoordinatorStreamStub: DemoQuotaCoordinating {
         state
     }
 
-    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State {
-        state
+    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State? {
+        completionResult
     }
 
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {
@@ -483,6 +571,10 @@ actor DemoQuotaCoordinatorStreamStub: DemoQuotaCoordinating {
     func updateState(_ newState: DemoQuotaStateMachine.State) async {
         state = newState
         broadcast()
+    }
+
+    func setCompletionResult(_ newValue: DemoQuotaStateMachine.State?) {
+        completionResult = newValue
     }
 
     private func addContinuation(_ continuation: AsyncStream<DemoQuotaStateMachine.State>.Continuation, id: UUID) {
@@ -497,6 +589,48 @@ actor DemoQuotaCoordinatorStreamStub: DemoQuotaCoordinating {
     private func broadcast() {
         continuations.values.forEach { $0.yield(state) }
     }
+}
+
+private struct HTTPResponseStub {
+    let statusCode: Int
+    let body: [String: Any]
+}
+
+private final class EvaluateSessionURLProtocol: URLProtocol {
+    static var responseProvider: ((URLRequest) throws -> HTTPResponseStub)?
+
+    override class func canInit(with request: URLRequest) -> Bool {
+        true
+    }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest {
+        request
+    }
+
+    override func startLoading() {
+        guard let responseProvider = Self.responseProvider else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+
+        do {
+            let stub = try responseProvider(request)
+            let data = try JSONSerialization.data(withJSONObject: stub.body)
+            let response = HTTPURLResponse(
+                url: try XCTUnwrap(request.url),
+                statusCode: stub.statusCode,
+                httpVersion: nil,
+                headerFields: ["Content-Type": "application/json"]
+            )!
+            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+            client?.urlProtocol(self, didLoad: data)
+            client?.urlProtocolDidFinishLoading(self)
+        } catch {
+            client?.urlProtocol(self, didFailWithError: error)
+        }
+    }
+
+    override func stopLoading() {}
 }
 
 final class InMemoryOnboardingRepository: OnboardingCompletionRepository {

@@ -104,6 +104,29 @@ Deno.test('evaluate-session fails closed when the LLM decision path times out', 
   assertEquals(body.fallback_used, true);
 });
 
+Deno.test('evaluate-session returns 429 rate-limited response as an authoritative deny outcome', async () => {
+  const handler = buildEvaluateSessionHandler({
+    ...makeDependencies({}),
+    rateLimiter: {
+      evaluate: () => Promise.resolve({
+        allowed: false,
+        attempt_count: 4,
+        window_start: '2026-03-14T00:00:00.000Z',
+        limit: 3,
+        window_seconds: 60,
+      }),
+    },
+  });
+
+  const response = await handler(makeRequest());
+  const body = await response.json();
+
+  assertEquals(response.status, 429);
+  assertEquals(body.allow_another_demo, false);
+  assertEquals(body.reason, 'rate_limited');
+  assertEquals(body.rate_limit.allowed, false);
+});
+
 Deno.test('evaluate-session rejects invalid request bodies', async () => {
   const handler = buildEvaluateSessionHandler(makeDependencies({}));
   const response = await handler(new Request('http://local.test/functions/v1/evaluate-session', {

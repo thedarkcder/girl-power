@@ -73,7 +73,7 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
     func observeStates() -> AsyncStream<DemoQuotaStateMachine.State> { stream }
     func currentState() async -> DemoQuotaStateMachine.State { .fresh }
     func markAttemptStarted(startMetadata: [String : Any]) async throws -> DemoQuotaStateMachine.State { .firstAttemptActive }
-    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State { .gatePending }
+    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State? { .gatePending }
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {}
 }
 

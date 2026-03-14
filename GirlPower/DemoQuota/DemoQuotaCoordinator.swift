@@ -5,7 +5,7 @@ protocol DemoQuotaCoordinating: Actor {
     func observeStates() -> AsyncStream<DemoQuotaStateMachine.State>
     func currentState() async -> DemoQuotaStateMachine.State
     func markAttemptStarted(startMetadata: [String: Any]) async throws -> DemoQuotaStateMachine.State
-    func markAttemptCompleted(resultMetadata: [String: Any]) async -> DemoQuotaStateMachine.State
+    func markAttemptCompleted(resultMetadata: [String: Any]) async -> DemoQuotaStateMachine.State?
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async
 }
 
@@ -73,12 +73,12 @@ actor DemoQuotaCoordinator: DemoQuotaCoordinating {
         return try await apply(.startAttempt, metadata: startMetadata)
     }
 
-    func markAttemptCompleted(resultMetadata: [String: Any] = [:]) async -> DemoQuotaStateMachine.State {
-        guard state.hasActiveAttempt else { return state }
+    func markAttemptCompleted(resultMetadata: [String: Any] = [:]) async -> DemoQuotaStateMachine.State? {
+        guard state.hasActiveAttempt else { return nil }
         do {
             return try await apply(.attemptCompleted, metadata: resultMetadata)
         } catch {
-            return state
+            return nil
         }
     }
 
@@ -250,8 +250,8 @@ final actor DemoQuotaCoordinatorDisabled: DemoQuotaCoordinating {
         .firstAttemptActive
     }
 
-    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State {
-        .fresh
+    func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State? {
+        nil
     }
 
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {}
