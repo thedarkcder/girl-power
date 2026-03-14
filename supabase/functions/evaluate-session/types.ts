@@ -1,3 +1,5 @@
+import type { DemoQuotaSnapshot } from '../demo-quota/types.ts';
+
 export type EvaluateSessionInput = {
   prompt: string;
   context?: Record<string, unknown>;
@@ -77,10 +79,16 @@ export type EvaluateSessionResponse = {
   session_id?: string;
   attempt_id?: string;
   payload_version: string;
+  allow_another_demo: boolean;
+  attempts_used: number;
+  evaluated_at: string;
+  lock_reason?: string;
   fallback_used: boolean;
+  message?: string;
   reason?: string;
   request?: Record<string, unknown>;
   response?: Record<string, unknown>;
   moderation?: Record<string, unknown>;
+  snapshot: DemoQuotaSnapshot;
   rate_limit: RateLimitSnapshot;
 };
