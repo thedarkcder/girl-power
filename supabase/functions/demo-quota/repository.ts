@@ -45,13 +45,21 @@ export class DemoQuotaRepository {
   async logAttempt(request: DemoQuotaLogRequest): Promise<{ attempt: DemoQuotaAttemptLog; snapshot: DemoQuotaSnapshot }> {
     const existingAttempt = await this.fetchAttemptLog(request.device_id, request.attempt_index);
     const now = new Date().toISOString();
+    const startedAt = request.stage === 'start'
+      ? existingAttempt?.started_at ?? now
+      : existingAttempt?.started_at ?? null;
+    const completedAt = request.stage === 'completion'
+      ? existingAttempt?.completed_at ?? now
+      : existingAttempt?.completed_at ?? null;
     const payload = {
       device_id: request.device_id,
       attempt_index: request.attempt_index,
       start_metadata: request.stage === 'start' ? request.metadata ?? {} : existingAttempt?.start_metadata ?? {},
-      completion_metadata: request.stage === 'completion' ? request.metadata ?? {} : existingAttempt?.completion_metadata ?? {},
-      started_at: request.stage === 'start' ? existingAttempt?.started_at ?? now : existingAttempt?.started_at ?? null,
-      completed_at: request.stage === 'completion' ? now : existingAttempt?.completed_at ?? null,
+      completion_metadata: request.stage === 'completion'
+        ? existingAttempt?.completion_metadata ?? request.metadata ?? {}
+        : existingAttempt?.completion_metadata ?? {},
+      started_at: startedAt,
+      completed_at: completedAt,
     };
 
     const { data, error } = await this.client
@@ -69,7 +77,7 @@ export class DemoQuotaRepository {
       active_attempt_index: request.stage === 'start' ? request.attempt_index : null,
       attempts_used: request.stage === 'completion' ? request.attempt_index : currentSnapshot?.attempts_used ?? 0,
       server_lock_reason: request.stage === 'completion' && request.attempt_index >= 2 ? 'quota' : undefined,
-      last_sync_at: now,
+      last_sync_at: request.stage === 'completion' ? completedAt : startedAt,
     });
     const snapshot = await this.persistSnapshot(request.device_id, mergedSnapshot);
     return { attempt: data, snapshot };

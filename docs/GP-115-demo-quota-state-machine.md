@@ -21,7 +21,7 @@ Enforce the two-attempt demo quota per device while keeping Supabase logging + L
 | `evaluationAllow` | Supabase Edge Function responded with `allowAnotherDemo=true`. |
 | `evaluationDeny` | Supabase Edge Function responded false or returned a validation error. |
 | `evaluationTimeout` | Evaluate call timed out (>3 s) or failed (network/server). This is treated as a deny. |
-| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs (during cold start or reinstall). Snapshot contains `{attemptsUsed, lastDecision}`. |
+| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs during cold start while the keychain-backed `device_id` is still available. Snapshot contains `{attemptsUsed, lastDecision}`. |
 
 ## Reducer signature
 ```swift
@@ -61,7 +61,7 @@ struct DemoQuotaStateMachine {
 ```
 Fresh --start--> FirstAttemptActive --complete--> GatePending --allow--> SecondAttemptEligible --start--> SecondAttemptActive --complete--> Locked
                                         \--deny/timeout--> Locked
-resetFromServer(snapshot) projects directly into Fresh / SecondAttemptEligible / Locked depending on attemptsUsed + decision.
+resetFromServer(snapshot) projects directly into Fresh / SecondAttemptEligible / Locked depending on attemptsUsed + decision while the original keychain-backed `device_id` remains available.
 ```
 
 ## Notes

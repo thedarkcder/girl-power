@@ -4,8 +4,7 @@ GP-115 uses a small Edge-function bundle:
 
 - `evaluate-session`: authoritative second-attempt decision path
 - `demo-session-log`: attempt start/completion audit logging
-- `demo-snapshot-fetch` / `demo-snapshot-mirror`: reinstall-safe quota snapshot hydration
-- `demo-identity-fetch` / `demo-identity-mirror`: lookup-key to `device_id` recovery for reinstall flows
+- `demo-snapshot-fetch` / `demo-snapshot-mirror`: quota snapshot hydration while the client still has its keychain-backed `device_id`
 
 ## API Contract
 
@@ -90,8 +89,6 @@ Example success body:
    supabase functions serve demo-session-log --env-file supabase/functions/.env.local
    supabase functions serve demo-snapshot-fetch --env-file supabase/functions/.env.local
    supabase functions serve demo-snapshot-mirror --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-fetch --env-file supabase/functions/.env.local
-   supabase functions serve demo-identity-mirror --env-file supabase/functions/.env.local
    ```
 6. **Call the endpoint** using the anon key printed by `supabase start`:
 
@@ -111,15 +108,9 @@ Example success body:
      http://localhost:54321/functions/v1/evaluate-session | jq
    ```
 
-7. **Seed + snapshot validation**:
+7. **Snapshot validation**:
 
    ```bash
-   curl -s \
-     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
-     http://localhost:54321/functions/v1/demo-identity-mirror | jq
-
    curl -s \
      -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
      -H "Content-Type: application/json" \
@@ -133,7 +124,7 @@ Example success body:
      http://localhost:54321/functions/v1/demo-snapshot-fetch | jq
    ```
 
-   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"`; that is the reinstall-safe third-attempt block.
+   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"` while the same keychain-backed `device_id` is still available on the client. Full uninstall/reinstall recovery is intentionally unsupported until a durable identity contract is approved.
 
 8. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
 
