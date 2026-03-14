@@ -224,10 +224,13 @@ final class AppFlowViewModelTests: XCTestCase {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
         let router = PaywallRouterSpy()
+        let auth = AuthServiceStub(initialState: .authenticated(.fixture))
+        auth.ensuredSession = .fixture
         let viewModel = AppFlowViewModel(
             repository: repository,
             demoQuotaCoordinator: coordinator,
             entitlementService: EntitlementServiceStub(),
+            authService: auth,
             paywallRouter: router
         )
 
@@ -242,6 +245,7 @@ final class AppFlowViewModelTests: XCTestCase {
 
         viewModel.continueToPaywall()
 
+        await waitForCondition { viewModel.state == .paywall }
         XCTAssertNil(viewModel.summaryViewModel)
         XCTAssertEqual(viewModel.state, .paywall)
         XCTAssertEqual(viewModel.navigationPath.count, 1)
@@ -299,5 +303,16 @@ private final class PaywallRouterSpy: PaywallRouting {
 
     func presentPaywall() {
         presentCallCount += 1
+    }
+}
+
+private extension AuthSession {
+    static var fixture: AuthSession {
+        AuthSession(
+            accessToken: "token",
+            refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
     }
 }

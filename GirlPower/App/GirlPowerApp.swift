@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 struct GirlPowerApp: App {
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var viewModel: AppFlowViewModel
     @StateObject private var entitlementService: StoreKitEntitlementService
     private let quotaCoordinator: DemoQuotaCoordinating
@@ -21,6 +22,21 @@ struct GirlPowerApp: App {
         } else {
             coordinator = DemoQuotaDependenciesFactory.makeCoordinator()
         }
+        let authService: any AuthServicing
+        if arguments.contains("-uiTesting") {
+            authService = DisabledAuthService()
+        } else {
+            let configuration = SupabaseProjectConfiguration.live()
+            let anonymousSessionStore = UserDefaultsPendingAnonymousSessionStore()
+            authService = SupabaseAuthService(
+                api: SupabaseAuthRESTAPI(configuration: configuration),
+                anonymousSessionStore: anonymousSessionStore,
+                linker: SupabaseAnonymousSessionLinker(
+                    configuration: configuration,
+                    pendingStore: anonymousSessionStore
+                )
+            )
+        }
         let entitlementService = StoreKitEntitlementService(productIDs: ["com.girlpower.app.pro.monthly"])
         self.quotaCoordinator = coordinator
         _entitlementService = StateObject(wrappedValue: entitlementService)
@@ -28,10 +44,12 @@ struct GirlPowerApp: App {
             wrappedValue: AppFlowViewModel(
                 repository: repository,
                 demoQuotaCoordinator: coordinator,
-                entitlementService: entitlementService
+                entitlementService: entitlementService,
+                authService: authService
             )
         )
         Task {
+            await authService.restoreSession()
             await entitlementService.load()
         }
     }
@@ -39,6 +57,10 @@ struct GirlPowerApp: App {
     var body: some Scene {
         WindowGroup {
             AppFlowRootView(viewModel: viewModel)
+                .onChange(of: scenePhase) { newPhase in
+                    guard newPhase == .active else { return }
+                    viewModel.handleAppDidBecomeActive()
+                }
         }
     }
 }
@@ -67,6 +89,11 @@ struct AppFlowRootView: View {
                             onClose: { viewModel.finishDemo(reason: "paywall_exit") }
                         )
                     }
+                }
+                .sheet(item: $viewModel.authPrompt) { prompt in
+                    AuthGateView(viewModel: viewModel, prompt: prompt)
+                        .presentationDetents([.medium, .large])
+                        .presentationDragIndicator(.visible)
                 }
         }
     }
