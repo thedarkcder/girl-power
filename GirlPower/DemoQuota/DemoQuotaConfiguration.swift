@@ -11,8 +11,6 @@ struct DemoQuotaConfiguration {
         let evaluateSessionURL: URL
         let snapshotFetchURL: URL
         let snapshotMirrorURL: URL
-        let identityFetchURL: URL
-        let identityMirrorURL: URL
         let anonKey: String
     }
 
@@ -43,8 +41,6 @@ private extension DemoQuotaConfiguration.SupabaseEndpoints {
               let evaluateSessionURL = DemoQuotaConfiguration.url(key: "DemoQuotaEvaluateSessionURL", env: "DEMO_QUOTA_EVALUATE_SESSION_URL", info: info, environment: environment),
               let snapshotFetchURL = DemoQuotaConfiguration.url(key: "DemoQuotaSnapshotFetchURL", env: "DEMO_QUOTA_SNAPSHOT_FETCH_URL", info: info, environment: environment),
               let snapshotMirrorURL = DemoQuotaConfiguration.url(key: "DemoQuotaSnapshotMirrorURL", env: "DEMO_QUOTA_SNAPSHOT_MIRROR_URL", info: info, environment: environment),
-              let identityFetchURL = DemoQuotaConfiguration.url(key: "DemoQuotaIdentityFetchURL", env: "DEMO_QUOTA_IDENTITY_FETCH_URL", info: info, environment: environment),
-              let identityMirrorURL = DemoQuotaConfiguration.url(key: "DemoQuotaIdentityMirrorURL", env: "DEMO_QUOTA_IDENTITY_MIRROR_URL", info: info, environment: environment),
               let anonKey = DemoQuotaConfiguration.value(key: "DemoQuotaAnonKey", env: "DEMO_QUOTA_ANON_KEY", info: info, environment: environment),
               anonKey.isEmpty == false else {
             return nil
@@ -55,8 +51,6 @@ private extension DemoQuotaConfiguration.SupabaseEndpoints {
             evaluateSessionURL: evaluateSessionURL,
             snapshotFetchURL: snapshotFetchURL,
             snapshotMirrorURL: snapshotMirrorURL,
-            identityFetchURL: identityFetchURL,
-            identityMirrorURL: identityMirrorURL,
             anonKey: anonKey
         )
     }

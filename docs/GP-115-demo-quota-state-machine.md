@@ -21,7 +21,7 @@ Enforce the two-attempt demo quota per device while keeping Supabase logging + L
 | `evaluationAllow` | Supabase Edge Function responded with `allowAnotherDemo=true`. |
 | `evaluationDeny` | Supabase Edge Function responded false or returned a validation error. |
 | `evaluationTimeout` | Evaluate call timed out (>3 s) or failed (network/server). This is treated as a deny. |
-| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs (during cold start or reinstall). Snapshot contains `{attemptsUsed, lastDecision}`. |
+| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs during cold start and any reinstall that still retains the same keychain-backed `device_id`. Snapshot contains `{attemptsUsed, lastDecision}`. |
 
 ## Reducer signature
 ```swift

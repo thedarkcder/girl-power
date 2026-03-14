@@ -1,7 +1,4 @@
 import Foundation
-#if canImport(UIKit)
-import UIKit
-#endif
 
 protocol DeviceIdentityProviding {
     func deviceID() async throws -> UUID
@@ -14,7 +11,7 @@ enum DeviceIdentityError: Error, Equatable {
 }
 
 protocol DeviceIdentityLookupKeyProviding {
-    func lookupKey() -> String?
+    func stableLookupKey() -> String?
 }
 
 final class DeviceIdentityProvider: DeviceIdentityProviding {
@@ -25,7 +22,7 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
     init(
         keychain: KeychainPersisting,
         serverMirror: DeviceIdentityMirroring,
-        lookupKeyProvider: DeviceIdentityLookupKeyProviding = VendorDeviceIdentityLookupKeyProvider()
+        lookupKeyProvider: DeviceIdentityLookupKeyProviding = UnsupportedDeviceIdentityLookupKeyProvider()
     ) {
         self.keychain = keychain
         self.serverMirror = serverMirror
@@ -37,19 +34,22 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
             return existing
         }
 
-        let lookupKey = lookupKeyProvider.lookupKey()
+        let stableLookupKey = lookupKeyProvider.stableLookupKey()
 
-        if let lookupKey,
-           let mirrored = try await serverMirror.fetchDeviceID(lookupKey: lookupKey) {
-            try keychain.store(uuid: mirrored)
-            return mirrored
+        if let stableLookupKey {
+            if let mirrored = try await serverMirror.fetchDeviceID(stableLookupKey: stableLookupKey) {
+                try keychain.store(uuid: mirrored)
+                return mirrored
+            }
+
+            let generated = UUID()
+            try keychain.store(uuid: generated)
+            try await serverMirror.mirror(deviceID: generated, stableLookupKey: stableLookupKey)
+            return generated
         }
 
         let generated = UUID()
         try keychain.store(uuid: generated)
-        if let lookupKey {
-            try await serverMirror.mirror(deviceID: generated, lookupKey: lookupKey)
-        }
         return generated
     }
 }
@@ -60,16 +60,12 @@ protocol KeychainPersisting {
 }
 
 protocol DeviceIdentityMirroring {
-    func fetchDeviceID(lookupKey: String) async throws -> UUID?
-    func mirror(deviceID: UUID, lookupKey: String) async throws
+    func fetchDeviceID(stableLookupKey: String) async throws -> UUID?
+    func mirror(deviceID: UUID, stableLookupKey: String) async throws
 }
 
-struct VendorDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
-    func lookupKey() -> String? {
-#if canImport(UIKit)
-        return UIDevice.current.identifierForVendor?.uuidString
-#else
+struct UnsupportedDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
+    func stableLookupKey() -> String? {
         return nil
-#endif
     }
 }

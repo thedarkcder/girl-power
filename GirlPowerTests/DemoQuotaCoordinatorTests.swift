@@ -359,21 +359,55 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
 }
 
 final class DeviceIdentityProviderTests: XCTestCase {
-    func testFetchesMirroredDeviceIDUsingLookupKeyBeforeGenerating() async throws {
-        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+    func testReusesPersistedKeychainUUIDWithoutMirrorLookup() async throws {
+        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000321")!
         let keychain = DemoQuotaTestKeychain()
-        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: expected)
+        keychain.storedUUID = expected
+        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: UUID(uuidString: "00000000-0000-0000-0000-000000000777"))
         let provider = DeviceIdentityProvider(
             keychain: keychain,
             serverMirror: mirror,
-            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: "vendor-lookup")
+            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: "stable-device-key")
         )
 
         let deviceID = try await provider.deviceID()
 
         XCTAssertEqual(deviceID, expected)
         XCTAssertEqual(keychain.storedUUID, expected)
-        XCTAssertEqual(mirror.fetchLookupKeys, ["vendor-lookup"])
+        XCTAssertTrue(mirror.fetchStableLookupKeys.isEmpty)
+        XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+    }
+
+    func testFetchesMirroredDeviceIDUsingStableLookupKeyBeforeGenerating() async throws {
+        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+        let keychain = DemoQuotaTestKeychain()
+        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: expected)
+        let provider = DeviceIdentityProvider(
+            keychain: keychain,
+            serverMirror: mirror,
+            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: "stable-device-key")
+        )
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(deviceID, expected)
+        XCTAssertEqual(keychain.storedUUID, expected)
+        XCTAssertEqual(mirror.fetchStableLookupKeys, ["stable-device-key"])
+        XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+    }
+
+    func testGeneratesAndStoresUUIDWithoutMirrorLookupWhenStableLookupIsUnsupported() async throws {
+        let keychain = DemoQuotaTestKeychain()
+        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: nil)
+        let provider = DeviceIdentityProvider(
+            keychain: keychain,
+            serverMirror: mirror
+        )
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(keychain.storedUUID, deviceID)
+        XCTAssertTrue(mirror.fetchStableLookupKeys.isEmpty)
         XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
     }
 }
@@ -417,19 +451,19 @@ final class DemoQuotaTestKeychain: KeychainPersisting {
 
 final class DemoQuotaTestDeviceIdentityMirror: DeviceIdentityMirroring {
     let fetchResult: UUID?
-    private(set) var fetchLookupKeys: [String] = []
+    private(set) var fetchStableLookupKeys: [String] = []
     private(set) var mirroredDeviceIDs: [UUID] = []
 
     init(fetchResult: UUID?) {
         self.fetchResult = fetchResult
     }
 
-    func fetchDeviceID(lookupKey: String) async throws -> UUID? {
-        fetchLookupKeys.append(lookupKey)
+    func fetchDeviceID(stableLookupKey: String) async throws -> UUID? {
+        fetchStableLookupKeys.append(stableLookupKey)
         return fetchResult
     }
 
-    func mirror(deviceID: UUID, lookupKey: String) async throws {
+    func mirror(deviceID: UUID, stableLookupKey: String) async throws {
         mirroredDeviceIDs.append(deviceID)
     }
 }
@@ -437,7 +471,7 @@ final class DemoQuotaTestDeviceIdentityMirror: DeviceIdentityMirroring {
 struct StaticDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
     let value: String?
 
-    func lookupKey() -> String? {
+    func stableLookupKey() -> String? {
         value
     }
 }
