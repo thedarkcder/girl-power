@@ -47,6 +47,9 @@ struct DemoCTAView: View {
         if viewModel.isProUser {
             return "Start a coaching session without limits."
         }
+        if viewModel.demoQuotaState == .secondAttemptEligible && viewModel.authState.isAuthenticated == false {
+            return "Opens authentication before a second demo can begin"
+        }
         switch viewModel.demoQuotaState {
         case .gatePending:
             return "Waiting for eligibility decision"
