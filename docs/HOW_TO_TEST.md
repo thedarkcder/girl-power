@@ -65,6 +65,7 @@
      http://127.0.0.1:54321/functions/v1/evaluate-session | jq
    ```
    - Expect `allow_another_demo=true`, `attempts_used=1`, and a mirrored snapshot whose `last_decision.type` is `allow`.
+   - `demo-session-log` only accepts `attempt_index` values `1` and `2`. `evaluate-session` only accepts `attempt_index=1`.
 3. Install/run the simulator build (clean install to exercise keychain provisioning). Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.
@@ -88,8 +89,23 @@
      http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch | jq
    ```
    - Expect `attempts_used=2`, `server_lock_reason="quota"`, and no path back to `secondAttemptEligible`.
-7. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
-8. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
+7. Verify invalid attempt indexes fail at the HTTP boundary:
+   ```sh
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":3,"stage":"start","metadata":{"source":"qa"}}' \
+     http://127.0.0.1:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"payload_version":"v1","input":{"prompt":"should fail"}}' \
+     http://127.0.0.1:54321/functions/v1/evaluate-session | jq
+   ```
+   - Expect both requests to return `400` with `error="invalid_body"` and no additional attempt/snapshot writes.
+8. Delete the app (or run on a new simulator), relaunch, and verify quota only rehydrates when the existing keychain entry or the current lookup key still resolves to the mirrored `device_id`. If that continuity hint changed, the app should generate a new anonymous device identity instead of claiming reinstall-safe recovery.
+9. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
 
 ## GP-116 Summary + Paywall Flow
 

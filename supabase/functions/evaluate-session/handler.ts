@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HttpError, jsonResponse } from '../demo-quota/http.ts';
+import { evaluableDemoAttemptIndexSchema, HttpError, jsonResponse } from '../demo-quota/http.ts';
 import type {
   DemoQuotaAttemptLog,
   DemoQuotaEvaluationDecision,
@@ -74,7 +74,7 @@ export type EvaluateSessionHandlerDependencies = {
 
 const RequestSchema = z.object({
   device_id: z.string().min(1, 'device_id is required'),
-  attempt_index: z.number().int().positive(),
+  attempt_index: evaluableDemoAttemptIndexSchema,
   payload_version: z.string().min(1).default('v1'),
   input: z.object({
     prompt: z.string().min(1, 'prompt is required'),

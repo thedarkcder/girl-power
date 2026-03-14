@@ -4,12 +4,13 @@ GP-115 uses a small Edge-function bundle:
 
 - `evaluate-session`: authoritative second-attempt decision path
 - `demo-session-log`: attempt start/completion audit logging
-- `demo-snapshot-fetch` / `demo-snapshot-mirror`: reinstall-safe quota snapshot hydration
-- `demo-identity-fetch` / `demo-identity-mirror`: lookup-key to `device_id` recovery for reinstall flows
+- `demo-snapshot-fetch` / `demo-snapshot-mirror`: remote quota snapshot hydration for the current `device_id`
+- `demo-identity-fetch` / `demo-identity-mirror`: best-effort lookup-key continuity for a missing local `device_id`
 
 ## API Contract
 
 - **Endpoint:** `POST /functions/v1/evaluate-session`
+- **Contract:** `attempt_index` must be `1`. Attempts outside the first demo are rejected at the HTTP boundary with `400`.
 - **Required headers:**
   - `Authorization: Bearer <SUPABASE_ANON_KEY>` (mobile callers only have the anon key)
   - `Content-Type: application/json`
@@ -39,6 +40,7 @@ GP-115 uses a small Edge-function bundle:
 | Status | When | Body pieces |
 | --- | --- | --- |
 | `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, mirrored `snapshot`, plus persisted audit payloads |
+| `400` | Invalid JSON/body shape or unsupported `attempt_index` | `error="invalid_body"` plus validation details |
 | `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted decision + audit payload with `reason="duplicate_attempt"` |
 | `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `allow_another_demo=false`, `reason="rate_limited"` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
@@ -111,6 +113,8 @@ Example success body:
      http://localhost:54321/functions/v1/evaluate-session | jq
    ```
 
+   `demo-session-log` accepts only `attempt_index` values `1` and `2`; `evaluate-session` accepts only `attempt_index=1`.
+
 7. **Seed + snapshot validation**:
 
    ```bash
@@ -133,7 +137,25 @@ Example success body:
      http://localhost:54321/functions/v1/demo-snapshot-fetch | jq
    ```
 
-   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"`; that is the reinstall-safe third-attempt block.
+   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"`; that blocks a third attempt whenever the app presents the same `device_id` again.
+
+9. **Invalid attempt boundary checks**:
+
+   ```bash
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":3,"stage":"start"}' \
+     http://localhost:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"payload_version":"v1","input":{"prompt":"invalid"}}' \
+     http://localhost:54321/functions/v1/evaluate-session | jq
+   ```
+
+   Both requests should return `400` with `error="invalid_body"` and should not write new attempt or snapshot state.
 
 8. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
 
@@ -163,3 +185,4 @@ Example success body:
 
 - Each response includes a `correlation_id`; logs emitted from `logger.ts` include the same field for tracing.
 - Structured logging ensures rate-limit hits, fallback paths, and DB failures are distinguishable without parsing string logs.
+- On iOS, a keychain miss creates a new anonymous `device_id` unless the current lookup key still resolves to a mirrored identity; that lookup is best-effort continuity, not reinstall-safe proof.

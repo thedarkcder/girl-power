@@ -21,7 +21,7 @@ Enforce the two-attempt demo quota per device while keeping Supabase logging + L
 | `evaluationAllow` | Supabase Edge Function responded with `allowAnotherDemo=true`. |
 | `evaluationDeny` | Supabase Edge Function responded false or returned a validation error. |
 | `evaluationTimeout` | Evaluate call timed out (>3 s) or failed (network/server). This is treated as a deny. |
-| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs (during cold start or reinstall). Snapshot contains `{attemptsUsed, lastDecision}`. |
+| `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs during cold start or best-effort identity continuity recovery. Snapshot contains `{attemptsUsed, lastDecision}`. |
 
 ## Reducer signature
 ```swift
@@ -67,5 +67,6 @@ resetFromServer(snapshot) projects directly into Fresh / SecondAttemptEligible /
 ## Notes
 - Only attempt #1 triggers the evaluate-session Edge Function. Attempt #2 completion transitions straight to `Locked` and never re-enters GatePending.
 - Network failures (timeout/error) while calling `evaluate-session` must emit `evaluationTimeout` so the reducer lands in `Locked` but still captures the decision for audits.
+- A keychain miss does not imply reinstall-safe recovery. The app first attempts a best-effort lookup-key fetch, and if that misses it generates a new anonymous `device_id`.
 - Locked is absorbing. Any future quota resets must come from a top-level Reset (e.g., purchase) and would use a new event, not `resetFromServer`.
 - The reducer remains pure; all HTTP, Keychain, and persistence work happens in the coordinator when it processes the side-effect intents returned alongside the next state.

@@ -14,6 +14,8 @@ enum DeviceIdentityError: Error, Equatable {
 }
 
 protocol DeviceIdentityLookupKeyProviding {
+    /// Returns a best-effort continuity hint for anonymous quota recovery.
+    /// This value is not guaranteed to survive reinstalls or device/vendor resets.
     func lookupKey() -> String?
 }
 
@@ -37,6 +39,10 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
             return existing
         }
 
+        return try await resolveIdentityOnKeychainMiss()
+    }
+
+    private func resolveIdentityOnKeychainMiss() async throws -> UUID {
         let lookupKey = lookupKeyProvider.lookupKey()
 
         if let lookupKey,
