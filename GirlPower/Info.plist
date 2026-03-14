@@ -18,6 +18,20 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.route25.girlpower.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>girlpower</string>
+				<string>girlpower-stage</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -28,5 +42,9 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is required to analyze your squat form and provide coaching feedback.</string>
+	<key>SupabaseAnonKey</key>
+	<string>sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl</string>
+	<key>SupabaseProjectURL</key>
+	<string>https://ktgapnamhpdbmhhgydnl.supabase.co</string>
 </dict>
 </plist>
