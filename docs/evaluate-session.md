@@ -1,6 +1,11 @@
-# Evaluate Session Edge Function
+# Demo Quota Edge Functions
 
-The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-device coaching attempts, persists session + demo attempt records, enforces idempotency on (`device_id`, `attempt_index`), and responds to mobile clients with a structured payload that captures both LLM results and fallback paths.
+GP-115 uses a small Edge-function bundle:
+
+- `evaluate-session`: authoritative second-attempt decision path
+- `demo-session-log`: attempt start/completion audit logging
+- `demo-snapshot-fetch` / `demo-snapshot-mirror`: reinstall-safe quota snapshot hydration
+- `demo-identity-fetch` / `demo-identity-mirror`: lookup-key to `device_id` recovery for reinstall flows
 
 ## API Contract
 
@@ -13,13 +18,14 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
 ```jsonc
 {
   "device_id": "uuid-or-string",
-  "attempt_index": 0,
+  "attempt_index": 1,
   "payload_version": "v1",
   "input": {
-    "prompt": "Explain how I should pace my next set",
+    "prompt": "Decide whether a second demo is allowed",
     "context": {
       "goal": "tempo",
-      "reps_completed": 12
+      "reps_completed": 12,
+      "duration_seconds": 48
     }
   },
   "metadata": {
@@ -32,14 +38,31 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
 
 | Status | When | Body pieces |
 | --- | --- | --- |
-| `200` | Attempt succeeded or deterministic fallback produced | `session_id`, `attempt_id`, `state`, `payload_version`, `request`, `response`, `moderation`, `rate_limit`, `fallback_used=false` unless fallback executed |
-| `409` | Duplicate (`device_id`, `attempt_index`) | Returns persisted attempt payload, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
-| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `fallback_used=true`, `reason="rate_limited"`, `rate_limit.allowed=false` |
+| `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, mirrored `snapshot`, plus persisted audit payloads |
+| `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted decision + audit payload with `reason="duplicate_attempt"` |
+| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `allow_another_demo=false`, `reason="rate_limited"` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
+
+Example success body:
+
+```jsonc
+{
+  "allow_another_demo": true,
+  "attempts_used": 1,
+  "evaluated_at": "2026-03-14T12:00:00.000Z",
+  "snapshot": {
+    "attempts_used": 1,
+    "active_attempt_index": null,
+    "last_decision": { "type": "allow", "ts": "2026-03-14T12:00:00.000Z" },
+    "server_lock_reason": null,
+    "last_sync_at": "2026-03-14T12:00:00.000Z"
+  }
+}
+```
 
 ## Security Boundary
 
-- Only the Edge function runs with the Supabase **service-role key**. New tables (`public.users`, `public.sessions`, `public.demo_attempts`) have RLS enabled with service-role-only write policies and authenticated read policies; anon clients cannot insert/update/delete.
+- Only the Edge functions run with the Supabase **service-role key**. New tables (`public.demo_quota_attempt_logs`, `public.demo_quota_snapshots`, `public.device_identity_mirrors`) and the earlier `users/sessions/demo_attempts` tables are all RLS-protected for service-role writes only.
 - The mobile app uses the anon key solely to call the Edge endpoint; it can never talk to the tables directly.
 - Secrets (`SUPABASE_SERVICE_ROLE_KEY`, future LLM provider keys) live in `supabase/functions/.env.local` locally and Supabase Edge secrets remotely—never in source control.
 
@@ -61,7 +84,15 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
    ```
 3. **Start the local stack**: `scripts/supabase-start.sh`
 4. **Apply migrations** (requires the stack running): `scripts/supabase-reset.sh`
-5. **Serve the function with hot reload**: `scripts/serve-evaluate-session.sh`
+5. **Serve the function bundle with hot reload**:
+   ```bash
+   scripts/serve-evaluate-session.sh
+   supabase functions serve demo-session-log --env-file supabase/functions/.env.local
+   supabase functions serve demo-snapshot-fetch --env-file supabase/functions/.env.local
+   supabase functions serve demo-snapshot-mirror --env-file supabase/functions/.env.local
+   supabase functions serve demo-identity-fetch --env-file supabase/functions/.env.local
+   supabase functions serve demo-identity-mirror --env-file supabase/functions/.env.local
+   ```
 6. **Call the endpoint** using the anon key printed by `supabase start`:
 
    ```bash
@@ -72,21 +103,46 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
      -H "Content-Type: application/json" \
      -d '{
        "device_id": "11111111-1111-1111-1111-111111111111",
-       "attempt_index": 0,
+       "attempt_index": 1,
        "payload_version": "v1",
-       "input": { "prompt": "Give me coaching cues", "context": { "goal": "tempo" } }
+       "input": { "prompt": "Decide whether a second demo is allowed", "context": { "goal": "tempo" } },
+       "metadata": { "source": "curl" }
      }' \
      http://localhost:54321/functions/v1/evaluate-session | jq
    ```
 
-7. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `fallback_used=true`.
+7. **Seed + snapshot validation**:
 
    ```bash
-   for i in 0 1 2 3; do
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"lookup_key":"gp-sim-1","device_id":"11111111-1111-1111-1111-111111111111"}' \
+     http://localhost:54321/functions/v1/demo-identity-mirror | jq
+
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"stage":"completion","metadata":{"source":"curl"}}' \
+     http://localhost:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111"}' \
+     http://localhost:54321/functions/v1/demo-snapshot-fetch | jq
+   ```
+
+   The snapshot should report `attempts_used=2` and `server_lock_reason="quota"`; that is the reinstall-safe third-attempt block.
+
+8. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
+
+   ```bash
+   for i in 1 2 3 4; do
      curl -s -o /dev/null -w "Attempt $i => %\{http_code\}\n" \
        -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
        -H "Content-Type: application/json" \
-       -d "{\"device_id\":\"11111111-1111-1111-1111-111111111111\",\"attempt_index\":$i,\"payload_version\":\"v1\",\"input\":{\"prompt\":\"rep $i\"}}" \
+       -d "{\"device_id\":\"11111111-1111-1111-1111-111111111111\",\"attempt_index\":1,\"payload_version\":\"v1\",\"input\":{\"prompt\":\"rep $i\"}}" \
        http://localhost:54321/functions/v1/evaluate-session
    done
    ```
@@ -100,7 +156,7 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
 | `scripts/supabase-start.sh` | Boots the Supabase local stack (`docker compose` under the hood). |
 | `scripts/supabase-reset.sh` | Runs `supabase db reset` (migrations + `supabase/seed.sql`). Requires the stack to be running. |
 | `scripts/serve-evaluate-session.sh` | Serves the `evaluate-session` Edge function with `--env-file supabase/functions/.env.local`. |
-| `cd supabase/functions && deno task test` | Runs the reducer + rate-limit unit tests. |
+| `cd supabase/functions && deno task test` | Runs the decision-path, reducer, and rate-limit unit tests. |
 | `supabase db reset && psql ...` | Validate schema applied (`select expires_at from sessions limit 1;`). |
 
 ## Observability

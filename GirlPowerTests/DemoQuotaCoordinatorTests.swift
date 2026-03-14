@@ -316,9 +316,21 @@ final class DemoQuotaTestEvaluationService: DemoEvaluationServicing {
         let response = responses.isEmpty ? .allow : responses.removeFirst()
         switch response {
         case .allow:
-            return EvaluationResult(allowAnotherDemo: true, message: nil, timestamp: timestamp)
+            return EvaluationResult(
+                allowAnotherDemo: true,
+                message: nil,
+                lockReason: nil,
+                attemptsUsed: 1,
+                timestamp: timestamp
+            )
         case .deny(let message):
-            return EvaluationResult(allowAnotherDemo: false, message: message, timestamp: timestamp)
+            return EvaluationResult(
+                allowAnotherDemo: false,
+                message: message,
+                lockReason: "evaluation_denied",
+                attemptsUsed: 1,
+                timestamp: timestamp
+            )
         case .timeout:
             throw DemoEvaluationError.timeout
         case .networkFailure:
@@ -346,6 +358,26 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
     }
 }
 
+final class DeviceIdentityProviderTests: XCTestCase {
+    func testFetchesMirroredDeviceIDUsingLookupKeyBeforeGenerating() async throws {
+        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+        let keychain = DemoQuotaTestKeychain()
+        let mirror = DemoQuotaTestDeviceIdentityMirror(fetchResult: expected)
+        let provider = DeviceIdentityProvider(
+            keychain: keychain,
+            serverMirror: mirror,
+            lookupKeyProvider: StaticDeviceIdentityLookupKeyProvider(value: "vendor-lookup")
+        )
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(deviceID, expected)
+        XCTAssertEqual(keychain.storedUUID, expected)
+        XCTAssertEqual(mirror.fetchLookupKeys, ["vendor-lookup"])
+        XCTAssertTrue(mirror.mirroredDeviceIDs.isEmpty)
+    }
+}
+
 final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
     var fetchResult: DemoQuotaStateMachine.RemoteSnapshot?
     var fetchError: Error?
@@ -368,6 +400,45 @@ final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
         }
         mirroredSnapshots.append(snapshot)
         mirroredDeviceIDs.append(deviceID)
+    }
+}
+
+final class DemoQuotaTestKeychain: KeychainPersisting {
+    var storedUUID: UUID?
+
+    func readUUID() throws -> UUID? {
+        storedUUID
+    }
+
+    func store(uuid: UUID) throws {
+        storedUUID = uuid
+    }
+}
+
+final class DemoQuotaTestDeviceIdentityMirror: DeviceIdentityMirroring {
+    let fetchResult: UUID?
+    private(set) var fetchLookupKeys: [String] = []
+    private(set) var mirroredDeviceIDs: [UUID] = []
+
+    init(fetchResult: UUID?) {
+        self.fetchResult = fetchResult
+    }
+
+    func fetchDeviceID(lookupKey: String) async throws -> UUID? {
+        fetchLookupKeys.append(lookupKey)
+        return fetchResult
+    }
+
+    func mirror(deviceID: UUID, lookupKey: String) async throws {
+        mirroredDeviceIDs.append(deviceID)
+    }
+}
+
+struct StaticDeviceIdentityLookupKeyProvider: DeviceIdentityLookupKeyProviding {
+    let value: String?
+
+    func lookupKey() -> String? {
+        value
     }
 }
 

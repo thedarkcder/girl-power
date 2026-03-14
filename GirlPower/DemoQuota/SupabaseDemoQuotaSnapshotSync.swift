@@ -24,11 +24,21 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
         self.urlSession = urlSession
 
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            try container.encode(Self.timestampFormatter.string(from: date))
+        }
         self.encoder = encoder
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let value = try container.decode(String.self)
+            if let date = Self.timestampFormatter.date(from: value) ?? Self.fallbackTimestampFormatter.date(from: value) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 timestamp")
+        }
         self.decoder = decoder
     }
 
@@ -121,6 +131,18 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             lastSyncAt: snapshot.lastSyncAt ?? Date()
         )
     }
+
+    private static let timestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let fallbackTimestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
 }
 
 private struct DevicePayload: Codable {

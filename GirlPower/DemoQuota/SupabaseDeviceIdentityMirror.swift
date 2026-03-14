@@ -2,9 +2,11 @@ import Foundation
 
 final class SupabaseDeviceIdentityMirror: DeviceIdentityMirroring {
     private struct MirrorPayload: Codable {
+        let lookupKey: String
         let deviceID: String
 
         enum CodingKeys: String, CodingKey {
+            case lookupKey = "lookup_key"
             case deviceID = "device_id"
         }
     }
@@ -31,8 +33,16 @@ final class SupabaseDeviceIdentityMirror: DeviceIdentityMirroring {
         self.urlSession = urlSession
     }
 
-    func fetchDeviceID() async throws -> UUID? {
-        var request = baseRequest(url: fetchEndpoint)
+    func fetchDeviceID(lookupKey: String) async throws -> UUID? {
+        guard var components = URLComponents(url: fetchEndpoint, resolvingAgainstBaseURL: false) else {
+            throw DeviceIdentityError.networkUnavailable
+        }
+        components.queryItems = [URLQueryItem(name: "lookup_key", value: lookupKey)]
+        guard let url = components.url else {
+            throw DeviceIdentityError.networkUnavailable
+        }
+
+        var request = baseRequest(url: url)
         request.httpMethod = "GET"
 
         let (data, response) = try await urlSession.data(for: request)
@@ -51,10 +61,10 @@ final class SupabaseDeviceIdentityMirror: DeviceIdentityMirroring {
         }
     }
 
-    func mirror(deviceID: UUID) async throws {
+    func mirror(deviceID: UUID, lookupKey: String) async throws {
         var request = baseRequest(url: mirrorEndpoint)
         request.httpMethod = "POST"
-        request.httpBody = try encoder.encode(MirrorPayload(deviceID: deviceID.uuidString))
+        request.httpBody = try encoder.encode(MirrorPayload(lookupKey: lookupKey, deviceID: deviceID.uuidString))
 
         let (_, response) = try await urlSession.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse,
