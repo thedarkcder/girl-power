@@ -80,6 +80,108 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertNil(pendingStore.load())
     }
 
+    func testConfigurationLoadsFromInfoDictionary() throws {
+        let configuration = try SupabaseProjectConfiguration(
+            infoDictionary: [
+                "SupabaseProjectURL": "https://example.test",
+                "SupabaseAnonKey": "anon-key",
+                "SupabaseAuthRedirectURL": "girlpower-stage://auth/callback",
+                "SupabaseAppleServiceID": "com.route25.girlpower.auth",
+                "SupabaseCallbackScheme": "girlpower-stage",
+            ]
+        )
+
+        XCTAssertEqual(configuration.projectURL.absoluteString, "https://example.test")
+        XCTAssertEqual(configuration.anonKey, "anon-key")
+        XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower-stage://auth/callback")
+        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.auth")
+        XCTAssertEqual(configuration.urlScheme, "girlpower-stage")
+    }
+
+    func testRestoreSessionAndForegroundRefreshShareSingleInFlightTask() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let refreshed = AuthSession(
+            accessToken: "refreshed-token",
+            refreshToken: "refreshed-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let api = RefreshBlockingAuthAPI(refreshedSession: refreshed)
+        let store = InMemoryAuthSessionStore(initial: expired)
+        let service = SupabaseAuthService(
+            api: api,
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        let restoreTask = Task { await service.restoreSession() }
+        await waitForCondition {
+            await api.refreshCallCount() == 1 && service.state.session?.accessToken == "expired-token"
+        }
+
+        let foregroundTask = Task { await service.handleAppDidBecomeActive() }
+        await Task.yield()
+        let refreshCallsBeforeResume = await api.refreshCallCount()
+        XCTAssertEqual(refreshCallsBeforeResume, 1)
+
+        await api.resumeRefresh()
+        await restoreTask.value
+        await foregroundTask.value
+
+        let refreshCallsAfterResume = await api.refreshCallCount()
+        XCTAssertEqual(refreshCallsAfterResume, 1)
+        guard case .authenticated(let session) = service.state else {
+            return XCTFail("Expected authenticated state after shared refresh")
+        }
+        XCTAssertEqual(session.accessToken, "refreshed-token")
+        XCTAssertEqual(store.savedSession?.refreshToken, "refreshed-refresh")
+    }
+
+    func testEnsureValidSessionWaitsForInFlightRefresh() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let refreshed = AuthSession(
+            accessToken: "refreshed-token",
+            refreshToken: "refreshed-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let api = RefreshBlockingAuthAPI(refreshedSession: refreshed)
+        let service = SupabaseAuthService(
+            api: api,
+            sessionStore: InMemoryAuthSessionStore(initial: expired),
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        let restoreTask = Task { await service.restoreSession() }
+        await waitForCondition {
+            await api.refreshCallCount() == 1 && service.state.session?.accessToken == "expired-token"
+        }
+
+        let ensuredTask = Task { await service.ensureValidSession(for: .paywall) }
+        await Task.yield()
+        if case .authRequired = service.state {
+            XCTFail("Expected refresh to stay in flight instead of forcing auth")
+        }
+
+        await api.resumeRefresh()
+        let ensuredSession = await ensuredTask.value
+        await restoreTask.value
+
+        XCTAssertEqual(ensuredSession?.accessToken, "refreshed-token")
+    }
+
     private func makeService(initialSession: AuthSession? = nil) -> (SupabaseAuthService, InMemoryAuthSessionStore) {
         let configuration = SupabaseProjectConfiguration(
             projectURL: URL(string: "https://example.test")!,
@@ -147,6 +249,44 @@ private final class AnonymousSessionLinkerStub: AnonymousSessionLinking {
     func linkPendingSession(with authSession: AuthSession) async -> Bool { true }
 }
 
+private actor RefreshBlockingAuthAPI: SupabaseAuthAPI {
+    private let refreshedSession: AuthSession
+    private var continuation: CheckedContinuation<AuthSession, Never>?
+    private var refreshCalls = 0
+
+    init(refreshedSession: AuthSession) {
+        self.refreshedSession = refreshedSession
+    }
+
+    func signUp(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func signIn(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func exchangeAppleIdentityToken(_ identityToken: String, nonce: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func refresh(refreshToken: String) async throws -> AuthSession {
+        refreshCalls += 1
+        return await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func refreshCallCount() -> Int {
+        refreshCalls
+    }
+
+    func resumeRefresh() {
+        continuation?.resume(returning: refreshedSession)
+        continuation = nil
+    }
+}
+
 private final class FakeKeychainPersisting: KeychainPersisting {
     let uuid: UUID
 
@@ -196,5 +336,21 @@ private extension AuthSession {
             expiresAt: Date().addingTimeInterval(3600),
             user: AuthUser(id: "user-1", email: "member@example.com")
         )
+    }
+}
+
+private extension AuthSystemTests {
+    func waitForCondition(
+        timeout: TimeInterval = 1.0,
+        condition: @escaping () async -> Bool
+    ) async {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if await condition() {
+                return
+            }
+            await Task.yield()
+        }
+        XCTFail("Timed out waiting for condition")
     }
 }

@@ -74,10 +74,7 @@ enum AuthState: Equatable {
     }
 
     var isAuthenticated: Bool {
-        if case .authenticated = self {
-            return true
-        }
-        return false
+        session != nil
     }
 }
 
@@ -124,24 +121,75 @@ struct AuthPrompt: Identifiable, Equatable {
 }
 
 struct SupabaseProjectConfiguration {
+    enum Error: Swift.Error, Equatable {
+        case missingValue(String)
+        case invalidURL(String, String)
+    }
+
+    private enum InfoKey {
+        static let projectURL = "SupabaseProjectURL"
+        static let anonKey = "SupabaseAnonKey"
+        static let authRedirectURL = "SupabaseAuthRedirectURL"
+        static let appleServiceID = "SupabaseAppleServiceID"
+        static let callbackScheme = "SupabaseCallbackScheme"
+    }
+
     let projectURL: URL
     let anonKey: String
     let authRedirectURL: URL
     let appleServiceID: String
     let urlScheme: String
 
-    static func live() -> SupabaseProjectConfiguration {
-        SupabaseProjectConfiguration(
-            projectURL: URL(string: "https://ktgapnamhpdbmhhgydnl.supabase.co")!,
-            anonKey: "sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl",
-            authRedirectURL: URL(string: "https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback")!,
-            appleServiceID: "com.route25.girlpower.auth",
-            urlScheme: "girlpower"
-        )
+    init(
+        projectURL: URL,
+        anonKey: String,
+        authRedirectURL: URL,
+        appleServiceID: String,
+        urlScheme: String
+    ) {
+        self.projectURL = projectURL
+        self.anonKey = anonKey
+        self.authRedirectURL = authRedirectURL
+        self.appleServiceID = appleServiceID
+        self.urlScheme = urlScheme
+    }
+
+    static func live(bundle: Bundle = .main) -> SupabaseProjectConfiguration {
+        do {
+            return try SupabaseProjectConfiguration(infoDictionary: bundle.infoDictionary ?? [:])
+        } catch {
+            preconditionFailure("Missing Supabase auth configuration: \(error)")
+        }
+    }
+
+    init(infoDictionary: [String: Any]) throws {
+        let projectURLValue = try Self.requiredString(InfoKey.projectURL, in: infoDictionary)
+        let authRedirectURLValue = try Self.requiredString(InfoKey.authRedirectURL, in: infoDictionary)
+
+        guard let projectURL = URL(string: projectURLValue) else {
+            throw Error.invalidURL(InfoKey.projectURL, projectURLValue)
+        }
+        guard let authRedirectURL = URL(string: authRedirectURLValue) else {
+            throw Error.invalidURL(InfoKey.authRedirectURL, authRedirectURLValue)
+        }
+
+        self.projectURL = projectURL
+        self.anonKey = try Self.requiredString(InfoKey.anonKey, in: infoDictionary)
+        self.authRedirectURL = authRedirectURL
+        self.appleServiceID = try Self.requiredString(InfoKey.appleServiceID, in: infoDictionary)
+        self.urlScheme = try Self.requiredString(InfoKey.callbackScheme, in: infoDictionary)
     }
 
     var linkAnonymousSessionURL: URL {
         projectURL.appendingPathComponent("functions/v1/link-anonymous-session")
+    }
+
+    private static func requiredString(_ key: String, in infoDictionary: [String: Any]) throws -> String {
+        guard let value = infoDictionary[key] as? String,
+              value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false else {
+            throw Error.missingValue(key)
+        }
+        return value
     }
 }
 
@@ -454,6 +502,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private let anonymousSessionStore: PendingAnonymousSessionStoring
     private let linker: AnonymousSessionLinking
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
+    private var sessionRecoveryTask: Task<AuthSession?, Never>?
     private let logger = Logger(subsystem: "com.route25.girlpower", category: "Auth")
 
     init(
@@ -483,30 +532,17 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func restoreSession() async {
-        do {
-            guard let session = try sessionStore.load() else {
-                apply(.clearAuthentication)
-                return
-            }
-            if session.shouldRefreshSoon {
-                _ = await refresh(session: session, context: .restore)
-            } else {
-                apply(.restoreSession(session))
-                _ = await linker.linkPendingSession(with: session)
-            }
-        } catch {
-            apply(.authenticationFailed(context: .restore, message: "Stored session could not be restored.", reason: .unexpectedResponse))
-        }
+        _ = await restoreOrJoinExistingRecovery()
     }
 
     func handleAppDidBecomeActive() async {
         switch state {
         case .authenticated(let session) where session.shouldRefreshSoon:
-            _ = await refresh(session: session, context: .restore)
+            _ = await refreshOrJoin(session: session, context: .restore)
         case .refreshing:
-            break
+            _ = await sessionRecoveryTask?.value
         default:
-            await restoreSession()
+            _ = await restoreOrJoinExistingRecovery()
         }
     }
 
@@ -522,11 +558,14 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         switch state {
         case .authenticated(let session):
             if session.shouldRefreshSoon {
-                return await refresh(session: session, context: context)
+                return await refreshOrJoin(session: session, context: context)
             }
             return session
-        case .refreshing(let session, _):
-            return session.shouldRefreshSoon ? nil : session
+        case .refreshing:
+            if let task = sessionRecoveryTask {
+                return await task.value
+            }
+            return state.session
         case .authRequired, .authFailed, .anonymousEligible, .authenticating:
             apply(.requireAuthentication(context: context, message: context.defaultMessage))
             return nil
@@ -611,6 +650,49 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
             apply(.authenticationFailed(context: resolvedContext, message: "Your session expired or Supabase could not refresh it. Sign in again to continue.", reason: .refreshRejected))
             return nil
         }
+    }
+
+    private func restoreOrJoinExistingRecovery() async -> AuthSession? {
+        if let task = sessionRecoveryTask {
+            return await task.value
+        }
+        return await startSessionRecovery {
+            do {
+                guard let session = try self.sessionStore.load() else {
+                    self.apply(.clearAuthentication)
+                    return nil
+                }
+                if session.shouldRefreshSoon {
+                    return await self.refresh(session: session, context: .restore)
+                }
+                self.apply(.restoreSession(session))
+                _ = await self.linker.linkPendingSession(with: session)
+                return session
+            } catch {
+                self.apply(.authenticationFailed(context: .restore, message: "Stored session could not be restored.", reason: .unexpectedResponse))
+                return nil
+            }
+        }
+    }
+
+    private func refreshOrJoin(session: AuthSession, context: AuthRequirementContext?) async -> AuthSession? {
+        if let task = sessionRecoveryTask {
+            return await task.value
+        }
+        return await startSessionRecovery {
+            await self.refresh(session: session, context: context)
+        }
+    }
+
+    private func startSessionRecovery(
+        operation: @escaping @MainActor () async -> AuthSession?
+    ) async -> AuthSession? {
+        let task = Task<AuthSession?, Never> { @MainActor in
+            defer { self.sessionRecoveryTask = nil }
+            return await operation()
+        }
+        sessionRecoveryTask = task
+        return await task.value
     }
 
     private func apply(_ event: AuthStateMachine.Event) {

@@ -175,18 +175,13 @@ final class AppFlowViewModel: ObservableObject {
         }
         guard isDemoButtonDisabled == false else { return }
         if demoQuotaState == .secondAttemptEligible {
-            pendingProtectedAction = .secondDemo(reason: reason)
-            Task {
-                guard await authService.ensureValidSession(for: .secondDemo) != nil else {
-                    await MainActor.run {
-                        presentAuthPrompt(context: .secondDemo, message: AuthRequirementContext.secondDemo.defaultMessage)
-                    }
-                    return
+            executeProtectedAction(
+                .secondDemo(reason: reason),
+                context: .secondDemo,
+                onAuthorized: { viewModel in
+                    viewModel.startTrackedDemo(reason: reason)
                 }
-                await MainActor.run {
-                    startTrackedDemo(reason: reason)
-                }
-            }
+            )
             return
         }
         startTrackedDemo(reason: reason)
@@ -309,18 +304,13 @@ final class AppFlowViewModel: ObservableObject {
             logger.notice("Skipping paywall routing because entitlement already unlocked")
             return
         }
-        pendingProtectedAction = .paywall
-        Task {
-            guard await authService.ensureValidSession(for: .paywall) != nil else {
-                await MainActor.run {
-                    presentAuthPrompt(context: .paywall, message: AuthRequirementContext.paywall.defaultMessage)
-                }
-                return
+        executeProtectedAction(
+            .paywall,
+            context: .paywall,
+            onAuthorized: { viewModel in
+                viewModel.presentPaywall()
             }
-            await MainActor.run {
-                presentPaywall()
-            }
-        }
+        )
     }
 
     private func handleSlideIndexChange(to index: Int) {
@@ -397,6 +387,8 @@ final class AppFlowViewModel: ObservableObject {
                     if case .authenticated = newState {
                         authPrompt = nil
                         resumePendingProtectedActionIfNeeded()
+                    } else if case .authRequired(let context, let message) = newState {
+                        authPrompt = AuthPrompt(context: context, message: message)
                     } else if case .authFailed(let context, let message, _) = newState {
                         authPrompt = AuthPrompt(context: context, message: message)
                     }
@@ -498,6 +490,36 @@ final class AppFlowViewModel: ObservableObject {
 
     private func presentAuthPrompt(context: AuthRequirementContext, message: String) {
         authPrompt = AuthPrompt(context: context, message: message)
+    }
+
+    private func promptMessage(for context: AuthRequirementContext) -> String {
+        switch authState {
+        case .authRequired(let promptContext, let message) where promptContext == context:
+            return message
+        case .authFailed(let promptContext, let message, _) where promptContext == context:
+            return message
+        default:
+            return context.defaultMessage
+        }
+    }
+
+    private func executeProtectedAction(
+        _ protectedAction: ProtectedAction,
+        context: AuthRequirementContext,
+        onAuthorized: @escaping @MainActor (AppFlowViewModel) -> Void
+    ) {
+        Task {
+            guard await authService.ensureValidSession(for: context) != nil else {
+                await MainActor.run {
+                    self.pendingProtectedAction = protectedAction
+                    self.presentAuthPrompt(context: context, message: self.promptMessage(for: context))
+                }
+                return
+            }
+            await MainActor.run {
+                onAuthorized(self)
+            }
+        }
     }
 
     private func resumePendingProtectedActionIfNeeded() {

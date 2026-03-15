@@ -87,3 +87,31 @@
 6. Validate non-subscribed behavior:
    - Without a subscription, complete two demo attempts to confirm DemoQuota still locks at two and routes to the paywall.
    - Ensure tapping **Subscribe** while offline/error triggers the inline error banner but leaves buttons usable after hitting **Try again** or reloading.
+
+## GP-122 Auth Gate Regression
+
+1. Run the targeted auth/app-flow regressions:
+   ```sh
+   xcodebuild test \
+     -scheme GirlPower \
+     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -only-testing:GirlPowerTests/AuthSystemTests \
+     -only-testing:GirlPowerTests/AppFlowViewModelProTests
+   ```
+2. Verify the build-specific auth metadata resolves as expected:
+   ```sh
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL'
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL'
+   ```
+   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, and `girlpower-stage://auth/callback`.
+   - Release should resolve to `com.route25.girlpower`, `girlpower`, and `girlpower://auth/callback`.
+3. Run the edge-function regression checks:
+   ```sh
+   cd supabase/functions
+   deno lint link-anonymous-session
+   deno test link-anonymous-session/linker.test.ts
+   ```
+4. Run the full app suite:
+   ```sh
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
+   ```
