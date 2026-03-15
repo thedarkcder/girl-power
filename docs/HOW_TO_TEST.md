@@ -100,18 +100,33 @@
    ```
 2. Verify the build-specific auth metadata resolves as expected:
    ```sh
-   xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL'
-   xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL'
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
    ```
-   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, and `girlpower-stage://auth/callback`.
-   - Release should resolve to `com.route25.girlpower`, `girlpower`, and `girlpower://auth/callback`.
+   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, `girlpower-stage://auth/callback`, and `com.route25.girlpower.stage.auth`.
+   - Release should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
+   - Confirm the signed app target still reports `CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements`.
 3. Run the edge-function regression checks:
    ```sh
    cd supabase/functions
    deno lint link-anonymous-session
    deno test link-anonymous-session/linker.test.ts
    ```
-4. Run the full app suite:
+4. Verify the local Supabase Apple configuration stays local-first:
+   ```sh
+   supabase start
+   supabase functions serve link-anonymous-session
+   supabase status | rg 'API URL|Studio URL'
+   rg -n 'client_id|redirect_uri' supabase/config.toml
+   ```
+   - `client_id` should be `com.route25.girlpower.stage.auth`.
+   - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
+5. Manual simulator regression for refresh + link behavior:
+   - Install a clean Debug build on the iPhone 15 simulator, complete the first anonymous demo, then trigger the protected second-demo or paywall path.
+   - Confirm the auth sheet appears until a real `.authenticated` state is reached; a refreshing cached session must not unlock the second demo or paywall early.
+   - If you force refresh failure (for example by invalidating the refresh token in Supabase), the prompt should remain blocked and show the re-auth message instead of continuing.
+   - After successful email/password or Apple sign-in, retry the protected action and confirm the app proceeds without creating duplicate anonymous-link rows on repeated attempts.
+6. Run the full app suite:
    ```sh
    xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
    ```

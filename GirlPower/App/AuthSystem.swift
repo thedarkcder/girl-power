@@ -74,7 +74,10 @@ enum AuthState: Equatable {
     }
 
     var isAuthenticated: Bool {
-        session != nil
+        if case .authenticated = self {
+            return true
+        }
+        return false
     }
 }
 
@@ -503,6 +506,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private let linker: AnonymousSessionLinking
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
     private var sessionRecoveryTask: Task<AuthSession?, Never>?
+    private var sessionRecoveryContext: AuthRequirementContext?
     private let logger = Logger(subsystem: "com.route25.girlpower", category: "Auth")
 
     init(
@@ -561,11 +565,16 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
                 return await refreshOrJoin(session: session, context: context)
             }
             return session
-        case .refreshing:
+        case .refreshing(let session, let refreshingContext):
             if let task = sessionRecoveryTask {
+                if refreshingContext != context {
+                    sessionRecoveryContext = context
+                    apply(.beginRefresh(session, context: context))
+                }
                 return await task.value
             }
-            return state.session
+            apply(.requireAuthentication(context: context, message: context.defaultMessage))
+            return nil
         case .authRequired, .authFailed, .anonymousEligible, .authenticating:
             apply(.requireAuthentication(context: context, message: context.defaultMessage))
             return nil
@@ -599,7 +608,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func beginAnonymousSessionIfNeeded() -> UUID? {
-        guard state.isAuthenticated == false else {
+        guard state.session == nil else {
             anonymousSessionStore.clear()
             return nil
         }
@@ -646,7 +655,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
             return refreshed
         } catch {
             try? sessionStore.clear()
-            let resolvedContext = context ?? .restore
+            let resolvedContext = sessionRecoveryContext ?? context ?? .restore
             apply(.authenticationFailed(context: resolvedContext, message: "Your session expired or Supabase could not refresh it. Sign in again to continue.", reason: .refreshRejected))
             return nil
         }
@@ -656,7 +665,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         if let task = sessionRecoveryTask {
             return await task.value
         }
-        return await startSessionRecovery {
+        return await startSessionRecovery(context: .restore) {
             do {
                 guard let session = try self.sessionStore.load() else {
                     self.apply(.clearAuthentication)
@@ -679,16 +688,21 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         if let task = sessionRecoveryTask {
             return await task.value
         }
-        return await startSessionRecovery {
+        return await startSessionRecovery(context: context) {
             await self.refresh(session: session, context: context)
         }
     }
 
     private func startSessionRecovery(
+        context: AuthRequirementContext?,
         operation: @escaping @MainActor () async -> AuthSession?
     ) async -> AuthSession? {
         let task = Task<AuthSession?, Never> { @MainActor in
-            defer { self.sessionRecoveryTask = nil }
+            self.sessionRecoveryContext = context
+            defer {
+                self.sessionRecoveryTask = nil
+                self.sessionRecoveryContext = nil
+            }
             return await operation()
         }
         sessionRecoveryTask = task
