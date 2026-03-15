@@ -117,10 +117,12 @@
    supabase start
    supabase functions serve link-anonymous-session
    supabase status | rg 'API URL|Studio URL'
-   rg -n 'client_id|redirect_uri' supabase/config.toml
+   rg -n 'enabled =|client_id|redirect_uri' supabase/config.toml
    ```
-   - `client_id` should be `com.route25.girlpower.stage.auth`.
+   - The committed config should keep `[auth.external.apple] enabled = false` so `supabase start` does not require `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET`.
+   - `client_id` should still be `com.route25.girlpower.stage.auth`.
    - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
+   - For manual Apple Sign In verification only, export `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` and flip `enabled = true` in an uncommitted local change before restarting Supabase.
 5. Manual simulator regression for refresh + link behavior:
    - Install a clean Debug build on the iPhone 15 simulator, complete the first anonymous demo, then trigger the protected second-demo or paywall path.
    - Confirm the auth sheet appears until a real `.authenticated` state is reached; a refreshing cached session must not unlock the second demo or paywall early.
