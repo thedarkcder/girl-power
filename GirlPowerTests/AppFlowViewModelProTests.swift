@@ -53,13 +53,44 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .demoCTA)
     }
 
-    func testPaywallCanProceedAfterAuthSuccess() async {
-        let auth = AuthServiceStub(initialState: .anonymousEligible)
-        let coordinator = DemoQuotaCoordinatorStub(initialState: .fresh)
+    func testSecondDemoWithExistingSessionExecutesImmediatelyAndDoesNotReplay() async {
+        let auth = AuthServiceStub(initialState: .authenticated(.fixture))
+        auth.ensuredSession = .fixture
+        let coordinator = DemoQuotaCoordinatorStub(
+            initialState: .secondAttemptEligible,
+            startedState: .secondAttemptActive
+        )
         let viewModel = makeViewModel(
             entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
             auth: auth,
             coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        viewModel.startDemo(reason: "cta_second_demo_authenticated")
+
+        await waitForCondition { viewModel.state == .demoStub }
+        XCTAssertNil(viewModel.authPrompt)
+        let initialStartCount = await coordinator.recordedStartCount()
+        XCTAssertEqual(initialStartCount, 1)
+
+        auth.send(.authenticated(.fixture))
+        await Task.yield()
+
+        let replayedStartCount = await coordinator.recordedStartCount()
+        XCTAssertEqual(replayedStartCount, 1)
+    }
+
+    func testPaywallCanProceedAfterAuthSuccess() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let coordinator = DemoQuotaCoordinatorStub(initialState: .fresh)
+        let router = PaywallRouterSpy()
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator,
+            paywallRouter: router
         )
         let summary = SessionSummary(
             attemptIndex: 2,
@@ -83,6 +114,12 @@ final class AppFlowViewModelProTests: XCTestCase {
         auth.send(.authenticated(.fixture))
 
         await waitForCondition { viewModel.state == .paywall }
+        XCTAssertEqual(router.presentCallCount, 1)
+
+        auth.send(.authenticated(.fixture))
+        await Task.yield()
+
+        XCTAssertEqual(router.presentCallCount, 1)
     }
 
     // MARK: - Helpers
@@ -90,13 +127,15 @@ final class AppFlowViewModelProTests: XCTestCase {
     private func makeViewModel(
         entitlement: any EntitlementServicing,
         auth: (any AuthServicing)? = nil,
-        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub()
+        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub(),
+        paywallRouter: PaywallRouting = PaywallRouter()
     ) -> AppFlowViewModel {
         AppFlowViewModel(
             repository: OnboardingCompletionRepositoryStub(),
             demoQuotaCoordinator: coordinator,
             entitlementService: entitlement,
-            authService: auth
+            authService: auth,
+            paywallRouter: paywallRouter
         )
     }
 
@@ -119,9 +158,15 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
     private var continuation: AsyncStream<DemoQuotaStateMachine.State>.Continuation?
     private let stream: AsyncStream<DemoQuotaStateMachine.State>
     private let initialState: DemoQuotaStateMachine.State
+    private let startedState: DemoQuotaStateMachine.State
+    private var startCallCount = 0
 
-    init(initialState: DemoQuotaStateMachine.State = .fresh) {
+    init(
+        initialState: DemoQuotaStateMachine.State = .fresh,
+        startedState: DemoQuotaStateMachine.State = .firstAttemptActive
+    ) {
         self.initialState = initialState
+        self.startedState = startedState
         var capturedContinuation: AsyncStream<DemoQuotaStateMachine.State>.Continuation?
         self.stream = AsyncStream { continuation in
             capturedContinuation = continuation
@@ -133,9 +178,23 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
     func prepareForDemoStart() async {}
     func observeStates() -> AsyncStream<DemoQuotaStateMachine.State> { stream }
     func currentState() async -> DemoQuotaStateMachine.State { initialState }
-    func markAttemptStarted(startMetadata: [String : Any]) async throws -> DemoQuotaStateMachine.State { .firstAttemptActive }
+    func markAttemptStarted(startMetadata: [String : Any]) async throws -> DemoQuotaStateMachine.State {
+        startCallCount += 1
+        continuation?.yield(startedState)
+        return startedState
+    }
     func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State { .gatePending }
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {}
+
+    func recordedStartCount() -> Int { startCallCount }
+}
+
+private final class PaywallRouterSpy: PaywallRouting {
+    private(set) var presentCallCount = 0
+
+    func presentPaywall() {
+        presentCallCount += 1
+    }
 }
 
 @MainActor
