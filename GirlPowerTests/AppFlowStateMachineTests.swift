@@ -280,6 +280,46 @@ final class AppFlowViewModelTests: XCTestCase {
     }
 }
 
+@MainActor
+final class AppStartupWorkTests: XCTestCase {
+    func testBootstrapLoadsEntitlementsWithoutWaitingForAuthRestore() async {
+        let authService = BlockingStartupAuthService()
+        let entitlementService = StartupEntitlementServiceSpy()
+
+        let bootstrapTask = Task {
+            await AppStartupWork.bootstrap(
+                authService: authService,
+                entitlementService: entitlementService
+            )
+        }
+
+        await waitForCondition {
+            authService.didStartRestore && entitlementService.loadCallCount == 1
+        }
+
+        XCTAssertEqual(authService.restoreCallCount, 1)
+        XCTAssertEqual(entitlementService.loadCallCount, 1)
+
+        authService.resumeRestore()
+        await bootstrapTask.value
+    }
+
+    private func waitForCondition(
+        timeout: TimeInterval = 1.0,
+        condition: @escaping () -> Bool
+    ) async {
+        let conditionExpectation = expectation(description: "condition met")
+        let monitor = Task {
+            while !condition() {
+                await Task.yield()
+            }
+            conditionExpectation.fulfill()
+        }
+        await fulfillment(of: [conditionExpectation], timeout: timeout)
+        monitor.cancel()
+    }
+}
+
 private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepository {
     private(set) var markCompletedCallCount = 0
     private var completed: Bool
@@ -314,5 +354,65 @@ private extension AuthSession {
             expiresAt: Date().addingTimeInterval(3600),
             user: AuthUser(id: "user-1", email: "member@example.com")
         )
+    }
+}
+
+@MainActor
+private final class BlockingStartupAuthService: ObservableObject, AuthServicing {
+    @Published private(set) var state: AuthState = .anonymousEligible
+
+    private var restoreContinuation: CheckedContinuation<Void, Never>?
+    private(set) var restoreCallCount = 0
+    private(set) var didStartRestore = false
+
+    func observeStates() -> AsyncStream<AuthState> {
+        AsyncStream { continuation in
+            continuation.yield(state)
+            continuation.finish()
+        }
+    }
+
+    func restoreSession() async {
+        restoreCallCount += 1
+        didStartRestore = true
+        await withCheckedContinuation { continuation in
+            restoreContinuation = continuation
+        }
+    }
+
+    func resumeRestore() {
+        restoreContinuation?.resume()
+        restoreContinuation = nil
+    }
+
+    func handleAppDidBecomeActive() async {}
+    func requireAuthentication(context: AuthRequirementContext, message: String) async {}
+    func dismissFailure() async {}
+    func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? { nil }
+    func signIn(email: String, password: String, context: AuthRequirementContext) async {}
+    func signUp(email: String, password: String, context: AuthRequirementContext) async {}
+    func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async {}
+    func signOut() async {}
+    func beginAnonymousSessionIfNeeded() -> UUID? { nil }
+}
+
+@MainActor
+private final class StartupEntitlementServiceSpy: ObservableObject, EntitlementServicing {
+    @Published var state: EntitlementState = .loading
+    var isPro: Bool = false
+    private(set) var loadCallCount = 0
+
+    func load() async {
+        loadCallCount += 1
+    }
+
+    func purchase() async {}
+    func restore() async {}
+
+    func observeStates() -> AsyncStream<EntitlementState> {
+        AsyncStream { continuation in
+            continuation.yield(state)
+            continuation.finish()
+        }
     }
 }
