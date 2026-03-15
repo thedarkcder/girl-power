@@ -1,5 +1,17 @@
 import SwiftUI
 
+@MainActor
+enum AppStartupWork {
+    static func bootstrap(
+        authService: any AuthServicing,
+        entitlementService: any EntitlementServicing
+    ) async {
+        async let restoreSession: Void = authService.restoreSession()
+        async let loadEntitlements: Void = entitlementService.load()
+        _ = await (restoreSession, loadEntitlements)
+    }
+}
+
 @main
 struct GirlPowerApp: App {
     @Environment(\.scenePhase) private var scenePhase
@@ -49,8 +61,10 @@ struct GirlPowerApp: App {
             )
         )
         Task {
-            await authService.restoreSession()
-            await entitlementService.load()
+            await AppStartupWork.bootstrap(
+                authService: authService,
+                entitlementService: entitlementService
+            )
         }
     }
 
