@@ -94,6 +94,7 @@ final class AppFlowViewModel: ObservableObject {
     private var entitlementTask: Task<Void, Never>?
     private var authTask: Task<Void, Never>?
     private var currentAttemptIndex: Int = 1
+    private var activeAnonymousSessionID: UUID?
     private var pendingProtectedAction: ProtectedAction?
     private var appleSignInNonce: String?
     private let logger = Logger(subsystem: "com.girlpower.app", category: "AppFlow")
@@ -256,6 +257,7 @@ final class AppFlowViewModel: ObservableObject {
         Task {
             _ = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
             await MainActor.run {
+                self.activeAnonymousSessionID = nil
                 apply(event: .finishDemo)
             }
         }
@@ -448,7 +450,7 @@ final class AppFlowViewModel: ObservableObject {
             "tempo_samples": input.snapshot.tempoSamples,
             "coaching_corrections": corrections,
             "generated_at": isoFormatter.string(from: input.generatedAt)
-        ]
+        ].merging(anonymousSessionMetadata()) { current, _ in current }
     }
 
     private let isoFormatter: ISO8601DateFormatter = {
@@ -460,6 +462,7 @@ final class AppFlowViewModel: ObservableObject {
     private func startTrackedDemo(reason: String) {
         summaryViewModel = nil
         let anonymousSessionID = authService.beginAnonymousSessionIfNeeded()
+        activeAnonymousSessionID = anonymousSessionID
         var metadata: [String: Any] = [
             "reason": reason,
             "cta_label": demoButtonTitle,
@@ -486,6 +489,11 @@ final class AppFlowViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    private func anonymousSessionMetadata() -> [String: Any] {
+        guard let activeAnonymousSessionID else { return [:] }
+        return ["anon_session_id": activeAnonymousSessionID.uuidString]
     }
 
     private func presentAuthPrompt(context: AuthRequirementContext, message: String) {

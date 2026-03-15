@@ -53,6 +53,27 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertEqual(viewModel.state, .demoCTA)
     }
 
+    func testSecondDemoStaysFailClosedWhileSessionIsRefreshing() async {
+        let auth = AuthServiceStub(initialState: .refreshing(.fixture, context: .secondDemo))
+        let coordinator = DemoQuotaCoordinatorStub(initialState: .secondAttemptEligible)
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        XCTAssertEqual(viewModel.demoButtonTitle, "Sign in to continue")
+
+        viewModel.startDemo(reason: "cta_second_demo_refreshing")
+
+        await waitForCondition { viewModel.authPrompt?.context == .secondDemo }
+        let startedCount = await coordinator.recordedStartCount()
+        XCTAssertEqual(startedCount, 0)
+        XCTAssertEqual(viewModel.state, .demoCTA)
+    }
+
     func testSecondDemoWithExistingSessionExecutesImmediatelyAndDoesNotReplay() async {
         let auth = AuthServiceStub(initialState: .authenticated(.fixture))
         auth.ensuredSession = .fixture
@@ -120,6 +141,34 @@ final class AppFlowViewModelProTests: XCTestCase {
         await Task.yield()
 
         XCTAssertEqual(router.presentCallCount, 1)
+    }
+
+    func testPendingSecondDemoOnlyResumesAfterAuthenticatedState() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let coordinator = DemoQuotaCoordinatorStub(
+            initialState: .secondAttemptEligible,
+            startedState: .secondAttemptActive
+        )
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        viewModel.startDemo(reason: "cta_second_demo_wait_for_auth")
+        await waitForCondition { viewModel.authPrompt?.context == .secondDemo }
+
+        auth.send(.refreshing(.fixture, context: .secondDemo))
+        await Task.yield()
+        let countBeforeAuthentication = await coordinator.recordedStartCount()
+        XCTAssertEqual(countBeforeAuthentication, 0)
+
+        auth.send(.authenticated(.fixture))
+        await waitForCondition { viewModel.state == .demoStub }
+        let countAfterAuthentication = await coordinator.recordedStartCount()
+        XCTAssertEqual(countAfterAuthentication, 1)
     }
 
     // MARK: - Helpers

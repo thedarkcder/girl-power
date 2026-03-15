@@ -80,13 +80,41 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertNil(pendingStore.load())
     }
 
+    func testAnonymousLinkClearsPendingSessionWhenServerRejectsStaleSession() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        let pendingID = UUID()
+        pendingStore.save(pendingID)
+        let session = makeURLSession()
+        let linker = SupabaseAnonymousSessionLinker(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.girlpower.stage.auth",
+                urlScheme: "girlpower-stage"
+            ),
+            urlSession: session,
+            pendingStore: pendingStore,
+            deviceIdentityStorage: FakeKeychainPersisting(uuid: UUID())
+        )
+
+        URLProtocolStub.requestHandler = { _ in
+            (412, Data("{\"status\":\"stale_session\"}".utf8))
+        }
+
+        let linked = await linker.linkPendingSession(with: .fixture)
+
+        XCTAssertTrue(linked)
+        XCTAssertNil(pendingStore.load())
+    }
+
     func testConfigurationLoadsFromInfoDictionary() throws {
         let configuration = try SupabaseProjectConfiguration(
             infoDictionary: [
                 "SupabaseProjectURL": "https://example.test",
                 "SupabaseAnonKey": "anon-key",
                 "SupabaseAuthRedirectURL": "girlpower-stage://auth/callback",
-                "SupabaseAppleServiceID": "com.route25.girlpower.auth",
+                "SupabaseAppleServiceID": "com.route25.girlpower.stage.auth",
                 "SupabaseCallbackScheme": "girlpower-stage",
             ]
         )
@@ -94,7 +122,7 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(configuration.projectURL.absoluteString, "https://example.test")
         XCTAssertEqual(configuration.anonKey, "anon-key")
         XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower-stage://auth/callback")
-        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.auth")
+        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.stage.auth")
         XCTAssertEqual(configuration.urlScheme, "girlpower-stage")
     }
 
@@ -182,13 +210,76 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(ensuredSession?.accessToken, "refreshed-token")
     }
 
+    func testEnsureValidSessionFailsClosedWhenInFlightRefreshRejects() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let api = RefreshRejectingAuthAPI()
+        let store = InMemoryAuthSessionStore(initial: expired)
+        let service = SupabaseAuthService(
+            api: api,
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        let restoreTask = Task { await service.restoreSession() }
+        await waitForCondition {
+            await api.refreshCallCount() == 1 && service.state.session?.accessToken == "expired-token"
+        }
+
+        let ensuredTask = Task { await service.ensureValidSession(for: .paywall) }
+        await api.resumeRefresh()
+        let ensuredSession = await ensuredTask.value
+        await restoreTask.value
+
+        XCTAssertNil(ensuredSession)
+        XCTAssertNil(store.savedSession)
+        guard case .authFailed(let context, _, let reason) = service.state else {
+            return XCTFail("Expected auth failure after refresh rejection")
+        }
+        XCTAssertEqual(context, .paywall)
+        XCTAssertEqual(reason, .refreshRejected)
+    }
+
+    func testBeginAnonymousSessionDoesNotCreatePendingIDWhileRefreshingCachedSession() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let api = RefreshBlockingAuthAPI(refreshedSession: .fixture)
+        let service = SupabaseAuthService(
+            api: api,
+            sessionStore: InMemoryAuthSessionStore(initial: expired),
+            anonymousSessionStore: pendingStore,
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        let restoreTask = Task { await service.restoreSession() }
+        await waitForCondition {
+            await api.refreshCallCount() == 1 && service.state.session?.accessToken == "expired-token"
+        }
+        let pendingID = service.beginAnonymousSessionIfNeeded()
+        await api.resumeRefresh()
+        await restoreTask.value
+
+        XCTAssertNil(pendingID)
+        XCTAssertNil(pendingStore.load())
+    }
+
     private func makeService(initialSession: AuthSession? = nil) -> (SupabaseAuthService, InMemoryAuthSessionStore) {
         let configuration = SupabaseProjectConfiguration(
             projectURL: URL(string: "https://example.test")!,
             anonKey: "anon-key",
             authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-            appleServiceID: "com.route25.girlpower.auth",
-            urlScheme: "girlpower"
+            appleServiceID: "com.route25.girlpower.stage.auth",
+            urlScheme: "girlpower-stage"
         )
         let sessionStore = InMemoryAuthSessionStore(initial: initialSession)
         let pendingStore = InMemoryPendingAnonymousSessionStore()
@@ -283,6 +374,39 @@ private actor RefreshBlockingAuthAPI: SupabaseAuthAPI {
 
     func resumeRefresh() {
         continuation?.resume(returning: refreshedSession)
+        continuation = nil
+    }
+}
+
+private actor RefreshRejectingAuthAPI: SupabaseAuthAPI {
+    private var continuation: CheckedContinuation<AuthSession, Error>?
+    private var refreshCalls = 0
+
+    func signUp(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func signIn(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func exchangeAppleIdentityToken(_ identityToken: String, nonce: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func refresh(refreshToken: String) async throws -> AuthSession {
+        refreshCalls += 1
+        return try await withCheckedThrowingContinuation { continuation in
+            self.continuation = continuation
+        }
+    }
+
+    func refreshCallCount() -> Int {
+        refreshCalls
+    }
+
+    func resumeRefresh() {
+        continuation?.resume(throwing: SupabaseAuthAPIError.refreshRejected)
         continuation = nil
     }
 }
