@@ -171,6 +171,56 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertEqual(countAfterAuthentication, 1)
     }
 
+    func testAuthFailureKeepsPromptIdentityStable() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let coordinator = DemoQuotaCoordinatorStub(initialState: .secondAttemptEligible)
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        viewModel.startDemo(reason: "cta_second_demo_identity")
+        await waitForCondition { viewModel.authPrompt?.context == .secondDemo }
+        let originalPromptID = viewModel.authPrompt?.id
+
+        auth.send(.authFailed(context: .secondDemo, message: "Wrong password", reason: .invalidCredentials))
+        await waitForCondition { viewModel.authPrompt?.message == "Wrong password" }
+
+        XCTAssertEqual(viewModel.authPrompt?.id, originalPromptID)
+    }
+
+    func testDismissAuthPromptWhileBusyKeepsPendingProtectedAction() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let coordinator = DemoQuotaCoordinatorStub(
+            initialState: .secondAttemptEligible,
+            startedState: .secondAttemptActive
+        )
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        viewModel.startDemo(reason: "cta_second_demo_busy_dismiss")
+        await waitForCondition { viewModel.authPrompt?.context == .secondDemo }
+
+        auth.send(.authenticating(method: .emailSignIn, context: .secondDemo))
+        await Task.yield()
+        viewModel.dismissAuthPrompt()
+        XCTAssertNotNil(viewModel.authPrompt)
+
+        auth.send(.authenticated(.fixture))
+        await waitForCondition { viewModel.state == .demoStub }
+
+        let startedCount = await coordinator.recordedStartCount()
+        XCTAssertEqual(startedCount, 1)
+    }
+
     // MARK: - Helpers
 
     private func makeViewModel(

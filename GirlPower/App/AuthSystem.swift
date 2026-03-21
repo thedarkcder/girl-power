@@ -118,7 +118,7 @@ struct AuthStateMachine {
 }
 
 struct AuthPrompt: Identifiable, Equatable {
-    let id = UUID()
+    var id: String { context.rawValue }
     let context: AuthRequirementContext
     let message: String
 }
@@ -604,12 +604,12 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
 
     func signOut() async {
         try? sessionStore.clear()
+        anonymousSessionStore.clear()
         apply(.signOut)
     }
 
     func beginAnonymousSessionIfNeeded() -> UUID? {
         guard state.session == nil else {
-            anonymousSessionStore.clear()
             return nil
         }
         if let existing = anonymousSessionStore.load() {
@@ -653,11 +653,26 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
                 logger.warning("Anonymous session link still pending after refresh")
             }
             return refreshed
+        } catch let error as SupabaseAuthAPIError {
+            switch error {
+            case .refreshRejected:
+                try? sessionStore.clear()
+                let resolvedContext = sessionRecoveryContext ?? context ?? .restore
+                apply(.authenticationFailed(context: resolvedContext, message: "Your session expired or Supabase could not refresh it. Sign in again to continue.", reason: .refreshRejected))
+                return nil
+            case .networkUnavailable, .invalidResponse:
+                logger.warning("Keeping cached session after transient refresh failure: \(String(describing: error), privacy: .public)")
+                apply(.authenticationSucceeded(session))
+                return session
+            case .invalidCredentials, .appleCredentialInvalid:
+                logger.warning("Unexpected refresh error kept cached session active: \(String(describing: error), privacy: .public)")
+                apply(.authenticationSucceeded(session))
+                return session
+            }
         } catch {
-            try? sessionStore.clear()
-            let resolvedContext = sessionRecoveryContext ?? context ?? .restore
-            apply(.authenticationFailed(context: resolvedContext, message: "Your session expired or Supabase could not refresh it. Sign in again to continue.", reason: .refreshRejected))
-            return nil
+            logger.warning("Keeping cached session after unexpected refresh failure")
+            apply(.authenticationSucceeded(session))
+            return session
         }
     }
 

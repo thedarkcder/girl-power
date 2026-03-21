@@ -189,6 +189,7 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     func dismissAuthPrompt() {
+        guard isAuthBusy == false else { return }
         authPrompt = nil
         pendingProtectedAction = nil
     }

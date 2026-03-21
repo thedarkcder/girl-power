@@ -42,10 +42,10 @@
 3. Install/run the simulator build (clean install to exercise keychain provisioning). Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.
-   - Edge Function receives exactly one evaluate-session call with the device_id/metadata payload.
-4. When evaluate-session returns `allowAnotherDemo=true`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
+   - Edge Function receives exactly one evaluate-session call with the canonical `device_id`, `input.context`, and top-level `metadata` payload.
+4. When evaluate-session returns `decision.outcome = "allow"`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
 5. Force a deny/timeout path:
-   - Stop the `evaluate-session` function or have it return `{ allowAnotherDemo: false, message: "custom message" }`.
+   - Stop the `evaluate-session` function or have it return `{"decision":{"outcome":"deny","message":"custom message"}}`.
    - After attempt #1 completion the CTA should immediately show the deny/timeout copy and never present a second attempt.
 6. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
 7. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
@@ -58,7 +58,7 @@
 3. Simulate `.secondAttemptEligible` (allow response) and confirm the primary CTA switches to “One more go”, secondary CTA reads “Continue to Paywall”, and tapping One more go starts attempt #2 with a fresh SquatSessionCoordinator.
 4. Complete attempt #2 and confirm the summary only shows “Continue to Paywall” (no secondary button). Tapping it should clear the navigation stack and display the paywall placeholder without exposing any path back into SquatSessionView.
 5. Relaunch the app; ensure the summary cache is cleared, DemoCTA respects the locked quota state, and the user cannot start a third attempt.
-6. Force a denied/timeout path (e.g., return `{ allowAnotherDemo: false, message: "custom message" }` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
+6. Force a denied/timeout path (e.g., return `{"decision":{"outcome":"deny","message":"custom message"}}` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
 7. During both flows, tail `supabase functions logs --function demo-session-log` (or watch Xcode os_log output) to ensure attempt start/completion and evaluation events emit exactly once; any duplication indicates a routing race that must be investigated.
 
 ## GP-117 StoreKit Paywall + Entitlements

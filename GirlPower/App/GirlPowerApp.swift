@@ -108,6 +108,7 @@ struct AppFlowRootView: View {
                     AuthGateView(viewModel: viewModel, prompt: prompt)
                         .presentationDetents([.medium, .large])
                         .presentationDragIndicator(.visible)
+                        .interactiveDismissDisabled(viewModel.isAuthBusy)
                 }
         }
     }

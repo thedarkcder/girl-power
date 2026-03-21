@@ -1,8 +1,11 @@
 import { assertEquals, assertRejects } from 'std/assert';
-import { RateLimiter } from './rate-limit.ts';
+import { RateLimiter, type RateLimitRpcClient } from './rate-limit.ts';
 
-class FakeClient {
-  constructor(private readonly payload: unknown, private readonly shouldError = false) {}
+class FakeClient implements RateLimitRpcClient {
+  constructor(
+    private readonly payload: { allowed: boolean; attempt_count: number; window_start: string } | null,
+    private readonly shouldError = false,
+  ) {}
 
   rpc() {
     if (this.shouldError) {
@@ -13,7 +16,7 @@ class FakeClient {
 }
 
 Deno.test('rate limiter returns snapshot when allowed', async () => {
-  const limiter = new RateLimiter(new FakeClient({ allowed: true, attempt_count: 1, window_start: '2024-01-01T00:00:00Z' }) as any, {
+  const limiter = new RateLimiter(new FakeClient({ allowed: true, attempt_count: 1, window_start: '2024-01-01T00:00:00Z' }), {
     rateLimitAttempts: 3,
     rateLimitWindowSeconds: 60,
   });
@@ -24,7 +27,7 @@ Deno.test('rate limiter returns snapshot when allowed', async () => {
 });
 
 Deno.test('rate limiter throws when rpc errors', async () => {
-  const limiter = new RateLimiter(new FakeClient({}, true) as any, {
+  const limiter = new RateLimiter(new FakeClient(null, true), {
     rateLimitAttempts: 3,
     rateLimitWindowSeconds: 60,
   });

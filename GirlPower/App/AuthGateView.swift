@@ -50,11 +50,13 @@ struct AuthGateView: View {
             )
             .navigationTitle(promptTitle)
             .navigationBarTitleDisplayMode(.inline)
+            .interactiveDismissDisabled(viewModel.isAuthBusy)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Close") {
                         viewModel.dismissAuthPrompt()
                     }
+                    .disabled(viewModel.isAuthBusy)
                     .accessibilityIdentifier("auth_close_button")
                 }
             }

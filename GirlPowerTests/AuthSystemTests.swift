@@ -126,6 +126,73 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(configuration.urlScheme, "girlpower-stage")
     }
 
+    func testEvaluateSessionServiceSendsCanonicalPayloadWithAnonymousMetadata() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        var capturedBody: [String: Any] = [:]
+        URLProtocolStub.requestHandler = { request in
+            let data = try XCTUnwrap(request.httpBody)
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (200, Data("{\"decision\":{\"outcome\":\"allow\"}}".utf8))
+        }
+
+        _ = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 1,
+            context: [
+                "anon_session_id": "22222222-2222-2222-2222-222222222222",
+                "goal": "tempo"
+            ]
+        )
+
+        XCTAssertEqual(capturedBody["device_id"] as? String, "11111111-1111-1111-1111-111111111111")
+        XCTAssertEqual(capturedBody["attempt_index"] as? Int, 1)
+        XCTAssertEqual(capturedBody["payload_version"] as? String, "v1")
+        let input = try XCTUnwrap(capturedBody["input"] as? [String: Any])
+        XCTAssertEqual(input["prompt"] as? String, "Evaluate whether this device should unlock another free coaching demo.")
+        XCTAssertEqual((input["context"] as? [String: String])?["anon_session_id"], "22222222-2222-2222-2222-222222222222")
+        let metadata = try XCTUnwrap(capturedBody["metadata"] as? [String: String])
+        XCTAssertEqual(metadata["anon_session_id"], "22222222-2222-2222-2222-222222222222")
+        XCTAssertEqual(metadata["goal"], "tempo")
+    }
+
+    func testEvaluateSessionServiceMapsCanonicalDenyDecisionFromRateLimitResponse() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        URLProtocolStub.requestHandler = { _ in
+            (
+                429,
+                Data(
+                    """
+                    {
+                      "decision": {
+                        "outcome": "deny",
+                        "message": "Free demo eligibility is temporarily rate limited. Try again shortly."
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 1,
+            context: [:]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertEqual(result.message, "Free demo eligibility is temporarily rate limited. Try again shortly.")
+    }
+
     func testRestoreSessionAndForegroundRefreshShareSingleInFlightTask() async {
         let expired = AuthSession(
             accessToken: "expired-token",
@@ -245,6 +312,36 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(reason, .refreshRejected)
     }
 
+    func testTransientRefreshFailureKeepsCachedSessionAndAvoidsAuthFailure() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let store = InMemoryAuthSessionStore(initial: expired)
+        let service = SupabaseAuthService(
+            api: RefreshNetworkFailingAuthAPI(),
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        await service.restoreSession()
+        guard case .authenticated(let restoredSession) = service.state else {
+            return XCTFail("Expected cached session to remain authenticated")
+        }
+        XCTAssertEqual(restoredSession.accessToken, "expired-token")
+        XCTAssertEqual(store.savedSession?.accessToken, "expired-token")
+
+        let ensuredSession = await service.ensureValidSession(for: .paywall)
+        XCTAssertEqual(ensuredSession?.accessToken, "expired-token")
+        guard case .authenticated(let ensuredStateSession) = service.state else {
+            return XCTFail("Expected cached session to stay authenticated after transient refresh failure")
+        }
+        XCTAssertEqual(ensuredStateSession.accessToken, "expired-token")
+    }
+
     func testBeginAnonymousSessionDoesNotCreatePendingIDWhileRefreshingCachedSession() async {
         let pendingStore = InMemoryPendingAnonymousSessionStore()
         let expired = AuthSession(
@@ -271,6 +368,40 @@ final class AuthSystemTests: XCTestCase {
 
         XCTAssertNil(pendingID)
         XCTAssertNil(pendingStore.load())
+    }
+
+    func testBeginAnonymousSessionPreservesExistingPendingIDWhenAuthenticated() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        let pendingID = UUID()
+        pendingStore.save(pendingID)
+        let service = SupabaseAuthService(
+            api: RefreshBlockingAuthAPI(refreshedSession: .fixture),
+            sessionStore: InMemoryAuthSessionStore(initial: .fixture),
+            anonymousSessionStore: pendingStore,
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        await service.restoreSession()
+        let returnedID = service.beginAnonymousSessionIfNeeded()
+
+        XCTAssertNil(returnedID)
+        XCTAssertEqual(pendingStore.load(), pendingID)
+    }
+
+    func testSignOutClearsPendingAnonymousSession() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        pendingStore.save(UUID())
+        let service = SupabaseAuthService(
+            api: RefreshBlockingAuthAPI(refreshedSession: .fixture),
+            sessionStore: InMemoryAuthSessionStore(initial: .fixture),
+            anonymousSessionStore: pendingStore,
+            linker: AnonymousSessionLinkerStub()
+        )
+
+        await service.signOut()
+
+        XCTAssertNil(pendingStore.load())
+        XCTAssertEqual(service.state, .anonymousEligible)
     }
 
     private func makeService(initialSession: AuthSession? = nil) -> (SupabaseAuthService, InMemoryAuthSessionStore) {
@@ -408,6 +539,24 @@ private actor RefreshRejectingAuthAPI: SupabaseAuthAPI {
     func resumeRefresh() {
         continuation?.resume(throwing: SupabaseAuthAPIError.refreshRejected)
         continuation = nil
+    }
+}
+
+private actor RefreshNetworkFailingAuthAPI: SupabaseAuthAPI {
+    func signUp(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func signIn(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func exchangeAppleIdentityToken(_ identityToken: String, nonce: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func refresh(refreshToken: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.networkUnavailable
     }
 }
 

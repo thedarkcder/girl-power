@@ -32,10 +32,35 @@ The `supabase/functions/evaluate-session` Deno Edge Function orchestrates per-de
 
 | Status | When | Body pieces |
 | --- | --- | --- |
-| `200` | Attempt succeeded or deterministic fallback produced | `session_id`, `attempt_id`, `state`, `payload_version`, `request`, `response`, `moderation`, `rate_limit`, `fallback_used=false` unless fallback executed |
-| `409` | Duplicate (`device_id`, `attempt_index`) | Returns persisted attempt payload, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
-| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `fallback_used=true`, `reason="rate_limited"`, `rate_limit.allowed=false` |
+| `200` | Attempt succeeded or deterministic fallback produced | `session_id`, `attempt_id`, `state`, `payload_version`, canonical `decision`, `request`, `response`, `moderation`, `rate_limit`, `fallback_used=false` unless fallback executed |
+| `409` | Duplicate (`device_id`, `attempt_index`) | Returns persisted attempt payload plus canonical `decision`, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
+| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `decision.outcome="deny"`, `fallback_used=true`, `reason="rate_limited"`, `rate_limit.allowed=false` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
+
+The canonical response contract includes:
+
+```jsonc
+{
+  "correlation_id": "uuid",
+  "state": "COMPLETED",
+  "payload_version": "v1",
+  "fallback_used": false,
+  "decision": {
+    "outcome": "allow",
+    "message": null
+  },
+  "request": { "...": "..." },
+  "response": { "...": "..." },
+  "moderation": { "...": "..." },
+  "rate_limit": {
+    "allowed": true,
+    "attempt_count": 1,
+    "window_start": "2026-03-21T09:00:00Z",
+    "limit": 3,
+    "window_seconds": 3600
+  }
+}
+```
 
 ## Security Boundary
 

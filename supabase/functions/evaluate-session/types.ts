@@ -3,6 +3,11 @@ export type EvaluateSessionInput = {
   context?: Record<string, unknown>;
 };
 
+export type EvaluateSessionDecision = {
+  outcome: 'allow' | 'deny' | 'timeout';
+  message?: string;
+};
+
 export type EvaluateSessionRequest = {
   device_id: string;
   attempt_index: number;
@@ -79,6 +84,7 @@ export type EvaluateSessionResponse = {
   payload_version: string;
   fallback_used: boolean;
   reason?: string;
+  decision: EvaluateSessionDecision;
   request?: Record<string, unknown>;
   response?: Record<string, unknown>;
   moderation?: Record<string, unknown>;
