@@ -18,7 +18,7 @@ export class SessionRepository {
     const { data, error } = await this.client
       .from('demo_attempts')
       .select(
-        'id, session_id, device_id, attempt_index, payload_version, request_payload, llm_response, moderation_payload, state, reason, fallback_used, rate_limit_window_start, created_at',
+        'id, session_id, device_id, attempt_index, payload_version, request_payload, llm_response, moderation_payload, state, reason, fallback_used, rate_limit_payload, created_at',
       )
       .eq('device_id', deviceId)
       .eq('attempt_index', attemptIndex)
