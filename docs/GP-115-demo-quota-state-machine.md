@@ -18,8 +18,8 @@ Enforce the two-attempt demo quota per device while keeping Supabase logging + L
 | --- | --- |
 | `startAttempt` | User tapped the CTA and coordinator authorized the next attempt. State determines the attempt index (1 or 2). |
 | `attemptCompleted` | Demo flow finished and coordinator has emitted the completion log. |
-| `evaluationAllow` | Supabase Edge Function responded with `allowAnotherDemo=true`. |
-| `evaluationDeny` | Supabase Edge Function responded false or returned a validation error. |
+| `evaluationAllow` | Supabase Edge Function responded with `decision.outcome = "allow"`. |
+| `evaluationDeny` | Supabase Edge Function responded with `decision.outcome = "deny"` or returned a validation error. |
 | `evaluationTimeout` | Evaluate call timed out (>3 s) or failed (network/server). This is treated as a deny. |
 | `resetFromServer(snapshot)` | Local repo backfilled from Supabase mirror logs during cold start while the keychain-backed `device_id` is still available. Snapshot contains `{attemptsUsed, lastDecision}`. |
 

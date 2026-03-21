@@ -1,4 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RuntimeConfig } from './config.ts';
 import type { RateLimitSnapshot } from './types.ts';
 
@@ -7,9 +6,18 @@ type RpcResult<T> = {
   error: { message: string } | null;
 };
 
+type RateLimitRpcPayload = { allowed: boolean; attempt_count: number; window_start: string };
+
+export type RateLimitRpcClient = {
+  rpc(
+    fn: string,
+    args: Record<string, unknown>,
+  ): Promise<RpcResult<RateLimitRpcPayload>>;
+};
+
 export class RateLimiter {
   constructor(
-    private readonly client: SupabaseClient,
+    private readonly client: RateLimitRpcClient,
     private readonly config: Pick<RuntimeConfig, 'rateLimitAttempts' | 'rateLimitWindowSeconds'>,
   ) {}
 
@@ -18,7 +26,7 @@ export class RateLimiter {
       p_device_id: deviceId,
       p_window_seconds: this.config.rateLimitWindowSeconds,
       p_max_attempts: this.config.rateLimitAttempts,
-    }) as RpcResult<{ allowed: boolean; attempt_count: number; window_start: string }>;
+    });
 
     if (error) {
       throw new Error(`rate-limit rpc failed: ${error.message}`);

@@ -1,8 +1,14 @@
-import type { DemoQuotaDecisionType, DemoQuotaLockReason, DemoQuotaSnapshot } from '../demo-quota/types.ts';
+import type { DemoQuotaDecisionType, DemoQuotaLockReason } from '../demo-quota/types.ts';
 
 export type EvaluateSessionInput = {
   prompt: string;
   context?: Record<string, unknown>;
+};
+
+export type EvaluateSessionDecision = {
+  outcome: 'allow' | 'deny' | 'timeout';
+  message?: string;
+  lock_reason?: DemoQuotaLockReason;
 };
 
 export type EvaluateSessionRequest = {
@@ -89,16 +95,12 @@ export type EvaluateSessionResponse = {
   session_id?: string;
   attempt_id?: string;
   payload_version: string;
-  allow_another_demo: boolean;
-  attempts_used: number;
-  evaluated_at: string;
-  lock_reason?: string;
   fallback_used: boolean;
   message?: string;
   reason?: string;
+  decision: EvaluateSessionDecision;
   request?: Record<string, unknown>;
   response?: Record<string, unknown>;
   moderation?: Record<string, unknown>;
-  snapshot: DemoQuotaSnapshot;
   rate_limit: RateLimitSnapshot;
 };

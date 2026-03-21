@@ -37,25 +37,33 @@ GP-115 uses a small Edge-function bundle:
 
 | Status | When | Body pieces |
 | --- | --- | --- |
-| `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, mirrored `snapshot`, plus persisted audit payloads |
+| `200` | Attempt succeeded or deterministic fallback produced | `session_id`, `attempt_id`, `state`, `payload_version`, canonical `decision`, `request`, `response`, `moderation`, `rate_limit`, `fallback_used=false` unless fallback executed |
 | `400` | Invalid JSON/body shape or unsupported `attempt_index` | `error="invalid_body"` plus validation details |
-| `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted decision + audit payload with `reason="duplicate_attempt"` |
-| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `allow_another_demo=false`, `reason="rate_limited"` |
+| `409` | Duplicate (`device_id`, `attempt_index`) | Returns persisted attempt payload plus canonical `decision`, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
+| `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `decision.outcome="deny"`, `fallback_used=true`, `reason="rate_limited"`, `rate_limit.allowed=false` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
 
-Example success body:
+The canonical response contract includes:
 
 ```jsonc
 {
-  "allow_another_demo": true,
-  "attempts_used": 1,
-  "evaluated_at": "2026-03-14T12:00:00.000Z",
-  "snapshot": {
-    "attempts_used": 1,
-    "active_attempt_index": null,
-    "last_decision": { "type": "allow", "ts": "2026-03-14T12:00:00.000Z" },
-    "server_lock_reason": null,
-    "last_sync_at": "2026-03-14T12:00:00.000Z"
+  "correlation_id": "uuid",
+  "state": "COMPLETED",
+  "payload_version": "v1",
+  "fallback_used": false,
+  "decision": {
+    "outcome": "allow",
+    "message": null
+  },
+  "request": { "...": "..." },
+  "response": { "...": "..." },
+  "moderation": { "...": "..." },
+  "rate_limit": {
+    "allowed": true,
+    "attempt_count": 1,
+    "window_start": "2026-03-21T09:00:00Z",
+    "limit": 3,
+    "window_seconds": 3600
   }
 }
 ```
@@ -147,7 +155,7 @@ Example success body:
 
    Both requests should return `400` with `error="invalid_body"` and should not write new attempt or snapshot state.
 
-9. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
+9. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `decision.outcome="deny"`.
 
    ```bash
    for i in 1 2 3 4; do

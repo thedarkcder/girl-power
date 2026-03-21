@@ -21,8 +21,8 @@
    - GirlPowerApp cold start → coordinator.prepareForDemoStart(); hydrates local state from Supabase mirror/log repo before showing CTA when the same keychain-backed identity is still present.
 7. Domain term contracts:
    - demo attempt = full Squat Coaching flow; counted even if crash after logging start.
-   - device_id = keychain-backed UUID generated and persisted on-device; server snapshots are keyed by that identifier but do not claim reinstall-safe recovery.
-   - allowAnotherDemo = boolean from evaluate-session that can only open second attempt when attemptsUsed==1; persisted decision prevents re-evaluation.
+   - device_id = keychain-backed UUID generated and persisted on-device; server snapshot state is keyed by that identifier and does not claim reinstall-safe recovery.
+   - decision = canonical evaluate-session response object; `decision.outcome = "allow"` is the only path that can open the second attempt when attemptsUsed==1, and the persisted decision prevents re-evaluation.
 8. Authorization & data-access contract:
    - Acting principal is device-level client using Supabase anon/service token scoped by tenant/project/device_id fields.
    - Edge Functions perform privileged writes with server-side keys, so client never handles LLM credentials.

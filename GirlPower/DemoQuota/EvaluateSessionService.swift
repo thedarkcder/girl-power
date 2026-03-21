@@ -19,6 +19,9 @@ enum DemoEvaluationError: Error {
 }
 
 final class EvaluateSessionService: DemoEvaluationServicing {
+    private static let payloadVersion = "v1"
+    private static let defaultPrompt = "Evaluate whether this device should unlock another free coaching demo."
+
     private let urlSession: URLSession
     private let endpoint: URL
     private let anonKey: String
@@ -37,77 +40,85 @@ final class EvaluateSessionService: DemoEvaluationServicing {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
 
-        let prompt = """
-        Evaluate whether device \(deviceID.uuidString) is eligible for exactly one additional free Girl Power coaching demo after attempt \(attemptIndex). Use the structured context for audit only and fail closed if quota or validation checks fail.
-        """
         let payload: [String: Any] = [
             "device_id": deviceID.uuidString,
             "attempt_index": attemptIndex,
-            "payload_version": "v1",
+            "payload_version": Self.payloadVersion,
             "input": [
-                "prompt": prompt,
-                "context": context
+                "prompt": Self.defaultPrompt,
+                "context": context,
             ],
-            "metadata": context
+            "metadata": context,
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: payload)
 
         do {
             let (data, response) = try await urlSession.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse,
-                  200..<300 ~= httpResponse.statusCode else {
+            guard let httpResponse = response as? HTTPURLResponse else {
                 throw DemoEvaluationError.invalidResponse
             }
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .custom { decoder in
-                let container = try decoder.singleValueContainer()
-                let value = try container.decode(String.self)
-                if let date = Self.timestampFormatter.date(from: value) ?? Self.fallbackTimestampFormatter.date(from: value) {
-                    return date
-                }
-                throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 timestamp")
-            }
-            let result = try decoder.decode(EvaluateResponse.self, from: data)
-            return EvaluationResult(
-                allowAnotherDemo: result.allowAnotherDemo,
-                message: result.message,
-                lockReason: result.lockReason,
-                attemptsUsed: result.attemptsUsed,
-                timestamp: result.evaluatedAt ?? Date()
-            )
+            return try parseEvaluationResult(data: data, statusCode: httpResponse.statusCode)
+        } catch let error as DemoEvaluationError {
+            throw error
         } catch let error as URLError {
             if error.code == .timedOut {
                 throw DemoEvaluationError.timeout
             }
             throw DemoEvaluationError.networkFailure
+        } catch {
+            throw DemoEvaluationError.invalidResponse
+        }
+    }
+
+    private func parseEvaluationResult(data: Data, statusCode: Int) throws -> EvaluationResult {
+        guard (200..<300).contains(statusCode) || statusCode == 409 || statusCode == 429 else {
+            throw DemoEvaluationError.invalidResponse
+        }
+
+        let result = try JSONDecoder().decode(EvaluateResponse.self, from: data)
+        let now = Date()
+
+        switch result.decision.outcome {
+        case .allow:
+            return EvaluationResult(
+                allowAnotherDemo: true,
+                message: nil,
+                lockReason: nil,
+                attemptsUsed: 1,
+                timestamp: now
+            )
+        case .deny:
+            return EvaluationResult(
+                allowAnotherDemo: false,
+                message: result.decision.message,
+                lockReason: result.decision.lockReason,
+                attemptsUsed: 1,
+                timestamp: now
+            )
+        case .timeout:
+            throw DemoEvaluationError.timeout
         }
     }
 
     private struct EvaluateResponse: Decodable {
-        let allowAnotherDemo: Bool
+        let decision: Decision
+    }
+
+    private struct Decision: Decodable {
+        let outcome: Outcome
         let message: String?
         let lockReason: String?
-        let attemptsUsed: Int
-        let evaluatedAt: Date?
 
         enum CodingKeys: String, CodingKey {
-            case allowAnotherDemo = "allow_another_demo"
+            case outcome
             case message
             case lockReason = "lock_reason"
-            case attemptsUsed = "attempts_used"
-            case evaluatedAt = "evaluated_at"
         }
     }
 
-    private static let timestampFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    private static let fallbackTimestampFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
+    private enum Outcome: String, Decodable {
+        case allow
+        case deny
+        case timeout
+    }
 }

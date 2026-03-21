@@ -18,6 +18,19 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>$(SUPABASE_APPLE_SERVICE_ID)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>$(SUPABASE_CALLBACK_SCHEME)</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
@@ -28,5 +41,15 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera access is required to analyze your squat form and provide coaching feedback.</string>
+	<key>SupabaseAnonKey</key>
+	<string>$(SUPABASE_ANON_KEY)</string>
+	<key>SupabaseAppleServiceID</key>
+	<string>$(SUPABASE_APPLE_SERVICE_ID)</string>
+	<key>SupabaseAuthRedirectURL</key>
+	<string>$(SUPABASE_AUTH_REDIRECT_URL)</string>
+	<key>SupabaseCallbackScheme</key>
+	<string>$(SUPABASE_CALLBACK_SCHEME)</string>
+	<key>SupabaseProjectURL</key>
+	<string>$(SUPABASE_PROJECT_URL)</string>
 </dict>
 </plist>

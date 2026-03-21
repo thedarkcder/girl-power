@@ -35,7 +35,7 @@ type DependencyCallCounts = {
   llmGenerateCalls: number;
 };
 
-Deno.test('evaluate-session returns allowAnotherDemo when attempt #1 completed and quota is open', async () => {
+Deno.test('evaluate-session returns canonical allow decision when attempt #1 completed and quota is open', async () => {
   const harness = makeDependencies({
     attemptLog: completedAttemptLog(),
     llmResult: {
@@ -57,12 +57,11 @@ Deno.test('evaluate-session returns allowAnotherDemo when attempt #1 completed a
   const body = await response.json();
 
   assertEquals(response.status, 200);
-  assertEquals(body.allow_another_demo, true);
-  assertEquals(body.attempts_used, 1);
-  assertEquals(body.snapshot.last_decision.type, 'allow');
+  assertEquals(body.decision, { outcome: 'allow' });
+  assertEquals(body.fallback_used, false);
 });
 
-Deno.test('evaluate-session returns 409 duplicate response when the attempt was already evaluated', async () => {
+Deno.test('evaluate-session returns 409 duplicate response with the persisted canonical decision', async () => {
   const harness = makeDependencies({
     duplicateAttempt: {
       id: 'attempt-1',
@@ -97,8 +96,8 @@ Deno.test('evaluate-session returns 409 duplicate response when the attempt was 
   const body = await response.json();
 
   assertEquals(response.status, 409);
-  assertEquals(body.allow_another_demo, true);
   assertEquals(body.reason, 'duplicate_attempt');
+  assertEquals(body.decision, { outcome: 'allow' });
 });
 
 Deno.test('evaluate-session fails closed when the LLM decision path times out', async () => {
@@ -120,8 +119,11 @@ Deno.test('evaluate-session fails closed when the LLM decision path times out', 
   const body = await response.json();
 
   assertEquals(response.status, 200);
-  assertEquals(body.allow_another_demo, false);
-  assertEquals(body.lock_reason, 'evaluation_timeout');
+  assertEquals(body.decision, {
+    outcome: 'timeout',
+    message: 'Eligibility check timed out. Please retry.',
+    lock_reason: 'evaluation_timeout',
+  });
   assertEquals(body.fallback_used, true);
 });
 
@@ -173,7 +175,13 @@ function makeDependencies(overrides: DependencyOverrides) {
       rateLimiter: {
         evaluate: () => {
           calls.rateLimitEvaluations += 1;
-          return Promise.resolve({ allowed: true, attempt_count: 1, window_start: '2026-03-14T00:00:00.000Z', limit: 3, window_seconds: 60 });
+          return Promise.resolve({
+            allowed: true,
+            attempt_count: 1,
+            window_start: '2026-03-14T00:00:00.000Z',
+            limit: 3,
+            window_seconds: 60,
+          });
         },
       },
       sessionRepository: {
@@ -260,8 +268,8 @@ function completedAttemptLog(): DemoQuotaAttemptLog {
     id: 'log-1',
     device_id: 'device-1',
     attempt_index: 1,
-    start_metadata: {},
-    completion_metadata: { reps: 8 },
+    start_metadata: { source: 'test' },
+    completion_metadata: { source: 'test' },
     started_at: '2026-03-14T00:00:00.000Z',
     completed_at: '2026-03-14T00:00:10.000Z',
     created_at: '2026-03-14T00:00:00.000Z',

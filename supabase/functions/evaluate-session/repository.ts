@@ -6,6 +6,7 @@ import type {
   PersistEvaluateSessionResult,
   PersistedAttempt,
 } from './types.ts';
+import { buildRequestPayload } from './contract.ts';
 
 export class SessionRepository {
   constructor(
@@ -60,12 +61,4 @@ export class SessionRepository {
 
     return data;
   }
-}
-
-function buildRequestPayload(request: EvaluateSessionRequest): Record<string, unknown> {
-  return {
-    input: request.input,
-    metadata: request.metadata ?? {},
-    attempt_index: request.attempt_index,
-  };
 }

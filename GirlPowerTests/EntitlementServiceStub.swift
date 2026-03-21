@@ -33,3 +33,72 @@ final class EntitlementServiceStub: ObservableObject, EntitlementServicing {
         continuation.yield(newState)
     }
 }
+
+@MainActor
+final class AuthServiceStub: ObservableObject, AuthServicing {
+    @Published private(set) var state: AuthState
+
+    var ensuredSession: AuthSession?
+    var pendingAnonymousSessionID: UUID?
+    private let stream: AsyncStream<AuthState>
+    private let continuation: AsyncStream<AuthState>.Continuation
+
+    init(initialState: AuthState = .anonymousEligible) {
+        self.state = initialState
+        var captured: AsyncStream<AuthState>.Continuation!
+        self.stream = AsyncStream { continuation in
+            captured = continuation
+            continuation.yield(initialState)
+        }
+        self.continuation = captured
+    }
+
+    func observeStates() -> AsyncStream<AuthState> { stream }
+    func restoreSession() async {}
+    func handleAppDidBecomeActive() async {}
+
+    func requireAuthentication(context: AuthRequirementContext, message: String) async {
+        send(.authRequired(context: context, message: message))
+    }
+
+    func dismissFailure() async {
+        send(.anonymousEligible)
+    }
+
+    func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? {
+        if let ensuredSession {
+            send(.authenticated(ensuredSession))
+            return ensuredSession
+        }
+        send(.authRequired(context: context, message: context.defaultMessage))
+        return nil
+    }
+
+    func signIn(email: String, password: String, context: AuthRequirementContext) async {
+        guard let ensuredSession else { return }
+        send(.authenticated(ensuredSession))
+    }
+
+    func signUp(email: String, password: String, context: AuthRequirementContext) async {
+        guard let ensuredSession else { return }
+        send(.authenticated(ensuredSession))
+    }
+
+    func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async {
+        guard let ensuredSession else { return }
+        send(.authenticated(ensuredSession))
+    }
+
+    func signOut() async {
+        send(.anonymousEligible)
+    }
+
+    func beginAnonymousSessionIfNeeded() -> UUID? {
+        pendingAnonymousSessionID
+    }
+
+    func send(_ newState: AuthState) {
+        state = newState
+        continuation.yield(newState)
+    }
+}

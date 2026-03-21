@@ -195,10 +195,19 @@ final class DemoQuotaViewModelBindingTests: XCTestCase {
     func testButtonTitleSwitchesToOneMoreGoWhenEligible() async throws {
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
         let repository = InMemoryOnboardingRepository(hasCompleted: true)
+        let session = AuthSession(
+            accessToken: "token",
+            refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let auth = AuthServiceStub(initialState: .authenticated(session))
+        auth.ensuredSession = session
         let viewModel = AppFlowViewModel(
             repository: repository,
             demoQuotaCoordinator: coordinator,
-            entitlementService: EntitlementServiceStub()
+            entitlementService: EntitlementServiceStub(),
+            authService: auth
         )
 
         let expectation = expectation(description: "second attempt eligible")
