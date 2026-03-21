@@ -8,11 +8,11 @@ final class PaywallViewModel: ObservableObject {
     let termsURL: URL
     let featureBullets: [String]
 
-    private let entitlementService: EntitlementServicing
+    private let entitlementService: any EntitlementServicing
     private var stateTask: Task<Void, Never>?
 
     init(
-        entitlementService: EntitlementServicing,
+        entitlementService: any EntitlementServicing,
         privacyURL: URL = URL(string: "https://girlpower.ai/privacy")!,
         termsURL: URL = URL(string: "https://girlpower.ai/terms")!,
         featureBullets: [String] = [

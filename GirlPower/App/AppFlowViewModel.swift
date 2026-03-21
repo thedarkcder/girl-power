@@ -1,3 +1,4 @@
+import AuthenticationServices
 import OSLog
 import SwiftUI
 
@@ -14,10 +15,15 @@ final class AppFlowViewModel: ObservableObject {
     @Published private(set) var summaryViewModel: SquatPostSetSummaryViewModel?
     @Published private(set) var entitlementState: EntitlementState
     @Published private(set) var isProUser: Bool
+    @Published private(set) var authState: AuthState
+    @Published var authPrompt: AuthPrompt?
 
     var demoButtonTitle: String {
         if isProUser {
             return "Start Coaching"
+        }
+        if demoQuotaState == .secondAttemptEligible && authState.isAuthenticated == false {
+            return "Sign in to continue"
         }
         switch (demoQuotaState, state) {
         case (.gatePending, _):
@@ -33,6 +39,9 @@ final class AppFlowViewModel: ObservableObject {
         if isProUser {
             return false
         }
+        if demoQuotaState == .secondAttemptEligible && authState.isAuthenticated == false {
+            return false
+        }
         return demoQuotaState.isLocked || demoQuotaState == .gatePending
     }
 
@@ -43,6 +52,9 @@ final class AppFlowViewModel: ObservableObject {
     var demoStatusMessage: String? {
         if isProUser {
             return "Unlimited coaching unlocked."
+        }
+        if demoQuotaState == .secondAttemptEligible && authState.isAuthenticated == false {
+            return AuthRequirementContext.secondDemo.defaultMessage
         }
         switch demoQuotaState {
         case .gatePending:
@@ -59,31 +71,50 @@ final class AppFlowViewModel: ObservableObject {
         slides.indices.last
     }
 
-    var paywallEntitlementService: EntitlementServicing {
+    var paywallEntitlementService: any EntitlementServicing {
         entitlementService
+    }
+
+    var isAuthBusy: Bool {
+        switch authState {
+        case .authenticating, .refreshing:
+            return true
+        default:
+            return false
+        }
     }
 
     private let stateMachine: AppFlowStateMachine
     private let repository: OnboardingCompletionRepository
     private let demoQuotaCoordinator: DemoQuotaCoordinating
-    private let entitlementService: EntitlementServicing
-    private let paywallRouter: PaywallRouting
+    private let entitlementService: any EntitlementServicing
+    private let authService: any AuthServicing
     private var stateTask: Task<Void, Never>?
     private var entitlementTask: Task<Void, Never>?
+    private var authTask: Task<Void, Never>?
     private var currentAttemptIndex: Int = 1
+    private var activeAnonymousSessionID: UUID?
+    private var pendingProtectedAction: ProtectedAction?
+    private var appleSignInNonce: String?
     private let logger = Logger(subsystem: "com.girlpower.app", category: "AppFlow")
+
+    private enum ProtectedAction {
+        case secondDemo(reason: String)
+        case paywall
+    }
 
     init(
         repository: OnboardingCompletionRepository,
         demoQuotaCoordinator: DemoQuotaCoordinating,
-        entitlementService: EntitlementServicing,
-        paywallRouter: PaywallRouting = PaywallRouter(),
+        entitlementService: any EntitlementServicing,
+        authService: (any AuthServicing)? = nil,
         slides: [OnboardingSlide] = OnboardingSlide.defaultSlides,
         stateMachine: AppFlowStateMachine? = nil
     ) {
         self.repository = repository
         self.demoQuotaCoordinator = demoQuotaCoordinator
         self.entitlementService = entitlementService
+        self.authService = authService ?? DisabledAuthService()
         self.slides = slides
         self.stateMachine = stateMachine ?? AppFlowStateMachine(
             slideCount: slides.count,
@@ -92,15 +123,17 @@ final class AppFlowViewModel: ObservableObject {
         self.state = self.stateMachine.initialState()
         self.entitlementState = entitlementService.state
         self.isProUser = entitlementService.isPro
-        self.paywallRouter = paywallRouter
+        self.authState = self.authService.state
         syncNavigation(for: state)
         observeDemoQuota()
         observeEntitlements()
+        observeAuth()
     }
 
     deinit {
         stateTask?.cancel()
         entitlementTask?.cancel()
+        authTask?.cancel()
     }
 
     func handleSplashFinished() {
@@ -127,34 +160,83 @@ final class AppFlowViewModel: ObservableObject {
         apply(event: .onboardingCompleted)
     }
 
+    func handleAppDidBecomeActive() {
+        Task {
+            await authService.handleAppDidBecomeActive()
+        }
+    }
+
     func startDemo(reason: String = "cta_tap") {
         if isProUser {
             startUnlimitedSession(reason: reason)
             return
         }
         guard isDemoButtonDisabled == false else { return }
-        summaryViewModel = nil
-        let metadata: [String: Any] = [
-            "reason": reason,
-            "cta_label": demoButtonTitle,
-            "timestamp": isoFormatter.string(from: Date())
-        ]
+        if demoQuotaState == .secondAttemptEligible {
+            executeProtectedAction(
+                .secondDemo(reason: reason),
+                context: .secondDemo,
+                onAuthorized: { viewModel in
+                    viewModel.startTrackedDemo(reason: reason)
+                }
+            )
+            return
+        }
+        startTrackedDemo(reason: reason)
+    }
+
+    func dismissAuthPrompt() {
+        guard authStateIsBusy(authService.state) == false else { return }
+        authPrompt = nil
+        pendingProtectedAction = nil
+    }
+
+    func submitEmailSignIn(email: String, password: String) {
+        let context = authPrompt?.context ?? .retry
         Task {
-            let newState = try? await demoQuotaCoordinator.markAttemptStarted(startMetadata: metadata)
-            await MainActor.run {
-                if let startState = newState {
-                    switch startState {
-                    case .firstAttemptActive:
-                        self.currentAttemptIndex = 1
-                    case .secondAttemptActive:
-                        self.currentAttemptIndex = 2
-                    default:
-                        break
-                    }
+            await authService.signIn(email: email, password: password, context: context)
+        }
+    }
+
+    func submitEmailSignUp(email: String, password: String) {
+        let context = authPrompt?.context ?? .retry
+        Task {
+            await authService.signUp(email: email, password: password, context: context)
+        }
+    }
+
+    func prepareAppleSignIn(request: ASAuthorizationAppleIDRequest) {
+        let nonce = AppleSignInNonce.makeRawNonce()
+        appleSignInNonce = nonce
+        request.requestedScopes = [.fullName, .email]
+        request.nonce = AppleSignInNonce.sha256(nonce)
+    }
+
+    func completeAppleSignIn(result: Result<ASAuthorization, Error>) {
+        let context = authPrompt?.context ?? .retry
+        switch result {
+        case .success(let authorization):
+            guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+                  let tokenData = credential.identityToken,
+                  let identityToken = String(data: tokenData, encoding: .utf8),
+                  let nonce = appleSignInNonce else {
+                Task {
+                    await authService.requireAuthentication(
+                        context: context,
+                        message: "Apple Sign In did not return a valid credential."
+                    )
                 }
-                if newState != nil {
-                    apply(event: .startDemo)
-                }
+                return
+            }
+            Task {
+                await authService.signInWithApple(identityToken: identityToken, nonce: nonce, context: context)
+            }
+        case .failure:
+            Task {
+                await authService.requireAuthentication(
+                    context: context,
+                    message: "Apple Sign In was cancelled before Supabase could create a session."
+                )
             }
         }
     }
@@ -173,6 +255,7 @@ final class AppFlowViewModel: ObservableObject {
         Task {
             _ = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
             await MainActor.run {
+                self.activeAnonymousSessionID = nil
                 apply(event: .finishDemo)
             }
         }
@@ -186,7 +269,7 @@ final class AppFlowViewModel: ObservableObject {
         } else {
             let metadata = summaryMetadata(from: input)
             let newState = await demoQuotaCoordinator.markAttemptCompleted(resultMetadata: metadata)
-            resolvedState = newState ?? demoQuotaState
+            resolvedState = newState
             demoQuotaState = resolvedState
         }
         currentAttemptIndex = min(summary.attemptIndex + 1, 2)
@@ -221,16 +304,13 @@ final class AppFlowViewModel: ObservableObject {
             logger.notice("Skipping paywall routing because entitlement already unlocked")
             return
         }
-        guard state != .paywall else {
-            logger.notice("Ignoring duplicate paywall navigation request while already presenting")
-            return
-        }
-        navigationPath = NavigationPath()
-        let attemptIndex = summaryViewModel?.context.summary.attemptIndex ?? currentAttemptIndex
-        summaryViewModel = nil
-        paywallRouter.presentPaywall()
-        apply(event: .showPaywall)
-        currentAttemptIndex = min(attemptIndex + 1, 2)
+        executeProtectedAction(
+            .paywall,
+            context: .paywall,
+            onAuthorized: { viewModel in
+                viewModel.presentPaywall()
+            }
+        )
     }
 
     private func handleSlideIndexChange(to index: Int) {
@@ -298,6 +378,25 @@ final class AppFlowViewModel: ObservableObject {
         }
     }
 
+    private func observeAuth() {
+        authTask = Task {
+            let stream = authService.observeStates()
+            for await newState in stream {
+                await MainActor.run {
+                    authState = newState
+                    if case .authenticated = newState {
+                        authPrompt = nil
+                        resumePendingProtectedActionIfNeeded()
+                    } else if case .authRequired(let context, let message) = newState {
+                        authPrompt = AuthPrompt(context: context, message: message)
+                    } else if case .authFailed(let context, let message, _) = newState {
+                        authPrompt = AuthPrompt(context: context, message: message)
+                    }
+                }
+            }
+        }
+    }
+
     private func handleProUnlocked() {
         logger.log("Entitlement unlocked; dismissing paywall if needed")
         if state == .paywall {
@@ -349,7 +448,7 @@ final class AppFlowViewModel: ObservableObject {
             "tempo_samples": input.snapshot.tempoSamples,
             "coaching_corrections": corrections,
             "generated_at": isoFormatter.string(from: input.generatedAt)
-        ]
+        ].merging(anonymousSessionMetadata()) { current, _ in current }
     }
 
     private let isoFormatter: ISO8601DateFormatter = {
@@ -358,11 +457,114 @@ final class AppFlowViewModel: ObservableObject {
         return formatter
     }()
 
+    private func startTrackedDemo(reason: String) {
+        summaryViewModel = nil
+        let anonymousSessionID = authService.beginAnonymousSessionIfNeeded()
+        activeAnonymousSessionID = anonymousSessionID
+        var metadata: [String: Any] = [
+            "reason": reason,
+            "cta_label": demoButtonTitle,
+            "timestamp": isoFormatter.string(from: Date())
+        ]
+        if let anonymousSessionID {
+            metadata["anon_session_id"] = anonymousSessionID.uuidString
+        }
+        Task {
+            let newState = try? await demoQuotaCoordinator.markAttemptStarted(startMetadata: metadata)
+            await MainActor.run {
+                if let startState = newState {
+                    switch startState {
+                    case .firstAttemptActive:
+                        self.currentAttemptIndex = 1
+                    case .secondAttemptActive:
+                        self.currentAttemptIndex = 2
+                    default:
+                        break
+                    }
+                }
+                if newState != nil {
+                    apply(event: .startDemo)
+                }
+            }
+        }
+    }
+
+    private func anonymousSessionMetadata() -> [String: Any] {
+        guard let activeAnonymousSessionID else { return [:] }
+        return ["anon_session_id": activeAnonymousSessionID.uuidString]
+    }
+
+    private func presentAuthPrompt(context: AuthRequirementContext, message: String) {
+        authPrompt = AuthPrompt(context: context, message: message)
+    }
+
+    private func promptMessage(for context: AuthRequirementContext) -> String {
+        switch authState {
+        case .authRequired(let promptContext, let message) where promptContext == context:
+            return message
+        case .authFailed(let promptContext, let message, _) where promptContext == context:
+            return message
+        default:
+            return context.defaultMessage
+        }
+    }
+
+    private func executeProtectedAction(
+        _ protectedAction: ProtectedAction,
+        context: AuthRequirementContext,
+        onAuthorized: @escaping @MainActor (AppFlowViewModel) -> Void
+    ) {
+        Task {
+            guard await authService.ensureValidSession(for: context) != nil else {
+                await MainActor.run {
+                    self.pendingProtectedAction = protectedAction
+                    self.presentAuthPrompt(context: context, message: self.promptMessage(for: context))
+                }
+                return
+            }
+            await MainActor.run {
+                onAuthorized(self)
+            }
+        }
+    }
+
+    private func resumePendingProtectedActionIfNeeded() {
+        guard let action = pendingProtectedAction else { return }
+        pendingProtectedAction = nil
+        switch action {
+        case .secondDemo(let reason):
+            startTrackedDemo(reason: reason)
+        case .paywall:
+            presentPaywall()
+        }
+    }
+
+    private func presentPaywall() {
+        guard state != .paywall else {
+            logger.notice("Ignoring duplicate paywall navigation request while already presenting")
+            return
+        }
+        navigationPath = NavigationPath()
+        let attemptIndex = summaryViewModel?.context.summary.attemptIndex ?? currentAttemptIndex
+        summaryViewModel = nil
+        apply(event: .showPaywall)
+        currentAttemptIndex = min(attemptIndex + 1, 2)
+    }
+
     private func logSummaryMismatch(
         _ message: String,
         attemptIndex: Int,
         quotaState: DemoQuotaStateMachine.State
     ) {
         logger.error("Summary CTA mismatch: \(message, privacy: .public) [attempt=\(attemptIndex, privacy: .public) state=\(String(describing: quotaState), privacy: .public)]")
+    }
+
+    private func authStateIsBusy(_ state: AuthState) -> Bool {
+        switch state {
+        case .authenticating, .refreshing:
+            return true
+        default:
+            return false
+        }
     }
 }

@@ -47,6 +47,8 @@
 		A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */; };
 		CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */; };
 		D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */; };
+		A1B2C3D4E5F60718293A4B50 /* AuthSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */; };
+		A1B2C3D4E5F60718293A4B52 /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */; };
 		B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34C2BB9E8B100B8B310 /* GirlPowerApp.swift */; };
 		B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34E2BB9E8B100B8B310 /* AppFlowStateMachine.swift */; };
 		B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3502BB9E8B100B8B310 /* AppFlowViewModel.swift */; };
@@ -64,13 +66,13 @@
 		E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */; };
 		18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */; };
 		5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */; };
-		2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */; };
 		B1C9B3602BB9E8B100B8B310 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */; };
 		B1C9B3632BB9E8B100B8B310 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */; };
 		B1C9B3662BB9E8B100B8B310 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */; };
 		B1C9B36E2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B36D2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift */; };
 		B1C9B3712BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3702BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift */; };
 		B1C9B3742BB9E8B100B8B310 /* GirlPowerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3732BB9E8B100B8B310 /* GirlPowerUITests.swift */; };
+		A1B2C3D4E5F60718293A4B54 /* AuthSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B55 /* AuthSystemTests.swift */; };
 		E3F4C0A21F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */; };
 		E3F4C0A41F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */; };
 		E3F4C0A61F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */; };
@@ -133,6 +135,8 @@
 		9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDemoQuotaSnapshotSync.swift; sourceTree = "<group>"; };
 		33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDeviceIdentityMirror.swift; sourceTree = "<group>"; };
 		95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSessionLogger.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSystem.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
 		8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaStateMachineTests.swift; sourceTree = "<group>"; };
 		F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinatorTests.swift; sourceTree = "<group>"; };
 		B1C9B3052BB9E8AB00B8B310 /* GirlPower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GirlPower.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -149,12 +153,12 @@
 		B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAttemptFlowView.swift; sourceTree = "<group>"; };
 		6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryViewModel.swift; sourceTree = "<group>"; };
 		4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryView.swift; sourceTree = "<group>"; };
-		5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSummaryNavigation.swift; sourceTree = "<group>"; };
 		B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B1C9B3682BB9E8B100B8B310 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1C9B36D2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFlowStateMachineTests.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F60718293A4B55 /* AuthSystemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSystemTests.swift; sourceTree = "<group>"; };
 		B1C9B3702BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingCompletionRepositoryTests.swift; sourceTree = "<group>"; };
 		B1C9B3722BB9E8B100B8B310 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B1C9B3732BB9E8B100B8B310 /* GirlPowerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GirlPowerUITests.swift; sourceTree = "<group>"; };
@@ -247,6 +251,8 @@
 				B1C9B34C2BB9E8B100B8B310 /* GirlPowerApp.swift */,
 				B1C9B34E2BB9E8B100B8B310 /* AppFlowStateMachine.swift */,
 				B1C9B3502BB9E8B100B8B310 /* AppFlowViewModel.swift */,
+				A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */,
+				A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */,
 				B1C9B3522BB9E8B100B8B310 /* OnboardingSlide.swift */,
 				B1C9B3542BB9E8B100B8B310 /* OnboardingCompletionRepository.swift */,
 			);
@@ -339,7 +345,6 @@
 				B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */,
 				6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */,
 				4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */,
-				5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -374,6 +379,7 @@
 			children = (
 				8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */,
 				B1C9B36D2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift */,
+				A1B2C3D4E5F60718293A4B55 /* AuthSystemTests.swift */,
 				B1C9B3702BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift */,
 				F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */,
 				6F1343B0C8BD448BACBC6E2381A18EA4 /* SquatSessionStateMachineTests.swift */,
@@ -572,6 +578,8 @@
 				B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */,
 				B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */,
 				B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */,
+				A1B2C3D4E5F60718293A4B50 /* AuthSystem.swift in Sources */,
+				A1B2C3D4E5F60718293A4B52 /* AuthGateView.swift in Sources */,
 				B1C9B3552BB9E8B100B8B310 /* OnboardingCompletionRepository.swift in Sources */,
 				B1C9B3532BB9E8B100B8B310 /* OnboardingSlide.swift in Sources */,
 				B1C9B3572BB9E8B100B8B310 /* SplashView.swift in Sources */,
@@ -586,7 +594,6 @@
 				E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */,
 				18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */,
 				5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */,
-				2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */,
 				A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */,
 				CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */,
 				D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */,
@@ -599,6 +606,7 @@
 			files = (
 				B1C9B3712BB9E8B100B8B310 /* OnboardingCompletionRepositoryTests.swift in Sources */,
 				84D179FD71174F79B9122E09 /* DemoQuotaStateMachineTests.swift in Sources */,
+				A1B2C3D4E5F60718293A4B54 /* AuthSystemTests.swift in Sources */,
 				3F1E1E0CE56C45809A00D66C /* DemoQuotaCoordinatorTests.swift in Sources */,
 				B1C9B36E2BB9E8B100B8B310 /* AppFlowStateMachineTests.swift in Sources */,
 				69A937D9C9E6441D8941163993485F5C /* SquatSessionStateMachineTests.swift in Sources */,
@@ -754,6 +762,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"GirlPower/Preview Content\"";
 				DEVELOPMENT_TEAM = VKRTFP5C3W;
@@ -764,8 +773,13 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.stage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPABASE_ANON_KEY = sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl;
+				SUPABASE_APPLE_SERVICE_ID = com.route25.girlpower.stage.auth;
+				SUPABASE_AUTH_REDIRECT_URL = "girlpower-stage://auth/callback";
+				SUPABASE_CALLBACK_SCHEME = girlpower-stage;
+				SUPABASE_PROJECT_URL = "https://ktgapnamhpdbmhhgydnl.supabase.co";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -776,6 +790,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"GirlPower/Preview Content\"";
 				DEVELOPMENT_TEAM = VKRTFP5C3W;
@@ -786,8 +801,13 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPABASE_ANON_KEY = sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl;
+				SUPABASE_APPLE_SERVICE_ID = com.route25.girlpower.auth;
+				SUPABASE_AUTH_REDIRECT_URL = "girlpower://auth/callback";
+				SUPABASE_CALLBACK_SCHEME = girlpower;
+				SUPABASE_PROJECT_URL = "https://ktgapnamhpdbmhhgydnl.supabase.co";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -807,7 +827,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPowerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -828,7 +848,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPowerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -848,7 +868,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPowerUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -868,7 +888,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPowerUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;

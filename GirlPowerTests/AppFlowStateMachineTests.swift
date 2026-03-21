@@ -79,6 +79,11 @@ final class AppFlowStateMachineTests: XCTestCase {
         let next = stateMachine.transition(from: .sessionSummary, event: .showPaywall)
         XCTAssertEqual(next, .paywall)
     }
+
+    func testCTAShowPaywallRoutesToPaywall() {
+        let next = stateMachine.transition(from: .demoCTA, event: .showPaywall)
+        XCTAssertEqual(next, .paywall)
+    }
 }
 
 @MainActor
@@ -223,12 +228,13 @@ final class AppFlowViewModelTests: XCTestCase {
     func testContinueToPaywallClearsSummaryAndRoutes() async {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
-        let router = PaywallRouterSpy()
+        let auth = AuthServiceStub(initialState: .authenticated(.fixture))
+        auth.ensuredSession = .fixture
         let viewModel = AppFlowViewModel(
             repository: repository,
             demoQuotaCoordinator: coordinator,
             entitlementService: EntitlementServiceStub(),
-            paywallRouter: router
+            authService: auth
         )
 
         viewModel.handleSplashFinished()
@@ -242,10 +248,10 @@ final class AppFlowViewModelTests: XCTestCase {
 
         viewModel.continueToPaywall()
 
+        await waitForCondition { viewModel.state == .paywall }
         XCTAssertNil(viewModel.summaryViewModel)
         XCTAssertEqual(viewModel.state, .paywall)
         XCTAssertEqual(viewModel.navigationPath.count, 1)
-        XCTAssertEqual(router.presentCallCount, 1)
     }
 
     private func makeSummary(attemptIndex: Int) -> SessionSummary {
@@ -258,6 +264,46 @@ final class AppFlowViewModelTests: XCTestCase {
             duration: 15,
             generatedAt: Date()
         )
+    }
+
+    private func waitForCondition(
+        timeout: TimeInterval = 1.0,
+        condition: @escaping () -> Bool
+    ) async {
+        let conditionExpectation = expectation(description: "condition met")
+        let monitor = Task {
+            while !condition() {
+                await Task.yield()
+            }
+            conditionExpectation.fulfill()
+        }
+        await fulfillment(of: [conditionExpectation], timeout: timeout)
+        monitor.cancel()
+    }
+}
+
+@MainActor
+final class AppStartupWorkTests: XCTestCase {
+    func testBootstrapLoadsEntitlementsWithoutWaitingForAuthRestore() async {
+        let authService = BlockingStartupAuthService()
+        let entitlementService = StartupEntitlementServiceSpy()
+
+        let bootstrapTask = Task {
+            await AppStartupWork.bootstrap(
+                authService: authService,
+                entitlementService: entitlementService
+            )
+        }
+
+        await waitForCondition {
+            authService.didStartRestore && entitlementService.loadCallCount == 1
+        }
+
+        XCTAssertEqual(authService.restoreCallCount, 1)
+        XCTAssertEqual(entitlementService.loadCallCount, 1)
+
+        authService.resumeRestore()
+        await bootstrapTask.value
     }
 
     private func waitForCondition(
@@ -294,10 +340,73 @@ private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepo
     }
 }
 
-private final class PaywallRouterSpy: PaywallRouting {
-    private(set) var presentCallCount = 0
+private extension AuthSession {
+    static var fixture: AuthSession {
+        AuthSession(
+            accessToken: "token",
+            refreshToken: "refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+    }
+}
 
-    func presentPaywall() {
-        presentCallCount += 1
+@MainActor
+private final class BlockingStartupAuthService: ObservableObject, AuthServicing {
+    @Published private(set) var state: AuthState = .anonymousEligible
+
+    private var restoreContinuation: CheckedContinuation<Void, Never>?
+    private(set) var restoreCallCount = 0
+    private(set) var didStartRestore = false
+
+    func observeStates() -> AsyncStream<AuthState> {
+        AsyncStream { continuation in
+            continuation.yield(state)
+            continuation.finish()
+        }
+    }
+
+    func restoreSession() async {
+        restoreCallCount += 1
+        didStartRestore = true
+        await withCheckedContinuation { continuation in
+            restoreContinuation = continuation
+        }
+    }
+
+    func resumeRestore() {
+        restoreContinuation?.resume()
+        restoreContinuation = nil
+    }
+
+    func handleAppDidBecomeActive() async {}
+    func requireAuthentication(context: AuthRequirementContext, message: String) async {}
+    func dismissFailure() async {}
+    func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? { nil }
+    func signIn(email: String, password: String, context: AuthRequirementContext) async {}
+    func signUp(email: String, password: String, context: AuthRequirementContext) async {}
+    func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async {}
+    func signOut() async {}
+    func beginAnonymousSessionIfNeeded() -> UUID? { nil }
+}
+
+@MainActor
+private final class StartupEntitlementServiceSpy: ObservableObject, EntitlementServicing {
+    @Published var state: EntitlementState = .loading
+    var isPro: Bool = false
+    private(set) var loadCallCount = 0
+
+    func load() async {
+        loadCallCount += 1
+    }
+
+    func purchase() async {}
+    func restore() async {}
+
+    func observeStates() -> AsyncStream<EntitlementState> {
+        AsyncStream { continuation in
+            continuation.yield(state)
+            continuation.finish()
+        }
     }
 }

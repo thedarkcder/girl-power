@@ -3,7 +3,7 @@ import type { EvaluateSessionInput, LLMResult } from './types.ts';
 export class LLMProvider {
   constructor(private readonly model: string) {}
 
-  async generate(
+  generate(
     input: EvaluateSessionInput,
     opts: { signal?: AbortSignal } = {},
   ): Promise<LLMResult> {
@@ -27,7 +27,7 @@ export class LLMProvider {
     ];
     const summary = `Coach insight for prompt hash ${prompt.slice(0, 32)}`;
 
-    return {
+    return Promise.resolve({
       model: this.model,
       response: {
         summary,
@@ -38,6 +38,6 @@ export class LLMProvider {
         flagged: false,
         categories: [],
       },
-    };
+    });
   }
 }

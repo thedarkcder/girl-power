@@ -7,6 +7,8 @@ import { SessionRepository } from './repository.ts';
 import { LLMProvider } from './llm-provider.ts';
 import { transition, type EvaluateSessionState } from './state-machine.ts';
 import type { EvaluateSessionRequest, EvaluateSessionResponse, LLMResult, RateLimitSnapshot } from './types.ts';
+import { buildRequestPayload, parseEvaluateSessionRequest } from './contract.ts';
+import { buildDecision } from './decision.ts';
 
 const config = getRuntimeConfig();
 const supabase = createClient(config.supabaseUrl, config.serviceRoleKey, {
@@ -17,17 +19,6 @@ const logger = createLogger('evaluate-session');
 const rateLimiter = new RateLimiter(supabase, config);
 const repository = new SessionRepository(supabase, config);
 const llmProvider = new LLMProvider(config.llmModel);
-
-const RequestSchema = z.object({
-  device_id: z.string().min(1, 'device_id is required'),
-  attempt_index: z.number().int().nonnegative(),
-  payload_version: z.string().min(1).default('v1'),
-  input: z.object({
-    prompt: z.string().min(1, 'prompt is required'),
-    context: z.record(z.string(), z.any()).optional(),
-  }),
-  metadata: z.record(z.string(), z.any()).optional(),
-});
 
 class HttpError extends Error {
   constructor(public status: number, message: string) {
@@ -45,7 +36,7 @@ Deno.serve(async (req) => {
     }
 
     const request = await parseRequest(req);
-    const parsed = RequestSchema.parse(request) as EvaluateSessionRequest;
+    const parsed = parseEvaluateSessionRequest(request) as EvaluateSessionRequest;
     state = transition(state, { type: 'VALIDATION_SUCCEEDED' });
 
     const duplicate = await repository.findAttempt(parsed.device_id, parsed.attempt_index);
@@ -58,6 +49,7 @@ Deno.serve(async (req) => {
         payload_version: duplicate.payload_version,
         fallback_used: duplicate.fallback_used,
         reason: 'duplicate_attempt',
+        decision: buildDecision(duplicate.state as EvaluateSessionState, duplicate.reason),
         request: duplicate.request_payload,
         response: duplicate.llm_response,
         moderation: duplicate.moderation_payload,
@@ -125,6 +117,7 @@ Deno.serve(async (req) => {
         payload_version: persistResult.demo_attempt.payload_version,
         fallback_used: persistResult.demo_attempt.fallback_used,
         reason: 'duplicate_attempt',
+        decision: buildDecision(persistResult.demo_attempt.state as EvaluateSessionState, persistResult.demo_attempt.reason),
         request: persistResult.demo_attempt.request_payload,
         response: persistResult.demo_attempt.llm_response,
         moderation: persistResult.demo_attempt.moderation_payload,
@@ -152,6 +145,7 @@ Deno.serve(async (req) => {
       payload_version: parsed.payload_version,
       fallback_used: fallbackUsed,
       reason: failureReason,
+      decision: buildDecision(state, failureReason),
       request: persistResult.demo_attempt?.request_payload ?? buildRequestPayload(parsed),
       response: llmResult.response,
       moderation: llmResult.moderation,
@@ -181,7 +175,7 @@ Deno.serve(async (req) => {
 async function parseRequest(req: Request): Promise<unknown> {
   try {
     return await req.json();
-  } catch (error) {
+  } catch (_error) {
     throw new HttpError(400, 'Invalid JSON body');
   }
 }
@@ -196,7 +190,7 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   });
 }
 
-async function defaultRateLimitSnapshot(deviceId: string) {
+function defaultRateLimitSnapshot(deviceId: string) {
   return rateLimiter.evaluate(deviceId);
 }
 
@@ -211,6 +205,7 @@ function buildRateLimitedResponse(
     payload_version: request.payload_version,
     fallback_used: true,
     reason: 'rate_limited',
+    decision: buildDecision('RATE_LIMITED', 'rate_limited'),
     rate_limit: { ...snapshot, allowed: false },
   };
 }
@@ -225,13 +220,5 @@ function buildFallbackResponse(prompt: string, reason: string | undefined): LLMR
     },
     moderation: { flagged: false, categories: [] },
     reason,
-  };
-}
-
-function buildRequestPayload(request: EvaluateSessionRequest) {
-  return {
-    input: request.input,
-    metadata: request.metadata ?? {},
-    attempt_index: request.attempt_index,
   };
 }

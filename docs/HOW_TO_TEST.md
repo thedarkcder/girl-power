@@ -1,20 +1,22 @@
 # How to Test Girl Power App Flow
 
+Use the shared `GirlPower` scheme with the explicit simulator destination `platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro`. The shared scheme does not persist a simulator choice, so all `xcodebuild` examples below include the required `-destination` flag.
+
 1. Build the app target:
    ```sh
-   xcodebuild -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' build
+   xcodebuild -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' build
    ```
 2. Run targeted regression tests for the state machine invariants:
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:GirlPowerTests/AppFlowStateMachineTests
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' -only-testing:GirlPowerTests/AppFlowStateMachineTests
    ```
 3. Run demo quota unit tests:
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:GirlPowerTests/DemoQuotaCoordinatorTests
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' -only-testing:GirlPowerTests/DemoQuotaCoordinatorTests
    ```
 4. Run the full test suite (unit + UI tests):
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro'
    ```
 5. Launch the app on the simulator:
    - First launch should show the splash, onboarding carousel (three slides), CTA, then demo stub.
@@ -42,10 +44,10 @@
 3. Install/run the simulator build (clean install to exercise keychain provisioning). Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.
-   - Edge Function receives exactly one evaluate-session call with the device_id/metadata payload.
-4. When evaluate-session returns `allowAnotherDemo=true`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
+   - Edge Function receives exactly one evaluate-session call with the canonical `device_id`, `input.context`, and top-level `metadata` payload.
+4. When evaluate-session returns `decision.outcome = "allow"`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
 5. Force a deny/timeout path:
-   - Stop the `evaluate-session` function or have it return `{ allowAnotherDemo: false, message: "custom message" }`.
+   - Stop the `evaluate-session` function or have it return `{"decision":{"outcome":"deny","message":"custom message"}}`.
    - After attempt #1 completion the CTA should immediately show the deny/timeout copy and never present a second attempt.
 6. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
 7. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
@@ -58,7 +60,7 @@
 3. Simulate `.secondAttemptEligible` (allow response) and confirm the primary CTA switches to “One more go”, secondary CTA reads “Continue to Paywall”, and tapping One more go starts attempt #2 with a fresh SquatSessionCoordinator.
 4. Complete attempt #2 and confirm the summary only shows “Continue to Paywall” (no secondary button). Tapping it should clear the navigation stack and display the paywall placeholder without exposing any path back into SquatSessionView.
 5. Relaunch the app; ensure the summary cache is cleared, DemoCTA respects the locked quota state, and the user cannot start a third attempt.
-6. Force a denied/timeout path (e.g., return `{ allowAnotherDemo: false, message: "custom message" }` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
+6. Force a denied/timeout path (e.g., return `{"decision":{"outcome":"deny","message":"custom message"}}` from `evaluate-session`) and verify the summary immediately switches to the locked message with only the Continue to Paywall CTA available.
 7. During both flows, tail `supabase functions logs --function demo-session-log` (or watch Xcode os_log output) to ensure attempt start/completion and evaluation events emit exactly once; any duplication indicates a routing race that must be investigated.
 
 ## GP-117 StoreKit Paywall + Entitlements
@@ -70,7 +72,7 @@
    ```sh
    xcodebuild test \
      -scheme GirlPower \
-     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' \
      -only-testing:GirlPowerTests/EntitlementStateMachineTests \
      -only-testing:GirlPowerTests/PaywallViewModelTests \
      -only-testing:GirlPowerTests/AppFlowViewModelProTests
@@ -87,3 +89,48 @@
 6. Validate non-subscribed behavior:
    - Without a subscription, complete two demo attempts to confirm DemoQuota still locks at two and routes to the paywall.
    - Ensure tapping **Subscribe** while offline/error triggers the inline error banner but leaves buttons usable after hitting **Try again** or reloading.
+
+## GP-122 Auth Gate Regression
+
+1. Run the targeted auth/app-flow regressions:
+   ```sh
+   xcodebuild test \
+     -scheme GirlPower \
+     -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' \
+     -only-testing:GirlPowerTests/AuthSystemTests \
+     -only-testing:GirlPowerTests/AppFlowViewModelProTests
+   ```
+2. Verify the build-specific auth metadata resolves as expected:
+   ```sh
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
+   xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
+   ```
+   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, `girlpower-stage://auth/callback`, and `com.route25.girlpower.stage.auth`.
+   - Release should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
+   - Confirm the signed app target still reports `CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements`.
+3. Run the edge-function regression checks:
+   ```sh
+   cd supabase/functions
+   deno lint link-anonymous-session
+   deno test link-anonymous-session/linker.test.ts
+   ```
+4. Verify the local Supabase Apple configuration stays local-first:
+   ```sh
+   supabase start
+   supabase functions serve link-anonymous-session
+   supabase status | rg 'API URL|Studio URL'
+   rg -n 'enabled =|client_id|redirect_uri' supabase/config.toml
+   ```
+   - The committed config should keep `[auth.external.apple] enabled = false` so `supabase start` does not require `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET`.
+   - `client_id` should still be `com.route25.girlpower.stage.auth`.
+   - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
+   - For manual Apple Sign In verification only, export `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` and flip `enabled = true` in an uncommitted local change before restarting Supabase.
+5. Manual simulator regression for refresh + link behavior:
+   - Install a clean Debug build on the iPhone 15 Pro (iOS 17.0.1) simulator, complete the first anonymous demo, then trigger the protected second-demo or paywall path.
+   - Confirm the auth sheet appears until a real `.authenticated` state is reached; a refreshing cached session must not unlock the second demo or paywall early.
+   - If you force refresh failure (for example by invalidating the refresh token in Supabase), the prompt should remain blocked and show the re-auth message instead of continuing.
+   - After successful email/password or Apple sign-in, retry the protected action and confirm the app proceeds without creating duplicate anonymous-link rows on repeated attempts.
+6. Run the full app suite:
+   ```sh
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro'
+   ```
