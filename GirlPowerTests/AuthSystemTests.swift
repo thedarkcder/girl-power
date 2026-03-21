@@ -193,6 +193,42 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(result.message, "Free demo eligibility is temporarily rate limited. Try again shortly.")
     }
 
+    func testEvaluateSessionServiceMapsCanonicalDecisionFromDuplicateReplayResponse() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        URLProtocolStub.requestHandler = { _ in
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "reason": "duplicate_attempt",
+                      "decision": {
+                        "outcome": "deny",
+                        "message": "This device has already used its free demos.",
+                        "lock_reason": "quota"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 1,
+            context: [:]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertEqual(result.message, "This device has already used its free demos.")
+        XCTAssertEqual(result.lockReason, "quota")
+    }
+
     func testRestoreSessionAndForegroundRefreshShareSingleInFlightTask() async {
         let expired = AuthSession(
             accessToken: "expired-token",
