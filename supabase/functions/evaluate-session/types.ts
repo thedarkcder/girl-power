@@ -77,7 +77,7 @@ export type PersistedAttempt = {
   state: string;
   reason: string | null;
   fallback_used: boolean;
-  rate_limit_window_start: string | null;
+  rate_limit_payload: RateLimitSnapshot;
   created_at: string;
 };
 

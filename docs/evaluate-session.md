@@ -39,7 +39,7 @@ GP-115 uses a small Edge-function bundle:
 | --- | --- | --- |
 | `200` | Attempt succeeded or deterministic fallback produced | `session_id`, `attempt_id`, `state`, `payload_version`, canonical `decision`, `request`, `response`, `moderation`, `rate_limit`, `fallback_used=false` unless fallback executed |
 | `400` | Invalid JSON/body shape or unsupported `attempt_index` | `error="invalid_body"` plus validation details |
-| `409` | Duplicate (`device_id`, `attempt_index`) | Returns persisted attempt payload plus canonical `decision`, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
+| `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted attempt payload plus the original canonical `decision` and persisted `rate_limit` snapshot, `reason="duplicate_attempt"`, `fallback_used` reflects stored record |
 | `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `decision.outcome="deny"`, `fallback_used=true`, `reason="rate_limited"`, `rate_limit.allowed=false` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
 

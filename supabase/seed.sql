@@ -39,7 +39,7 @@ insert into public.demo_attempts (
   state,
   reason,
   fallback_used,
-  rate_limit_window_start
+  rate_limit_payload
 )
 select s.id,
        s.device_id,
@@ -51,6 +51,12 @@ select s.id,
        'COMPLETED',
        'seed data',
        false,
-       timezone('utc', now()) - interval '60 seconds'
+       jsonb_build_object(
+         'allowed', true,
+         'attempt_count', 1,
+         'window_start', timezone('utc', now()) - interval '60 seconds',
+         'limit', 3,
+         'window_seconds', 60
+       )
 from inserted_session s
 on conflict do nothing;
