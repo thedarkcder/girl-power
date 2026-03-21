@@ -106,12 +106,10 @@ final class AppFlowViewModelProTests: XCTestCase {
     func testPaywallCanProceedAfterAuthSuccess() async {
         let auth = AuthServiceStub(initialState: .anonymousEligible)
         let coordinator = DemoQuotaCoordinatorStub(initialState: .fresh)
-        let router = PaywallRouterSpy()
         let viewModel = makeViewModel(
             entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
             auth: auth,
-            coordinator: coordinator,
-            paywallRouter: router
+            coordinator: coordinator
         )
         let summary = SessionSummary(
             attemptIndex: 2,
@@ -135,12 +133,34 @@ final class AppFlowViewModelProTests: XCTestCase {
         auth.send(.authenticated(.fixture))
 
         await waitForCondition { viewModel.state == .paywall }
-        XCTAssertEqual(router.presentCallCount, 1)
+        XCTAssertEqual(viewModel.navigationPath.count, 1)
 
         auth.send(.authenticated(.fixture))
         await Task.yield()
 
-        XCTAssertEqual(router.presentCallCount, 1)
+        XCTAssertEqual(viewModel.state, .paywall)
+        XCTAssertEqual(viewModel.navigationPath.count, 1)
+    }
+
+    func testPendingPaywallFromCTAResumesToPaywallAfterAuthentication() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.state == .demoCTA }
+
+        viewModel.continueToPaywall()
+        await waitForCondition { viewModel.authPrompt?.context == .paywall }
+
+        auth.ensuredSession = .fixture
+        auth.send(.authenticated(.fixture))
+
+        await waitForCondition { viewModel.state == .paywall }
+        XCTAssertNil(viewModel.summaryViewModel)
+        XCTAssertEqual(viewModel.navigationPath.count, 1)
     }
 
     func testPendingSecondDemoOnlyResumesAfterAuthenticatedState() async {
@@ -226,15 +246,13 @@ final class AppFlowViewModelProTests: XCTestCase {
     private func makeViewModel(
         entitlement: any EntitlementServicing,
         auth: (any AuthServicing)? = nil,
-        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub(),
-        paywallRouter: PaywallRouting = PaywallRouter()
+        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub()
     ) -> AppFlowViewModel {
         AppFlowViewModel(
             repository: OnboardingCompletionRepositoryStub(),
             demoQuotaCoordinator: coordinator,
             entitlementService: entitlement,
-            authService: auth,
-            paywallRouter: paywallRouter
+            authService: auth
         )
     }
 
@@ -286,14 +304,6 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
     func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {}
 
     func recordedStartCount() -> Int { startCallCount }
-}
-
-private final class PaywallRouterSpy: PaywallRouting {
-    private(set) var presentCallCount = 0
-
-    func presentPaywall() {
-        presentCallCount += 1
-    }
 }
 
 @MainActor

@@ -89,7 +89,6 @@ final class AppFlowViewModel: ObservableObject {
     private let demoQuotaCoordinator: DemoQuotaCoordinating
     private let entitlementService: any EntitlementServicing
     private let authService: any AuthServicing
-    private let paywallRouter: PaywallRouting
     private var stateTask: Task<Void, Never>?
     private var entitlementTask: Task<Void, Never>?
     private var authTask: Task<Void, Never>?
@@ -109,7 +108,6 @@ final class AppFlowViewModel: ObservableObject {
         demoQuotaCoordinator: DemoQuotaCoordinating,
         entitlementService: any EntitlementServicing,
         authService: (any AuthServicing)? = nil,
-        paywallRouter: PaywallRouting = PaywallRouter(),
         slides: [OnboardingSlide] = OnboardingSlide.defaultSlides,
         stateMachine: AppFlowStateMachine? = nil
     ) {
@@ -126,7 +124,6 @@ final class AppFlowViewModel: ObservableObject {
         self.entitlementState = entitlementService.state
         self.isProUser = entitlementService.isPro
         self.authState = self.authService.state
-        self.paywallRouter = paywallRouter
         syncNavigation(for: state)
         observeDemoQuota()
         observeEntitlements()
@@ -550,7 +547,6 @@ final class AppFlowViewModel: ObservableObject {
         navigationPath = NavigationPath()
         let attemptIndex = summaryViewModel?.context.summary.attemptIndex ?? currentAttemptIndex
         summaryViewModel = nil
-        paywallRouter.presentPaywall()
         apply(event: .showPaywall)
         currentAttemptIndex = min(attemptIndex + 1, 2)
     }

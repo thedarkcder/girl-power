@@ -68,7 +68,8 @@ struct AppFlowStateMachine {
         case (.sessionSummary, .finishDemo):
             return .demoCTA
 
-        case (.sessionSummary, .showPaywall):
+        case (.demoCTA, .showPaywall),
+             (.sessionSummary, .showPaywall):
             return .paywall
 
         case (.paywall, .finishDemo):

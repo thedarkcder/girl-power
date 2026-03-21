@@ -79,6 +79,11 @@ final class AppFlowStateMachineTests: XCTestCase {
         let next = stateMachine.transition(from: .sessionSummary, event: .showPaywall)
         XCTAssertEqual(next, .paywall)
     }
+
+    func testCTAShowPaywallRoutesToPaywall() {
+        let next = stateMachine.transition(from: .demoCTA, event: .showPaywall)
+        XCTAssertEqual(next, .paywall)
+    }
 }
 
 @MainActor
@@ -223,15 +228,13 @@ final class AppFlowViewModelTests: XCTestCase {
     func testContinueToPaywallClearsSummaryAndRoutes() async {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
         let coordinator = DemoQuotaCoordinatorStreamStub(initialState: .fresh)
-        let router = PaywallRouterSpy()
         let auth = AuthServiceStub(initialState: .authenticated(.fixture))
         auth.ensuredSession = .fixture
         let viewModel = AppFlowViewModel(
             repository: repository,
             demoQuotaCoordinator: coordinator,
             entitlementService: EntitlementServiceStub(),
-            authService: auth,
-            paywallRouter: router
+            authService: auth
         )
 
         viewModel.handleSplashFinished()
@@ -249,7 +252,6 @@ final class AppFlowViewModelTests: XCTestCase {
         XCTAssertNil(viewModel.summaryViewModel)
         XCTAssertEqual(viewModel.state, .paywall)
         XCTAssertEqual(viewModel.navigationPath.count, 1)
-        XCTAssertEqual(router.presentCallCount, 1)
     }
 
     private func makeSummary(attemptIndex: Int) -> SessionSummary {
@@ -335,14 +337,6 @@ private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepo
     func markCompleted() {
         markCompletedCallCount += 1
         completed = true
-    }
-}
-
-private final class PaywallRouterSpy: PaywallRouting {
-    private(set) var presentCallCount = 0
-
-    func presentPaywall() {
-        presentCallCount += 1
     }
 }
 

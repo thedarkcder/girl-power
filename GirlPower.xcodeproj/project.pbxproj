@@ -66,7 +66,6 @@
 		E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */; };
 		18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */; };
 		5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */; };
-		2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */; };
 		B1C9B3602BB9E8B100B8B310 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */; };
 		B1C9B3632BB9E8B100B8B310 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */; };
 		B1C9B3662BB9E8B100B8B310 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */; };
@@ -154,7 +153,6 @@
 		B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAttemptFlowView.swift; sourceTree = "<group>"; };
 		6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryViewModel.swift; sourceTree = "<group>"; };
 		4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquatPostSetSummaryView.swift; sourceTree = "<group>"; };
-		5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSummaryNavigation.swift; sourceTree = "<group>"; };
 		B1C9B35F2BB9E8B100B8B310 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1C9B3622BB9E8B100B8B310 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		B1C9B3642BB9E8B100B8B310 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -347,7 +345,6 @@
 				B1C9B35C2BB9E8B100B8B310 /* DemoAttemptFlowView.swift */,
 				6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */,
 				4F4C0BF67D2243328E4EE9F4 /* SquatPostSetSummaryView.swift */,
-				5D6E2C16A5504906950E4F8B /* DemoSummaryNavigation.swift */,
 			);
 			path = Demo;
 			sourceTree = "<group>";
@@ -597,7 +594,6 @@
 				E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */,
 				18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */,
 				5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */,
-				2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */,
 				A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */,
 				CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */,
 				D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */,
