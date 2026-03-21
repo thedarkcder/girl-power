@@ -94,30 +94,6 @@ export class DemoQuotaRepository {
     return this.persistSnapshot(deviceId, snapshot);
   }
 
-  async fetchDeviceIdentity(lookupKey: string): Promise<string | null> {
-    const { data, error } = await this.client
-      .from('device_identity_mirrors')
-      .select('device_id')
-      .eq('lookup_key', lookupKey)
-      .maybeSingle<{ device_id: string }>();
-
-    if (error && error.code !== 'PGRST116') {
-      throw new Error(`Failed to fetch mirrored device identity: ${error.message}`);
-    }
-
-    return data?.device_id ?? null;
-  }
-
-  async mirrorDeviceIdentity(lookupKey: string, deviceId: string): Promise<void> {
-    const { error } = await this.client
-      .from('device_identity_mirrors')
-      .upsert({ lookup_key: lookupKey, device_id: deviceId }, { onConflict: 'lookup_key' });
-
-    if (error) {
-      throw new Error(`Failed to mirror device identity: ${error.message}`);
-    }
-  }
-
   snapshotFromDecision(
     existing: DemoQuotaSnapshot | null,
     attemptLogs: DemoQuotaAttemptLog[],

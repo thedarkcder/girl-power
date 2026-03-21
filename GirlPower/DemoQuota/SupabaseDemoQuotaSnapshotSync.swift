@@ -91,7 +91,10 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             case "allow":
                 return .allowSecondAttempt(timestamp: decisionPayload.timestamp)
             case "deny":
-                return .deny(message: decisionPayload.message, timestamp: decisionPayload.timestamp)
+                return .deny(
+                    lockReason: .evaluationDenied(message: decisionPayload.message),
+                    timestamp: decisionPayload.timestamp
+                )
             case "timeout":
                 return .timeout(timestamp: decisionPayload.timestamp)
             default:
@@ -114,8 +117,8 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             switch lastDecision {
             case .allowSecondAttempt(let timestamp):
                 decision = DecisionPayload(type: "allow", message: nil, timestamp: timestamp)
-            case .deny(let message, let timestamp):
-                decision = DecisionPayload(type: "deny", message: message, timestamp: timestamp)
+            case .deny(let lockReason, let timestamp):
+                decision = DecisionPayload(type: "deny", message: lockReason.denialMessage, timestamp: timestamp)
             case .timeout(let timestamp):
                 decision = DecisionPayload(type: "timeout", message: nil, timestamp: timestamp)
             }

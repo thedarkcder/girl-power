@@ -45,7 +45,6 @@
 		C25E543A243D45D390F52340 /* EvaluateSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */; };
 		7C637DEC9B9A40A1990B60B1 /* KeychainDeviceIdentityStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */; };
 		A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */; };
-		CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */; };
 		D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */; };
 		B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34C2BB9E8B100B8B310 /* GirlPowerApp.swift */; };
 		B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34E2BB9E8B100B8B310 /* AppFlowStateMachine.swift */; };
@@ -131,7 +130,6 @@
 		4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EvaluateSessionService.swift; sourceTree = "<group>"; };
 		1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDeviceIdentityStorage.swift; sourceTree = "<group>"; };
 		9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDemoQuotaSnapshotSync.swift; sourceTree = "<group>"; };
-		33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDeviceIdentityMirror.swift; sourceTree = "<group>"; };
 		95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSessionLogger.swift; sourceTree = "<group>"; };
 		8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaStateMachineTests.swift; sourceTree = "<group>"; };
 		F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinatorTests.swift; sourceTree = "<group>"; };
@@ -310,7 +308,6 @@
 				4F2B50A3AEFF45C2B37F0B78 /* EvaluateSessionService.swift */,
 				1CF9544BFEE04D908674F75C /* KeychainDeviceIdentityStorage.swift */,
 				9BA3F4B664DA4F5AA39AF4A0 /* SupabaseDemoQuotaSnapshotSync.swift */,
-				33612E1A5A8A4BAFA8B30A50 /* SupabaseDeviceIdentityMirror.swift */,
 				95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */,
 			);
 			path = DemoQuota;
@@ -588,7 +585,6 @@
 				5D434F3C2EA44FEC89A81828 /* SquatPostSetSummaryView.swift in Sources */,
 				2F6C58A5B6814A48A1D1419A /* DemoSummaryNavigation.swift in Sources */,
 				A7864F3BE1F24F40B6B19C13 /* SupabaseDemoQuotaSnapshotSync.swift in Sources */,
-				CFB9B69370E249FF93B5A8E3 /* SupabaseDeviceIdentityMirror.swift in Sources */,
 				D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

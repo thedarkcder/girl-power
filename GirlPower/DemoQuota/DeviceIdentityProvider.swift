@@ -32,8 +32,3 @@ protocol KeychainPersisting {
     func readUUID() throws -> UUID?
     func store(uuid: UUID) throws
 }
-
-protocol DeviceIdentityMirroring {
-    func fetchDeviceID(lookupKey: String) async throws -> UUID?
-    func mirror(deviceID: UUID, lookupKey: String) async throws
-}

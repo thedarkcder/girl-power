@@ -55,6 +55,7 @@
      http://127.0.0.1:54321/functions/v1/evaluate-session | jq
    ```
    - Expect `allow_another_demo=true`, `attempts_used=1`, and a mirrored snapshot whose `last_decision.type` is `allow`.
+   - `demo-session-log` should reject `attempt_index=3` with `400 invalid_body`; `evaluate-session` should reject any `attempt_index` other than `1` with the same boundary error.
 4. Install/run the simulator build. Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.

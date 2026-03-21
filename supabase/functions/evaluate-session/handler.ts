@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { HttpError, jsonResponse } from '../demo-quota/http.ts';
+import { evaluableDemoAttemptIndexSchema, HttpError, jsonResponse } from '../demo-quota/http.ts';
 import type {
   DemoQuotaAttemptLog,
   DemoQuotaEvaluationDecision,
@@ -11,6 +11,7 @@ import type {
   EvaluateSessionRequest,
   EvaluateSessionResponse,
   LLMResult,
+  PersistedDecisionPayload,
   RateLimitSnapshot,
 } from './types.ts';
 
@@ -74,7 +75,7 @@ export type EvaluateSessionHandlerDependencies = {
 
 const RequestSchema = z.object({
   device_id: z.string().min(1, 'device_id is required'),
-  attempt_index: z.number().int().positive(),
+  attempt_index: evaluableDemoAttemptIndexSchema,
   payload_version: z.string().min(1).default('v1'),
   input: z.object({
     prompt: z.string().min(1, 'prompt is required'),
@@ -177,9 +178,11 @@ export function buildEvaluateSessionHandler(deps: EvaluateSessionHandlerDependen
         }
       }
 
+      const persistedLLMResult = attachPersistedDecision(llmResult, decision);
+
       const persistResult = await deps.sessionRepository.persist(
         parsed,
-        llmResult,
+        persistedLLMResult,
         persistedState,
         failureReason ?? decision.type,
         correlationId,
@@ -218,7 +221,7 @@ export function buildEvaluateSessionHandler(deps: EvaluateSessionHandlerDependen
         message: decision.message,
         reason: failureReason ?? decision.type,
         request: persistResult.demo_attempt?.request_payload ?? buildRequestPayload(parsed),
-        response: llmResult.response,
+        response: persistedLLMResult.response,
         moderation: llmResult.moderation,
         snapshot: persistedSnapshot,
         rate_limit: rateSnapshot,
@@ -270,24 +273,28 @@ function buildDuplicateResponse(
   correlationId: string,
   snapshot: DemoQuotaSnapshot | null,
 ): EvaluateSessionResponse {
+  const persistedDecision = parsePersistedDecision(duplicate.llm_response);
   const lastDecision = snapshot?.last_decision;
+  const duplicateSnapshot = persistedDecision
+    ? snapshotFromPersistedDecision(persistedDecision)
+    : snapshot ?? emptySnapshot();
   return {
     correlation_id: correlationId,
     state: duplicate.state,
     session_id: duplicate.session_id,
     attempt_id: duplicate.id,
     payload_version: duplicate.payload_version,
-    allow_another_demo: lastDecision?.type === 'allow',
-    attempts_used: snapshot?.attempts_used ?? request.attempt_index,
-    evaluated_at: lastDecision?.ts ?? new Date().toISOString(),
-    lock_reason: snapshot?.server_lock_reason ?? undefined,
+    allow_another_demo: persistedDecision?.allow_another_demo ?? lastDecision?.type === 'allow',
+    attempts_used: persistedDecision?.attempts_used ?? snapshot?.attempts_used ?? request.attempt_index,
+    evaluated_at: persistedDecision?.evaluated_at ?? lastDecision?.ts ?? new Date().toISOString(),
+    lock_reason: persistedDecision?.lock_reason ?? snapshot?.server_lock_reason ?? undefined,
     fallback_used: duplicate.fallback_used,
-    message: lastDecision?.message,
+    message: persistedDecision?.message ?? lastDecision?.message,
     reason: duplicate.reason ?? 'duplicate_attempt',
     request: duplicate.request_payload,
     response: duplicate.llm_response,
     moderation: duplicate.moderation_payload,
-    snapshot: snapshot ?? emptySnapshot(),
+    snapshot: duplicateSnapshot,
     rate_limit: emptyRateLimitSnapshot(),
   };
 }
@@ -342,6 +349,80 @@ function buildDecisionResponse(
     moderation: { flagged: false, categories: [] },
     reason,
   };
+}
+
+function attachPersistedDecision(
+  llmResult: LLMResult,
+  decision: DemoQuotaEvaluationDecision,
+): LLMResult {
+  return {
+    ...llmResult,
+    response: {
+      ...llmResult.response,
+      decision: {
+        type: decision.type,
+        allow_another_demo: decision.allowAnotherDemo,
+        attempts_used: decision.attemptsUsed,
+        evaluated_at: decision.evaluatedAt,
+        lock_reason: decision.lockReason,
+        message: decision.message,
+      },
+    },
+  };
+}
+
+function parsePersistedDecision(response: Record<string, unknown>): PersistedDecisionPayload | null {
+  const candidate = response.decision;
+  if (!candidate || typeof candidate !== 'object') {
+    return null;
+  }
+  const decision = candidate as Record<string, unknown>;
+  const type = decision.type;
+  const allowAnotherDemo = decision.allow_another_demo;
+  const attemptsUsed = decision.attempts_used;
+  const evaluatedAt = decision.evaluated_at;
+  if (
+    (type !== 'allow' && type !== 'deny' && type !== 'timeout')
+    || typeof allowAnotherDemo !== 'boolean'
+    || typeof attemptsUsed !== 'number'
+    || typeof evaluatedAt !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    type,
+    allow_another_demo: allowAnotherDemo,
+    attempts_used: attemptsUsed,
+    evaluated_at: evaluatedAt,
+    lock_reason: isDemoQuotaLockReason(decision.lock_reason) ? decision.lock_reason : undefined,
+    message: typeof decision.message === 'string' ? decision.message : undefined,
+  };
+}
+
+function snapshotFromPersistedDecision(decision: PersistedDecisionPayload | null): DemoQuotaSnapshot {
+  if (!decision) {
+    return emptySnapshot();
+  }
+
+  return {
+    attempts_used: decision.attempts_used,
+    active_attempt_index: null,
+    last_decision: {
+      type: decision.type,
+      message: decision.message,
+      ts: decision.evaluated_at,
+    },
+    server_lock_reason: decision.lock_reason ?? null,
+    last_sync_at: decision.evaluated_at,
+  };
+}
+
+function isDemoQuotaLockReason(value: unknown): value is DemoQuotaLockReason {
+  return value === 'quota'
+    || value === 'evaluation_denied'
+    || value === 'evaluation_timeout'
+    || value === 'server_sync';
 }
 
 function allowDecision(attemptsUsed: number, evaluatedAt: string): DemoQuotaEvaluationDecision {

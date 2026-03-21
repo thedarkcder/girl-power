@@ -15,8 +15,3 @@ final class MockDemoEvaluationService: DemoEvaluationServicing {
         )
     }
 }
-
-struct NoopDeviceIdentityMirror: DeviceIdentityMirroring {
-    func fetchDeviceID(lookupKey: String) async throws -> UUID? { nil }
-    func mirror(deviceID: UUID, lookupKey: String) async throws {}
-}

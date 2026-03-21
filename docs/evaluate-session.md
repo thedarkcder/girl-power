@@ -38,6 +38,7 @@ GP-115 uses a small Edge-function bundle:
 | Status | When | Body pieces |
 | --- | --- | --- |
 | `200` | Decision resolved | `allow_another_demo`, `attempts_used`, `evaluated_at`, `lock_reason?`, `message?`, mirrored `snapshot`, plus persisted audit payloads |
+| `400` | Invalid JSON/body shape or unsupported `attempt_index` | `error="invalid_body"` plus validation details |
 | `409` | Duplicate (`device_id`, `attempt_index`) | Returns the persisted decision + audit payload with `reason="duplicate_attempt"` |
 | `429` | Rate limit tripped (more than `RATE_LIMIT_ATTEMPTS` within window) | `state="RATE_LIMITED"`, `allow_another_demo=false`, `reason="rate_limited"` |
 | `500` | Unexpected internal error | `error="internal_error"`, includes `correlation_id` for log lookup |
@@ -61,7 +62,7 @@ Example success body:
 
 ## Security Boundary
 
-- Only the Edge functions run with the Supabase **service-role key**. New tables (`public.demo_quota_attempt_logs`, `public.demo_quota_snapshots`, `public.device_identity_mirrors`) and the earlier `users/sessions/demo_attempts` tables are all RLS-protected for service-role writes only.
+- Only the Edge functions run with the Supabase **service-role key**. New tables (`public.demo_quota_attempt_logs`, `public.demo_quota_snapshots`) and the earlier `users/sessions/demo_attempts` tables are all RLS-protected for service-role writes only.
 - The mobile app uses the anon key solely to call the Edge endpoint; it can never talk to the tables directly.
 - Secrets (`SUPABASE_SERVICE_ROLE_KEY`, future LLM provider keys) live in `supabase/functions/.env.local` locally and Supabase Edge secrets remotely—never in source control.
 
@@ -104,9 +105,11 @@ Example success body:
        "payload_version": "v1",
        "input": { "prompt": "Decide whether a second demo is allowed", "context": { "goal": "tempo" } },
        "metadata": { "source": "curl" }
-     }' \
+   }' \
      http://localhost:54321/functions/v1/evaluate-session | jq
    ```
+
+   `demo-session-log` accepts only `attempt_index` values `1` and `2`; `evaluate-session` accepts only `attempt_index=1`.
 
 7. **Snapshot validation**:
 
@@ -126,7 +129,25 @@ Example success body:
 
    The snapshot should report `attempts_used=2` and `server_lock_reason="quota"` while the same keychain-backed `device_id` is still available on the client. Full uninstall/reinstall recovery is intentionally unsupported until a durable identity contract is approved.
 
-8. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
+8. **Invalid attempt boundary checks**:
+
+   ```bash
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":3,"stage":"start"}' \
+     http://localhost:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"payload_version":"v1","input":{"prompt":"invalid"}}' \
+     http://localhost:54321/functions/v1/evaluate-session | jq
+   ```
+
+   Both requests should return `400` with `error="invalid_body"` and should not write new attempt or snapshot state.
+
+9. **Rate-limit scenario**: send more than `RATE_LIMIT_ATTEMPTS` (default 3) within the window to observe `429` and `allow_another_demo=false`.
 
    ```bash
    for i in 1 2 3 4; do
