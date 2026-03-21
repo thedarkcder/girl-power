@@ -90,8 +90,8 @@ final class AuthSystemTests: XCTestCase {
                 projectURL: URL(string: "https://example.test")!,
                 anonKey: "anon-key",
                 authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-                appleServiceID: "com.route25.girlpower.stage.auth",
-                urlScheme: "girlpower-stage"
+                appleServiceID: "com.route25.girlpower.auth",
+                urlScheme: "girlpower"
             ),
             urlSession: session,
             pendingStore: pendingStore,
@@ -113,17 +113,17 @@ final class AuthSystemTests: XCTestCase {
             infoDictionary: [
                 "SupabaseProjectURL": "https://example.test",
                 "SupabaseAnonKey": "anon-key",
-                "SupabaseAuthRedirectURL": "girlpower-stage://auth/callback",
-                "SupabaseAppleServiceID": "com.route25.girlpower.stage.auth",
-                "SupabaseCallbackScheme": "girlpower-stage",
+                "SupabaseAuthRedirectURL": "girlpower://auth/callback",
+                "SupabaseAppleServiceID": "com.route25.girlpower.auth",
+                "SupabaseCallbackScheme": "girlpower",
             ]
         )
 
         XCTAssertEqual(configuration.projectURL.absoluteString, "https://example.test")
         XCTAssertEqual(configuration.anonKey, "anon-key")
-        XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower-stage://auth/callback")
-        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.stage.auth")
-        XCTAssertEqual(configuration.urlScheme, "girlpower-stage")
+        XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower://auth/callback")
+        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.auth")
+        XCTAssertEqual(configuration.urlScheme, "girlpower")
     }
 
     func testEvaluateSessionServiceSendsCanonicalPayloadWithAnonymousMetadata() async throws {
@@ -445,8 +445,8 @@ final class AuthSystemTests: XCTestCase {
             projectURL: URL(string: "https://example.test")!,
             anonKey: "anon-key",
             authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-            appleServiceID: "com.route25.girlpower.stage.auth",
-            urlScheme: "girlpower-stage"
+            appleServiceID: "com.route25.girlpower.auth",
+            urlScheme: "girlpower"
         )
         let sessionStore = InMemoryAuthSessionStore(initial: initialSession)
         let pendingStore = InMemoryPendingAnonymousSessionStore()

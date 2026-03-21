@@ -138,7 +138,7 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
    xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
    ```
-   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, `girlpower-stage://auth/callback`, and `com.route25.girlpower.stage.auth`.
+   - Debug should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
    - Release should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
    - Confirm the signed app target still reports `CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements`.
 3. Run the edge-function regression checks:
@@ -155,7 +155,7 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    rg -n 'enabled =|client_id|redirect_uri' supabase/config.toml
    ```
    - The committed config should keep `[auth.external.apple] enabled = false` so `supabase start` does not require `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET`.
-   - `client_id` should still be `com.route25.girlpower.stage.auth`.
+   - `client_id` should still be `com.route25.girlpower.auth`.
    - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
    - For manual Apple Sign In verification only, export `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` and flip `enabled = true` in an uncommitted local change before restarting Supabase.
 5. Manual simulator regression for refresh + link behavior:
