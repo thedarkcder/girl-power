@@ -229,6 +229,40 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(result.lockReason, "quota")
     }
 
+    func testEvaluateSessionServiceMapsTimeoutReplayResponseToCanonicalTimeoutResult() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        URLProtocolStub.requestHandler = { _ in
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "reason": "duplicate_attempt",
+                      "decision": {
+                        "outcome": "timeout"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 2,
+            context: [:]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertNil(result.message)
+        XCTAssertEqual(result.lockReason, "evaluation_timeout")
+    }
+
     func testRestoreSessionAndForegroundRefreshShareSingleInFlightTask() async {
         let expired = AuthSession(
             accessToken: "expired-token",

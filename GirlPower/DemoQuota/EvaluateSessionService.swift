@@ -96,7 +96,13 @@ final class EvaluateSessionService: DemoEvaluationServicing {
                 timestamp: now
             )
         case .timeout:
-            throw DemoEvaluationError.timeout
+            return EvaluationResult(
+                allowAnotherDemo: false,
+                message: result.decision.message,
+                lockReason: result.decision.lockReason ?? "evaluation_timeout",
+                attemptsUsed: 1,
+                timestamp: now
+            )
         }
     }
 
