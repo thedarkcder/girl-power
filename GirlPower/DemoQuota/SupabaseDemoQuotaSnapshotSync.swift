@@ -24,11 +24,21 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
         self.urlSession = urlSession
 
         let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
+        encoder.dateEncodingStrategy = .custom { date, encoder in
+            var container = encoder.singleValueContainer()
+            try container.encode(Self.timestampFormatter.string(from: date))
+        }
         self.encoder = encoder
 
         let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            let value = try container.decode(String.self)
+            if let date = Self.timestampFormatter.date(from: value) ?? Self.fallbackTimestampFormatter.date(from: value) {
+                return date
+            }
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid ISO-8601 timestamp")
+        }
         self.decoder = decoder
     }
 
@@ -81,7 +91,10 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             case "allow":
                 return .allowSecondAttempt(timestamp: decisionPayload.timestamp)
             case "deny":
-                return .deny(message: decisionPayload.message, timestamp: decisionPayload.timestamp)
+                return .deny(
+                    lockReason: .evaluationDenied(message: decisionPayload.message),
+                    timestamp: decisionPayload.timestamp
+                )
             case "timeout":
                 return .timeout(timestamp: decisionPayload.timestamp)
             default:
@@ -104,8 +117,8 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             switch lastDecision {
             case .allowSecondAttempt(let timestamp):
                 decision = DecisionPayload(type: "allow", message: nil, timestamp: timestamp)
-            case .deny(let message, let timestamp):
-                decision = DecisionPayload(type: "deny", message: message, timestamp: timestamp)
+            case .deny(let lockReason, let timestamp):
+                decision = DecisionPayload(type: "deny", message: lockReason.denialMessage, timestamp: timestamp)
             case .timeout(let timestamp):
                 decision = DecisionPayload(type: "timeout", message: nil, timestamp: timestamp)
             }
@@ -121,6 +134,18 @@ final class SupabaseDemoQuotaSnapshotSync: DemoQuotaSnapshotSyncing {
             lastSyncAt: snapshot.lastSyncAt ?? Date()
         )
     }
+
+    private static let timestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
+    }()
+
+    private static let fallbackTimestampFormatter: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
 }
 
 private struct DevicePayload: Codable {

@@ -74,9 +74,49 @@ final class DemoQuotaCoordinatorTests: XCTestCase {
         _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
 
         await expectState(.locked(reason: .evaluationDenied(message: "no more")))
-        XCTAssertEqual(persistence.lastDecision, .deny(message: "no more", timestamp: evaluation.timestamp))
+        XCTAssertEqual(
+            persistence.lastDecision,
+            .deny(lockReason: .evaluationDenied(message: "no more"), timestamp: evaluation.timestamp)
+        )
         XCTAssertEqual(persistence.lockReason, .evaluationDenied(message: "no more"))
         XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .evaluationDenied(message: "no more"))
+    }
+
+    func testServerQuotaDenyLocksAndPersistsQuotaReason() async throws {
+        evaluation.responses = [.deny(message: "No more free demos", lockReason: "quota")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .quotaExhausted))
+        XCTAssertEqual(persistence.lockReason, .quotaExhausted)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .quotaExhausted)
+    }
+
+    func testServerSyncDenyLocksAndPersistsServerSyncReason() async throws {
+        evaluation.responses = [.deny(message: "Sync failed", lockReason: "server_sync")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .serverSync))
+        XCTAssertEqual(persistence.lockReason, .serverSync)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .serverSync)
+    }
+
+    func testServerTimeoutDenyLocksAsEvaluationTimeout() async throws {
+        evaluation.responses = [.deny(message: nil, lockReason: "evaluation_timeout")]
+
+        await coordinator.prepareForDemoStart()
+        _ = try await coordinator.markAttemptStarted(startMetadata: [:])
+        _ = await coordinator.markAttemptCompleted(resultMetadata: [:])
+
+        await expectState(.locked(reason: .evaluationTimeout))
+        XCTAssertEqual(persistence.lastDecision, .timeout(timestamp: evaluation.timestamp))
+        XCTAssertEqual(persistence.lockReason, .evaluationTimeout)
+        XCTAssertEqual(snapshotSync.mirroredSnapshots.last?.serverLockReason, .evaluationTimeout)
     }
 
     func testEvaluationTimeoutFailsClosed() async throws {
@@ -307,7 +347,7 @@ final class DemoQuotaTestSessionLogger: DemoSessionLogging {
 final class DemoQuotaTestEvaluationService: DemoEvaluationServicing {
     enum Response {
         case allow
-        case deny(message: String?)
+        case deny(message: String?, lockReason: String = "evaluation_denied")
         case timeout
         case networkFailure
     }
@@ -325,9 +365,21 @@ final class DemoQuotaTestEvaluationService: DemoEvaluationServicing {
         let response = responses.isEmpty ? .allow : responses.removeFirst()
         switch response {
         case .allow:
-            return EvaluationResult(allowAnotherDemo: true, message: nil, timestamp: timestamp)
-        case .deny(let message):
-            return EvaluationResult(allowAnotherDemo: false, message: message, timestamp: timestamp)
+            return EvaluationResult(
+                allowAnotherDemo: true,
+                message: nil,
+                lockReason: nil,
+                attemptsUsed: 1,
+                timestamp: timestamp
+            )
+        case .deny(let message, let lockReason):
+            return EvaluationResult(
+                allowAnotherDemo: false,
+                message: message,
+                lockReason: lockReason,
+                attemptsUsed: 1,
+                timestamp: timestamp
+            )
         case .timeout:
             throw DemoEvaluationError.timeout
         case .networkFailure:
@@ -355,6 +407,28 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
     }
 }
 
+final class DeviceIdentityProviderTests: XCTestCase {
+    func testReturnsExistingKeychainDeviceID() async throws {
+        let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
+        let keychain = DemoQuotaTestKeychain()
+        keychain.storedUUID = expected
+        let provider = DeviceIdentityProvider(keychain: keychain)
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(deviceID, expected)
+    }
+
+    func testGeneratesAndStoresKeychainDeviceIDWhenMissing() async throws {
+        let keychain = DemoQuotaTestKeychain()
+        let provider = DeviceIdentityProvider(keychain: keychain)
+
+        let deviceID = try await provider.deviceID()
+
+        XCTAssertEqual(keychain.storedUUID, deviceID)
+    }
+}
+
 final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
     var fetchResult: DemoQuotaStateMachine.RemoteSnapshot?
     var fetchError: Error?
@@ -377,6 +451,18 @@ final class DemoQuotaTestSnapshotSync: DemoQuotaSnapshotSyncing {
         }
         mirroredSnapshots.append(snapshot)
         mirroredDeviceIDs.append(deviceID)
+    }
+}
+
+final class DemoQuotaTestKeychain: KeychainPersisting {
+    var storedUUID: UUID?
+
+    func readUUID() throws -> UUID? {
+        storedUUID
+    }
+
+    func store(uuid: UUID) throws {
+        storedUUID = uuid
     }
 }
 

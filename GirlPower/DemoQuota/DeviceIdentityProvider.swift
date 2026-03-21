@@ -12,11 +12,9 @@ enum DeviceIdentityError: Error, Equatable {
 
 final class DeviceIdentityProvider: DeviceIdentityProviding {
     private let keychain: KeychainPersisting
-    private let serverMirror: DeviceIdentityMirroring
 
-    init(keychain: KeychainPersisting, serverMirror: DeviceIdentityMirroring) {
+    init(keychain: KeychainPersisting) {
         self.keychain = keychain
-        self.serverMirror = serverMirror
     }
 
     func deviceID() async throws -> UUID {
@@ -24,14 +22,8 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
             return existing
         }
 
-        if let mirrored = try await serverMirror.fetchDeviceID() {
-            try keychain.store(uuid: mirrored)
-            return mirrored
-        }
-
         let generated = UUID()
         try keychain.store(uuid: generated)
-        try await serverMirror.mirror(deviceID: generated)
         return generated
     }
 }
@@ -39,9 +31,4 @@ final class DeviceIdentityProvider: DeviceIdentityProviding {
 protocol KeychainPersisting {
     func readUUID() throws -> UUID?
     func store(uuid: UUID) throws
-}
-
-protocol DeviceIdentityMirroring {
-    func fetchDeviceID() async throws -> UUID?
-    func mirror(deviceID: UUID) async throws
 }

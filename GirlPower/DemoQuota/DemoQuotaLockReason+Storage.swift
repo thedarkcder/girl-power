@@ -1,16 +1,23 @@
 import Foundation
 
 extension DemoQuotaStateMachine.LockReason {
+    var denialMessage: String? {
+        if case let .evaluationDenied(message) = self {
+            return message
+        }
+        return nil
+    }
+
     var storageValue: String {
         switch self {
         case .quotaExhausted:
             return "quota"
-        case .evaluationDenied(let message):
-            return "deny: \(message ?? "")"
+        case .evaluationDenied:
+            return "evaluation_denied"
         case .evaluationTimeout:
-            return "timeout"
+            return "evaluation_timeout"
         case .serverSync:
-            return "server"
+            return "server_sync"
         }
     }
 
@@ -18,18 +25,14 @@ extension DemoQuotaStateMachine.LockReason {
         switch storageValue {
         case "quota":
             self = .quotaExhausted
-        case "timeout":
+        case "evaluation_denied":
+            self = .evaluationDenied(message: nil)
+        case "evaluation_timeout":
             self = .evaluationTimeout
-        case "server":
+        case "server_sync":
             self = .serverSync
         default:
-            if storageValue.hasPrefix("deny: ") {
-                let message = String(storageValue.dropFirst(6))
-                let normalized = message.isEmpty ? nil : message
-                self = .evaluationDenied(message: normalized)
-            } else {
-                return nil
-            }
+            return nil
         }
     }
 }

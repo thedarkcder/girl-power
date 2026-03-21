@@ -7,6 +7,8 @@ protocol DemoEvaluationServicing {
 struct EvaluationResult: Equatable {
     let allowAnotherDemo: Bool
     let message: String?
+    let lockReason: String?
+    let attemptsUsed: Int
     let timestamp: Date
 }
 
@@ -38,16 +40,15 @@ final class EvaluateSessionService: DemoEvaluationServicing {
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.addValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
 
-        let input: [String: Any] = [
-            "prompt": Self.defaultPrompt,
-            "context": context
-        ]
         let payload: [String: Any] = [
             "device_id": deviceID.uuidString,
             "attempt_index": attemptIndex,
             "payload_version": Self.payloadVersion,
-            "input": input,
-            "metadata": context
+            "input": [
+                "prompt": Self.defaultPrompt,
+                "context": context,
+            ],
+            "metadata": context,
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: payload)
 
@@ -75,21 +76,33 @@ final class EvaluateSessionService: DemoEvaluationServicing {
         }
 
         let result = try JSONDecoder().decode(EvaluateResponse.self, from: data)
+        let now = Date()
+
         switch result.decision.outcome {
         case .allow:
             return EvaluationResult(
                 allowAnotherDemo: true,
                 message: nil,
-                timestamp: Date()
+                lockReason: nil,
+                attemptsUsed: 1,
+                timestamp: now
             )
         case .deny:
             return EvaluationResult(
                 allowAnotherDemo: false,
                 message: result.decision.message,
-                timestamp: Date()
+                lockReason: result.decision.lockReason,
+                attemptsUsed: 1,
+                timestamp: now
             )
         case .timeout:
-            throw DemoEvaluationError.timeout
+            return EvaluationResult(
+                allowAnotherDemo: false,
+                message: result.decision.message,
+                lockReason: result.decision.lockReason ?? "evaluation_timeout",
+                attemptsUsed: 1,
+                timestamp: now
+            )
         }
     }
 
@@ -100,6 +113,13 @@ final class EvaluateSessionService: DemoEvaluationServicing {
     private struct Decision: Decodable {
         let outcome: Outcome
         let message: String?
+        let lockReason: String?
+
+        enum CodingKeys: String, CodingKey {
+            case outcome
+            case message
+            case lockReason = "lock_reason"
+        }
     }
 
     private enum Outcome: String, Decodable {

@@ -29,9 +29,23 @@ final class DemoQuotaStateMachineTests: XCTestCase {
     }
 
     func testEvaluationDenyLocksMachine() {
-        let decision: DemoQuotaStateMachine.DemoEvaluationDecision = .deny(message: "nope", timestamp: Date())
+        let decision: DemoQuotaStateMachine.DemoEvaluationDecision = .deny(
+            lockReason: .evaluationDenied(message: "nope"),
+            timestamp: Date()
+        )
         let result = machine.reduce(state: .gatePending, event: .evaluationDeny(decision: decision))
         XCTAssertEqual(result.state, .locked(reason: .evaluationDenied(message: "nope")))
+    }
+
+    func testSnapshotRehydratesQuotaLockReasonAheadOfGenericDeny() {
+        let snapshot = DemoQuotaStateMachine.RemoteSnapshot(
+            attemptsUsed: 1,
+            activeAttemptIndex: nil,
+            lastDecision: .deny(lockReason: .evaluationDenied(message: "nope"), timestamp: Date()),
+            serverLockReason: .quotaExhausted
+        )
+
+        XCTAssertEqual(machine.state(from: snapshot), .locked(reason: .quotaExhausted))
     }
 
     func testEvaluationTimeoutLocksMachine() {

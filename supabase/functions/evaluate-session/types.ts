@@ -1,3 +1,5 @@
+import type { DemoQuotaDecisionType, DemoQuotaLockReason } from '../demo-quota/types.ts';
+
 export type EvaluateSessionInput = {
   prompt: string;
   context?: Record<string, unknown>;
@@ -6,6 +8,7 @@ export type EvaluateSessionInput = {
 export type EvaluateSessionDecision = {
   outcome: 'allow' | 'deny' | 'timeout';
   message?: string;
+  lock_reason?: DemoQuotaLockReason;
 };
 
 export type EvaluateSessionRequest = {
@@ -28,6 +31,16 @@ export type LLMResponse = {
   summary: string;
   guidance: string[];
   tokens_used: number;
+  decision?: PersistedDecisionPayload;
+};
+
+export type PersistedDecisionPayload = {
+  type: DemoQuotaDecisionType;
+  allow_another_demo: boolean;
+  attempts_used: number;
+  evaluated_at: string;
+  lock_reason?: DemoQuotaLockReason;
+  message?: string;
 };
 
 export type LLMResult = {
@@ -83,6 +96,7 @@ export type EvaluateSessionResponse = {
   attempt_id?: string;
   payload_version: string;
   fallback_used: boolean;
+  message?: string;
   reason?: string;
   decision: EvaluateSessionDecision;
   request?: Record<string, unknown>;

@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { evaluableDemoAttemptIndexSchema } from '../demo-quota/http.ts';
 import type { EvaluateSessionRequest } from './types.ts';
 
 export const EvaluateSessionRequestSchema = z.object({
   device_id: z.string().min(1, 'device_id is required'),
-  attempt_index: z.number().int().nonnegative(),
+  attempt_index: evaluableDemoAttemptIndexSchema,
   payload_version: z.string().min(1).default('v1'),
   input: z.object({
     prompt: z.string().min(1, 'prompt is required'),

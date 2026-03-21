@@ -90,8 +90,8 @@ final class AuthSystemTests: XCTestCase {
                 projectURL: URL(string: "https://example.test")!,
                 anonKey: "anon-key",
                 authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-                appleServiceID: "com.route25.girlpower.stage.auth",
-                urlScheme: "girlpower-stage"
+                appleServiceID: "com.route25.girlpower.auth",
+                urlScheme: "girlpower"
             ),
             urlSession: session,
             pendingStore: pendingStore,
@@ -113,17 +113,17 @@ final class AuthSystemTests: XCTestCase {
             infoDictionary: [
                 "SupabaseProjectURL": "https://example.test",
                 "SupabaseAnonKey": "anon-key",
-                "SupabaseAuthRedirectURL": "girlpower-stage://auth/callback",
-                "SupabaseAppleServiceID": "com.route25.girlpower.stage.auth",
-                "SupabaseCallbackScheme": "girlpower-stage",
+                "SupabaseAuthRedirectURL": "girlpower://auth/callback",
+                "SupabaseAppleServiceID": "com.route25.girlpower.auth",
+                "SupabaseCallbackScheme": "girlpower",
             ]
         )
 
         XCTAssertEqual(configuration.projectURL.absoluteString, "https://example.test")
         XCTAssertEqual(configuration.anonKey, "anon-key")
-        XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower-stage://auth/callback")
-        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.stage.auth")
-        XCTAssertEqual(configuration.urlScheme, "girlpower-stage")
+        XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower://auth/callback")
+        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.auth")
+        XCTAssertEqual(configuration.urlScheme, "girlpower")
     }
 
     func testEvaluateSessionServiceSendsCanonicalPayloadWithAnonymousMetadata() async throws {
@@ -191,6 +191,76 @@ final class AuthSystemTests: XCTestCase {
 
         XCTAssertFalse(result.allowAnotherDemo)
         XCTAssertEqual(result.message, "Free demo eligibility is temporarily rate limited. Try again shortly.")
+    }
+
+    func testEvaluateSessionServiceMapsCanonicalDecisionFromDuplicateReplayResponse() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        URLProtocolStub.requestHandler = { _ in
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "reason": "duplicate_attempt",
+                      "decision": {
+                        "outcome": "deny",
+                        "message": "This device has already used its free demos.",
+                        "lock_reason": "quota"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 1,
+            context: [:]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertEqual(result.message, "This device has already used its free demos.")
+        XCTAssertEqual(result.lockReason, "quota")
+    }
+
+    func testEvaluateSessionServiceMapsTimeoutReplayResponseToCanonicalTimeoutResult() async throws {
+        let session = makeURLSession()
+        let service = EvaluateSessionService(
+            endpoint: URL(string: "https://example.test/functions/v1/evaluate-session")!,
+            anonKey: "anon-key",
+            urlSession: session
+        )
+        URLProtocolStub.requestHandler = { _ in
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "reason": "duplicate_attempt",
+                      "decision": {
+                        "outcome": "timeout"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = try await service.evaluate(
+            deviceID: UUID(uuidString: "11111111-1111-1111-1111-111111111111")!,
+            attemptIndex: 2,
+            context: [:]
+        )
+
+        XCTAssertFalse(result.allowAnotherDemo)
+        XCTAssertNil(result.message)
+        XCTAssertEqual(result.lockReason, "evaluation_timeout")
     }
 
     func testRestoreSessionAndForegroundRefreshShareSingleInFlightTask() async {
@@ -409,8 +479,8 @@ final class AuthSystemTests: XCTestCase {
             projectURL: URL(string: "https://example.test")!,
             anonKey: "anon-key",
             authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-            appleServiceID: "com.route25.girlpower.stage.auth",
-            urlScheme: "girlpower-stage"
+            appleServiceID: "com.route25.girlpower.auth",
+            urlScheme: "girlpower"
         )
         let sessionStore = InMemoryAuthSessionStore(initial: initialSession)
         let pendingStore = InMemoryPendingAnonymousSessionStore()

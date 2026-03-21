@@ -28,7 +28,10 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
 1. Start Supabase locally:
    ```sh
    supabase start
-   supabase functions serve evaluate-session
+   supabase functions serve evaluate-session --env-file supabase/functions/.env.local
+   supabase functions serve demo-session-log --env-file supabase/functions/.env.local
+   supabase functions serve demo-snapshot-fetch --env-file supabase/functions/.env.local
+   supabase functions serve demo-snapshot-mirror --env-file supabase/functions/.env.local
    ```
 2. Export environment variables so the app uses Supabase mode:
    ```sh
@@ -37,20 +40,50 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    export DEMO_QUOTA_EVALUATE_SESSION_URL="http://127.0.0.1:54321/functions/v1/evaluate-session"
    export DEMO_QUOTA_SNAPSHOT_FETCH_URL="http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch"
    export DEMO_QUOTA_SNAPSHOT_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-snapshot-mirror"
-   export DEMO_QUOTA_IDENTITY_FETCH_URL="http://127.0.0.1:54321/functions/v1/demo-identity-fetch"
-   export DEMO_QUOTA_IDENTITY_MIRROR_URL="http://127.0.0.1:54321/functions/v1/demo-identity-mirror"
    export DEMO_QUOTA_ANON_KEY="<your supabase anon key>"
    ```
-3. Install/run the simulator build (clean install to exercise keychain provisioning). Observe:
+3. Validate the server contract before launching the app:
+   ```sh
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":1,"stage":"completion","metadata":{"source":"qa"}}' \
+     http://127.0.0.1:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":1,"payload_version":"v1","input":{"prompt":"Decide whether a second demo is allowed.","context":{"source":"qa"}},"metadata":{"source":"qa"}}' \
+     http://127.0.0.1:54321/functions/v1/evaluate-session | jq
+   ```
+   - Expect `decision.outcome = "allow"` for the allow path.
+   - `demo-session-log` should reject `attempt_index=3` with `400 invalid_body`; `evaluate-session` should reject any `attempt_index` other than `1` with the same boundary error.
+4. Install/run the simulator build. Observe:
    - Attempt #1 tap logs `stage=start` with metadata (check Supabase table or `supabase functions logs --function demo-session-log`).
    - Completing attempt #1 logs `stage=complete`, UI returns to CTA with “Checking eligibility…” and CTA disabled.
    - Edge Function receives exactly one evaluate-session call with the canonical `device_id`, `input.context`, and top-level `metadata` payload.
-4. When evaluate-session returns `decision.outcome = "allow"`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
-5. Force a deny/timeout path:
+5. When evaluate-session returns `decision.outcome = "allow"`, the CTA switches to “One more go”, metadata includes `cta_label = "One more go"`, and another tap starts attempt #2. Completion logs are written and the CTA locks with “You’ve used both free demos…”.
+6. Force a deny/timeout path:
    - Stop the `evaluate-session` function or have it return `{"decision":{"outcome":"deny","message":"custom message"}}`.
    - After attempt #1 completion the CTA should immediately show the deny/timeout copy and never present a second attempt.
-6. Delete the app (or run on a new simulator), relaunch, and verify the quota remains locked because the keychain + Supabase snapshot rehydrate the state.
-7. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
+7. Validate third-attempt blocking from the server after attempt #2:
+   ```sh
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111","attempt_index":2,"stage":"completion","metadata":{"source":"qa"}}' \
+     http://127.0.0.1:54321/functions/v1/demo-session-log | jq
+
+   curl -s \
+     -H "Authorization: Bearer $DEMO_QUOTA_ANON_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"device_id":"11111111-1111-1111-1111-111111111111"}' \
+     http://127.0.0.1:54321/functions/v1/demo-snapshot-fetch | jq
+   ```
+   - Expect `attempts_used=2`, `server_lock_reason="quota"`, and no path back to `secondAttemptEligible`.
+8. Cold-launch the app again without deleting its keychain identity and verify the quota remains locked because the same keychain-backed `device_id` can rehydrate the mirrored snapshot.
+   - Do not treat full uninstall/reinstall as deterministic recovery; that contract is intentionally unsupported in GP-115.
+9. Record manual notes in Jira (build hash, simulator version, key device_id) plus any cURL scripts used to seed Supabase so reviewers can replay the scenario.
 
 ## GP-116 Summary + Paywall Flow
 
@@ -105,7 +138,7 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    xcodebuild -scheme GirlPower -showBuildSettings -configuration Debug | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
    xcodebuild -scheme GirlPower -showBuildSettings -configuration Release | rg 'PRODUCT_BUNDLE_IDENTIFIER|SUPABASE_CALLBACK_SCHEME|SUPABASE_AUTH_REDIRECT_URL|SUPABASE_APPLE_SERVICE_ID|SUPABASE_PROJECT_URL|CODE_SIGN_ENTITLEMENTS'
    ```
-   - Debug should resolve to `com.route25.girlpower.stage`, `girlpower-stage`, `girlpower-stage://auth/callback`, and `com.route25.girlpower.stage.auth`.
+   - Debug should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
    - Release should resolve to `com.route25.girlpower`, `girlpower`, `girlpower://auth/callback`, and `com.route25.girlpower.auth`.
    - Confirm the signed app target still reports `CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements`.
 3. Run the edge-function regression checks:
@@ -122,7 +155,7 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    rg -n 'enabled =|client_id|redirect_uri' supabase/config.toml
    ```
    - The committed config should keep `[auth.external.apple] enabled = false` so `supabase start` does not require `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET`.
-   - `client_id` should still be `com.route25.girlpower.stage.auth`.
+   - `client_id` should still be `com.route25.girlpower.auth`.
    - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
    - For manual Apple Sign In verification only, export `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` and flip `enabled = true` in an uncommitted local change before restarting Supabase.
 5. Manual simulator regression for refresh + link behavior:

@@ -54,10 +54,10 @@ final class UserDefaultsDemoAttemptRepository: DemoAttemptPersisting {
         switch decision {
         case .allowSecondAttempt(let timestamp):
             defaults.set(["type": "allow", "ts": timestamp.timeIntervalSince1970], forKey: lastDecisionKey)
-        case .deny(let message, let timestamp):
+        case .deny(let lockReason, let timestamp):
             defaults.set([
                 "type": "deny",
-                "message": message ?? "",
+                "message": lockReason.denialMessage ?? "",
                 "ts": timestamp.timeIntervalSince1970
             ], forKey: lastDecisionKey)
         case .timeout(let timestamp):
@@ -103,7 +103,7 @@ final class UserDefaultsDemoAttemptRepository: DemoAttemptPersisting {
             return .allowSecondAttempt(timestamp: date)
         case "deny":
             let message = (payload["message"] as? String).flatMap { $0.isEmpty ? nil : $0 }
-            return .deny(message: message, timestamp: date)
+            return .deny(lockReason: .evaluationDenied(message: message), timestamp: date)
         case "timeout":
             return .timeout(timestamp: date)
         default:
@@ -116,4 +116,3 @@ final class UserDefaultsDemoAttemptRepository: DemoAttemptPersisting {
         return DemoQuotaStateMachine.LockReason(storageValue: raw)
     }
 }
-
