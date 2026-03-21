@@ -1,20 +1,22 @@
 # How to Test Girl Power App Flow
 
+Use the shared `GirlPower` scheme with the explicit simulator destination `platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro`. The shared scheme does not persist a simulator choice, so all `xcodebuild` examples below include the required `-destination` flag.
+
 1. Build the app target:
    ```sh
-   xcodebuild -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' build
+   xcodebuild -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' build
    ```
 2. Run targeted regression tests for the state machine invariants:
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:GirlPowerTests/AppFlowStateMachineTests
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' -only-testing:GirlPowerTests/AppFlowStateMachineTests
    ```
 3. Run demo quota unit tests:
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15' -only-testing:GirlPowerTests/DemoQuotaCoordinatorTests
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' -only-testing:GirlPowerTests/DemoQuotaCoordinatorTests
    ```
 4. Run the full test suite (unit + UI tests):
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro'
    ```
 5. Launch the app on the simulator:
    - First launch should show the splash, onboarding carousel (three slides), CTA, then demo stub.
@@ -70,7 +72,7 @@
    ```sh
    xcodebuild test \
      -scheme GirlPower \
-     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' \
      -only-testing:GirlPowerTests/EntitlementStateMachineTests \
      -only-testing:GirlPowerTests/PaywallViewModelTests \
      -only-testing:GirlPowerTests/AppFlowViewModelProTests
@@ -94,7 +96,7 @@
    ```sh
    xcodebuild test \
      -scheme GirlPower \
-     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro' \
      -only-testing:GirlPowerTests/AuthSystemTests \
      -only-testing:GirlPowerTests/AppFlowViewModelProTests
    ```
@@ -124,11 +126,11 @@
    - No `redirect_uri = https://ktgapnamhpdbmhhgydnl.supabase.co/auth/v1/callback` override should remain in `supabase/config.toml`; local auth should use the CLI stack callback.
    - For manual Apple Sign In verification only, export `SUPABASE_AUTH_EXTERNAL_APPLE_SECRET` and flip `enabled = true` in an uncommitted local change before restarting Supabase.
 5. Manual simulator regression for refresh + link behavior:
-   - Install a clean Debug build on the iPhone 15 simulator, complete the first anonymous demo, then trigger the protected second-demo or paywall path.
+   - Install a clean Debug build on the iPhone 15 Pro (iOS 17.0.1) simulator, complete the first anonymous demo, then trigger the protected second-demo or paywall path.
    - Confirm the auth sheet appears until a real `.authenticated` state is reached; a refreshing cached session must not unlock the second demo or paywall early.
    - If you force refresh failure (for example by invalidating the refresh token in Supabase), the prompt should remain blocked and show the re-auth message instead of continuing.
    - After successful email/password or Apple sign-in, retry the protected action and confirm the app proceeds without creating duplicate anonymous-link rows on repeated attempts.
 6. Run the full app suite:
    ```sh
-   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro'
    ```
