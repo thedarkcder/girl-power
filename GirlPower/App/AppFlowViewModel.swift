@@ -189,7 +189,7 @@ final class AppFlowViewModel: ObservableObject {
     }
 
     func dismissAuthPrompt() {
-        guard isAuthBusy == false else { return }
+        guard authStateIsBusy(authService.state) == false else { return }
         authPrompt = nil
         pendingProtectedAction = nil
     }
@@ -561,5 +561,14 @@ final class AppFlowViewModel: ObservableObject {
         quotaState: DemoQuotaStateMachine.State
     ) {
         logger.error("Summary CTA mismatch: \(message, privacy: .public) [attempt=\(attemptIndex, privacy: .public) state=\(String(describing: quotaState), privacy: .public)]")
+    }
+
+    private func authStateIsBusy(_ state: AuthState) -> Bool {
+        switch state {
+        case .authenticating, .refreshing:
+            return true
+        default:
+            return false
+        }
     }
 }

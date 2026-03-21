@@ -135,7 +135,7 @@ final class AuthSystemTests: XCTestCase {
         )
         var capturedBody: [String: Any] = [:]
         URLProtocolStub.requestHandler = { request in
-            let data = try XCTUnwrap(request.httpBody)
+            let data = try XCTUnwrap(request.bodyData())
             capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
             return (200, Data("{\"decision\":{\"outcome\":\"allow\"}}".utf8))
         }
@@ -625,5 +625,37 @@ private extension AuthSystemTests {
             await Task.yield()
         }
         XCTFail("Timed out waiting for condition")
+    }
+}
+
+private extension URLRequest {
+    func bodyData() -> Data? {
+        if let httpBody {
+            return httpBody
+        }
+        guard let stream = httpBodyStream else {
+            return nil
+        }
+
+        stream.open()
+        defer { stream.close() }
+
+        let bufferSize = 1024
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        defer { buffer.deallocate() }
+
+        var data = Data()
+        while stream.hasBytesAvailable {
+            let readCount = stream.read(buffer, maxLength: bufferSize)
+            if readCount < 0 {
+                return nil
+            }
+            if readCount == 0 {
+                break
+            }
+            data.append(buffer, count: readCount)
+        }
+
+        return data
     }
 }
