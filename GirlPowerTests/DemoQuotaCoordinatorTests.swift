@@ -533,4 +533,8 @@ final class InMemoryOnboardingRepository: OnboardingCompletionRepository {
     func markCompleted() {
         hasCompletedOnboarding = true
     }
+
+    func syncWithProfile(using session: AuthSession) async -> Bool {
+        hasCompletedOnboarding
+    }
 }

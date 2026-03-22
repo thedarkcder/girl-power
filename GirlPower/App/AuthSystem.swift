@@ -504,6 +504,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private let sessionStore: AuthSessionStoring
     private let anonymousSessionStore: PendingAnonymousSessionStoring
     private let linker: AnonymousSessionLinking
+    private let profileService: any ProfileServicing
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
     private var sessionRecoveryTask: Task<AuthSession?, Never>?
     private var sessionRecoveryContext: AuthRequirementContext?
@@ -513,12 +514,14 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         api: SupabaseAuthAPI,
         sessionStore: AuthSessionStoring = KeychainAuthSessionStore(),
         anonymousSessionStore: PendingAnonymousSessionStoring = UserDefaultsPendingAnonymousSessionStore(),
-        linker: AnonymousSessionLinking
+        linker: AnonymousSessionLinking,
+        profileService: any ProfileServicing = DisabledProfileService()
     ) {
         self.api = api
         self.sessionStore = sessionStore
         self.anonymousSessionStore = anonymousSessionStore
         self.linker = linker
+        self.profileService = profileService
         self.state = .anonymousEligible
     }
 
@@ -627,6 +630,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         do {
             let session = try await action()
             try sessionStore.save(session)
+            await syncProfile(for: session)
             apply(.authenticationSucceeded(session))
             let linked = await linker.linkPendingSession(with: session)
             if linked == false {
@@ -647,6 +651,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         do {
             let refreshed = try await api.refresh(refreshToken: session.refreshToken)
             try sessionStore.save(refreshed)
+            await syncProfile(for: refreshed)
             apply(.authenticationSucceeded(refreshed))
             let linked = await linker.linkPendingSession(with: refreshed)
             if linked == false {
@@ -689,6 +694,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
                 if session.shouldRefreshSoon {
                     return await self.refresh(session: session, context: .restore)
                 }
+                await self.syncProfile(for: session)
                 self.apply(.restoreSession(session))
                 _ = await self.linker.linkPendingSession(with: session)
                 return session
@@ -729,6 +735,14 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         guard nextState != state else { return }
         state = nextState
         continuations.values.forEach { $0.yield(nextState) }
+    }
+
+    private func syncProfile(for session: AuthSession) async {
+        do {
+            _ = try await profileService.upsertProfile(using: session)
+        } catch {
+            logger.warning("Profile sync after authentication failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func reason(for error: SupabaseAuthAPIError) -> AuthFailureReason {

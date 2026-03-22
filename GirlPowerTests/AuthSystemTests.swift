@@ -46,6 +46,93 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(store.savedSession?.refreshToken, "refreshed-refresh")
     }
 
+    func testSignInTriggersCentralizedProfileUpsert() async {
+        let profileService = ProfileServiceSpy()
+        let service = SupabaseAuthService(
+            api: SuccessfulSignInAuthAPI(session: .fixture),
+            sessionStore: InMemoryAuthSessionStore(),
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        await service.signIn(email: "member@example.com", password: "Password-123!", context: .paywall)
+        let upsertedUserIDs = await profileService.upsertedUserIDs()
+
+        XCTAssertEqual(upsertedUserIDs, ["user-1"])
+        guard case .authenticated = service.state else {
+            return XCTFail("Expected authenticated state")
+        }
+    }
+
+    func testRestoreSessionRefreshTriggersProfileUpsert() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let profileService = ProfileServiceSpy()
+        let service = SupabaseAuthService(
+            api: SuccessfulRefreshAuthAPI(refreshedSession: .fixture),
+            sessionStore: InMemoryAuthSessionStore(initial: expired),
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        await service.restoreSession()
+        let upsertedUserIDs = await profileService.upsertedUserIDs()
+
+        XCTAssertEqual(upsertedUserIDs, ["user-1"])
+    }
+
+    func testProfileDecodingRejectsUnsupportedProPlatform() throws {
+        let payload = Data(
+            """
+            {
+              "id": "user-1",
+              "email": "member@example.com",
+              "created_at": "2026-03-22T10:00:00Z",
+              "updated_at": "2026-03-22T10:05:00Z",
+              "is_pro": false,
+              "pro_platform": "stripe",
+              "onboarding_completed": false,
+              "last_login_at": "2026-03-22T10:05:00Z"
+            }
+            """.utf8
+        )
+
+        XCTAssertThrowsError(try JSONDecoder.profileDecoder.decode(Profile.self, from: payload))
+    }
+
+    func testProfileUpsertSendsLatestEmailAndLastLoginAt() async throws {
+        let service = SupabaseProfileService(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: makeURLSession()
+        )
+        var capturedBody: [[String: Any]] = []
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.url?.path, "/rest/v1/profiles")
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [[String: Any]])
+            return (200, Self.profilePayload())
+        }
+
+        _ = try await service.upsertProfile(using: .fixture)
+
+        let payload = try XCTUnwrap(capturedBody.first)
+        XCTAssertEqual(payload["id"] as? String, "user-1")
+        XCTAssertEqual(payload["email"] as? String, "member@example.com")
+        XCTAssertNotNil(payload["last_login_at"] as? String)
+    }
+
     func testAnonymousLinkRetriesOnServerFailureAndClearsOnDuplicate() async {
         let pendingStore = InMemoryPendingAnonymousSessionStore()
         let pendingID = UUID()
@@ -515,6 +602,30 @@ final class AuthSystemTests: XCTestCase {
             """.utf8
         )
     }
+
+    private static func profilePayload(
+        onboardingCompleted: Bool = false,
+        isPro: Bool = false,
+        proPlatform: String? = nil
+    ) -> Data {
+        let platformJSON = proPlatform.map { "\"\($0)\"" } ?? "null"
+        return Data(
+            """
+            [
+              {
+                "id": "user-1",
+                "email": "member@example.com",
+                "created_at": "2026-03-22T10:00:00Z",
+                "updated_at": "2026-03-22T10:05:00Z",
+                "is_pro": \(isPro ? "true" : "false"),
+                "pro_platform": \(platformJSON),
+                "onboarding_completed": \(onboardingCompleted ? "true" : "false"),
+                "last_login_at": "2026-03-22T10:05:00Z"
+              }
+            ]
+            """.utf8
+        )
+    }
 }
 
 private final class InMemoryAuthSessionStore: AuthSessionStoring {
@@ -539,6 +650,75 @@ private final class InMemoryPendingAnonymousSessionStore: PendingAnonymousSessio
 
 private final class AnonymousSessionLinkerStub: AnonymousSessionLinking {
     func linkPendingSession(with authSession: AuthSession) async -> Bool { true }
+}
+
+private actor ProfileServiceSpy: ProfileServicing {
+    private var upsertedSessions: [AuthSession] = []
+
+    func fetchProfile(using session: AuthSession) async throws -> Profile? { nil }
+
+    func upsertProfile(using session: AuthSession) async throws -> Profile {
+        upsertedSessions.append(session)
+        return Profile(
+            id: session.user.id,
+            email: session.user.email,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isPro: false,
+            proPlatform: nil,
+            onboardingCompleted: false,
+            lastLoginAt: Date()
+        )
+    }
+
+    func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile {
+        try await upsertProfile(using: session)
+    }
+
+    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
+        try await upsertProfile(using: session)
+    }
+
+    func upsertedUserIDs() -> [String] {
+        upsertedSessions.map(\.user.id)
+    }
+}
+
+private actor SuccessfulSignInAuthAPI: SupabaseAuthAPI {
+    let session: AuthSession
+
+    init(session: AuthSession) {
+        self.session = session
+    }
+
+    func signUp(email: String, password: String) async throws -> AuthSession { session }
+    func signIn(email: String, password: String) async throws -> AuthSession { session }
+    func exchangeAppleIdentityToken(_ identityToken: String, nonce: String) async throws -> AuthSession { session }
+    func refresh(refreshToken: String) async throws -> AuthSession { session }
+}
+
+private actor SuccessfulRefreshAuthAPI: SupabaseAuthAPI {
+    let refreshedSession: AuthSession
+
+    init(refreshedSession: AuthSession) {
+        self.refreshedSession = refreshedSession
+    }
+
+    func signUp(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func signIn(email: String, password: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func exchangeAppleIdentityToken(_ identityToken: String, nonce: String) async throws -> AuthSession {
+        throw SupabaseAuthAPIError.invalidResponse
+    }
+
+    func refresh(refreshToken: String) async throws -> AuthSession {
+        refreshedSession
+    }
 }
 
 private actor RefreshBlockingAuthAPI: SupabaseAuthAPI {
@@ -695,6 +875,14 @@ private extension AuthSystemTests {
             await Task.yield()
         }
         XCTFail("Timed out waiting for condition")
+    }
+}
+
+private extension JSONDecoder {
+    static var profileDecoder: JSONDecoder {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
     }
 }
 
