@@ -20,7 +20,9 @@ create trigger profiles_touch_updated
 before update on public.profiles
 for each row execute function public.touch_updated_at();
 
-grant select, insert, update on public.profiles to authenticated;
+revoke all on public.profiles from authenticated;
+grant select, insert on public.profiles to authenticated;
+grant update (email, onboarding_completed, last_login_at) on public.profiles to authenticated;
 grant select, insert, update on public.profiles to service_role;
 
 alter table public.profiles enable row level security;

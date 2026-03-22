@@ -241,14 +241,12 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertEqual(startedCount, 1)
     }
 
-    func testAuthenticatedEntitlementChangesMirrorProfileAnalyticsWithoutDrivingGatingFromProfile() async {
-        let profileService = AppFlowProfileServiceSpy()
+    func testAuthenticatedEntitlementChangesUpdateGatingFromEntitlementsOnly() async {
         let entitlement = EntitlementServiceStub(initialState: .ready(product: .mock), isPro: false)
         let auth = AuthServiceStub(initialState: .authenticated(.fixture))
         let viewModel = makeViewModel(
             entitlement: entitlement,
-            auth: auth,
-            profileService: profileService
+            auth: auth
         )
 
         viewModel.handleSplashFinished()
@@ -258,12 +256,10 @@ final class AppFlowViewModelProTests: XCTestCase {
         entitlement.send(.subscribed(info: .init(product: .mock, transactionID: 7, expirationDate: nil)), isPro: true)
 
         await waitForCondition { viewModel.demoButtonTitle == "Start Coaching" }
-        await waitForCondition { await profileService.containsMirror(isPro: true, platform: .apple) }
 
         entitlement.send(.ready(product: .mock), isPro: false)
 
         await waitForCondition { viewModel.demoButtonTitle == "Start Free Demo" }
-        await waitForCondition { await profileService.containsMirror(isPro: false, platform: nil) }
     }
 
     // MARK: - Helpers
@@ -271,15 +267,13 @@ final class AppFlowViewModelProTests: XCTestCase {
     private func makeViewModel(
         entitlement: any EntitlementServicing,
         auth: (any AuthServicing)? = nil,
-        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub(),
-        profileService: any ProfileServicing = DisabledProfileService()
+        coordinator: DemoQuotaCoordinating = DemoQuotaCoordinatorStub()
     ) -> AppFlowViewModel {
         AppFlowViewModel(
             repository: OnboardingCompletionRepositoryStub(),
             demoQuotaCoordinator: coordinator,
             entitlementService: entitlement,
-            authService: auth,
-            profileService: profileService
+            authService: auth
         )
     }
 
@@ -361,46 +355,5 @@ private extension AuthSession {
             expiresAt: Date().addingTimeInterval(3600),
             user: AuthUser(id: "user-1", email: "member@example.com")
         )
-    }
-}
-
-private actor AppFlowProfileServiceSpy: ProfileServicing {
-    private var mirrors: [(Bool, ProPlatform?)] = []
-
-    func fetchProfile(using session: AuthSession) async throws -> Profile? { nil }
-
-    func upsertProfile(using session: AuthSession) async throws -> Profile {
-        Profile(
-            id: session.user.id,
-            email: session.user.email,
-            createdAt: Date(),
-            updatedAt: Date(),
-            isPro: false,
-            proPlatform: nil,
-            onboardingCompleted: false,
-            lastLoginAt: Date()
-        )
-    }
-
-    func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile {
-        try await upsertProfile(using: session)
-    }
-
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
-        mirrors.append((isPro, platform))
-        return Profile(
-            id: session.user.id,
-            email: session.user.email,
-            createdAt: Date(),
-            updatedAt: Date(),
-            isPro: isPro,
-            proPlatform: platform,
-            onboardingCompleted: false,
-            lastLoginAt: Date()
-        )
-    }
-
-    func containsMirror(isPro: Bool, platform: ProPlatform?) -> Bool {
-        mirrors.contains { $0.0 == isPro && $0.1 == platform }
     }
 }

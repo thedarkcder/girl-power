@@ -57,9 +57,10 @@ final class AuthSystemTests: XCTestCase {
         )
 
         await service.signIn(email: "member@example.com", password: "Password-123!", context: .paywall)
-        let upsertedUserIDs = await profileService.upsertedUserIDs()
+        await waitForCondition {
+            await profileService.upsertedUserIDs() == ["user-1"]
+        }
 
-        XCTAssertEqual(upsertedUserIDs, ["user-1"])
         guard case .authenticated = service.state else {
             return XCTFail("Expected authenticated state")
         }
@@ -82,9 +83,150 @@ final class AuthSystemTests: XCTestCase {
         )
 
         await service.restoreSession()
-        let upsertedUserIDs = await profileService.upsertedUserIDs()
+        await waitForCondition {
+            await profileService.upsertedUserIDs() == ["user-1"]
+        }
 
-        XCTAssertEqual(upsertedUserIDs, ["user-1"])
+        guard case .authenticated = service.state else {
+            return XCTFail("Expected authenticated state")
+        }
+    }
+
+    func testSignInPublishesAuthenticatedStateBeforeBackgroundProfileSyncCompletes() async {
+        let profileService = BlockingProfileServiceSpy()
+        let store = InMemoryAuthSessionStore()
+        let service = SupabaseAuthService(
+            api: SuccessfulSignInAuthAPI(session: .fixture),
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        let signInTask = Task {
+            await service.signIn(email: "member@example.com", password: "Password-123!", context: .paywall)
+        }
+        await waitForCondition {
+            await profileService.upsertStarted()
+        }
+
+        guard case .authenticated(let session) = service.state else {
+            signInTask.cancel()
+            return XCTFail("Expected authenticated state before profile sync completed")
+        }
+        XCTAssertEqual(session.accessToken, AuthSession.fixture.accessToken)
+        XCTAssertEqual(store.savedSession?.accessToken, AuthSession.fixture.accessToken)
+        let signInCompletedUpserts = await profileService.completedUpsertCount()
+        XCTAssertEqual(signInCompletedUpserts, 0)
+
+        await profileService.resumeUpsert()
+        await signInTask.value
+        await waitForCondition {
+            await profileService.completedUpsertCount() == 1
+        }
+    }
+
+    func testRestoreSessionPublishesAuthenticatedStateBeforeBackgroundProfileSyncCompletes() async {
+        let profileService = BlockingProfileServiceSpy()
+        let store = InMemoryAuthSessionStore(initial: .fixture)
+        let service = SupabaseAuthService(
+            api: SuccessfulSignInAuthAPI(session: .fixture),
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        let restoreTask = Task {
+            await service.restoreSession()
+        }
+        await waitForCondition {
+            await profileService.upsertStarted()
+        }
+
+        guard case .authenticated(let session) = service.state else {
+            restoreTask.cancel()
+            return XCTFail("Expected restored authenticated state before profile sync completed")
+        }
+        XCTAssertEqual(session.accessToken, AuthSession.fixture.accessToken)
+        XCTAssertEqual(store.savedSession?.accessToken, AuthSession.fixture.accessToken)
+        let restoreCompletedUpserts = await profileService.completedUpsertCount()
+        XCTAssertEqual(restoreCompletedUpserts, 0)
+
+        await profileService.resumeUpsert()
+        await restoreTask.value
+        await waitForCondition {
+            await profileService.completedUpsertCount() == 1
+        }
+    }
+
+    func testRefreshPublishesAuthenticatedStateBeforeBackgroundProfileSyncCompletes() async {
+        let expired = AuthSession(
+            accessToken: "expired-token",
+            refreshToken: "expired-refresh",
+            expiresAt: Date().addingTimeInterval(-60),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let refreshed = AuthSession(
+            accessToken: "refreshed-token",
+            refreshToken: "refreshed-refresh",
+            expiresAt: Date().addingTimeInterval(3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+        let profileService = BlockingProfileServiceSpy()
+        let store = InMemoryAuthSessionStore(initial: expired)
+        let service = SupabaseAuthService(
+            api: SuccessfulRefreshAuthAPI(refreshedSession: refreshed),
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        let restoreTask = Task {
+            await service.restoreSession()
+        }
+        await waitForCondition {
+            await profileService.upsertStarted()
+        }
+
+        guard case .authenticated(let session) = service.state else {
+            restoreTask.cancel()
+            return XCTFail("Expected refreshed authenticated state before profile sync completed")
+        }
+        XCTAssertEqual(session.accessToken, refreshed.accessToken)
+        XCTAssertEqual(store.savedSession?.accessToken, refreshed.accessToken)
+        let refreshCompletedUpserts = await profileService.completedUpsertCount()
+        XCTAssertEqual(refreshCompletedUpserts, 0)
+
+        await profileService.resumeUpsert()
+        await restoreTask.value
+        await waitForCondition {
+            await profileService.completedUpsertCount() == 1
+        }
+    }
+
+    func testProfileSyncFailureDoesNotBlockAuthenticatedState() async {
+        let profileService = FailingProfileServiceSpy()
+        let store = InMemoryAuthSessionStore()
+        let service = SupabaseAuthService(
+            api: SuccessfulSignInAuthAPI(session: .fixture),
+            sessionStore: store,
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: AnonymousSessionLinkerStub(),
+            profileService: profileService
+        )
+
+        await service.signIn(email: "member@example.com", password: "Password-123!", context: .paywall)
+        await waitForCondition {
+            await profileService.upsertAttempts() == 1
+        }
+
+        guard case .authenticated(let session) = service.state else {
+            return XCTFail("Expected authenticated state despite profile sync failure")
+        }
+        XCTAssertEqual(session.accessToken, AuthSession.fixture.accessToken)
+        XCTAssertEqual(store.savedSession?.accessToken, AuthSession.fixture.accessToken)
     }
 
     func testProfileDecodingRejectsUnsupportedProPlatform() throws {
@@ -106,7 +248,7 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertThrowsError(try JSONDecoder.profileDecoder.decode(Profile.self, from: payload))
     }
 
-    func testProfileUpsertSendsLatestEmailAndLastLoginAt() async throws {
+    func testProfileInsertSendsLatestEmailAndLastLoginAtWhenProfileMissing() async throws {
         let service = SupabaseProfileService(
             configuration: SupabaseProjectConfiguration(
                 projectURL: URL(string: "https://example.test")!,
@@ -118,19 +260,86 @@ final class AuthSystemTests: XCTestCase {
             urlSession: makeURLSession()
         )
         var capturedBody: [[String: Any]] = []
+        var requestMethods: [String] = []
         URLProtocolStub.requestHandler = { request in
+            requestMethods.append(request.httpMethod ?? "")
             XCTAssertEqual(request.url?.path, "/rest/v1/profiles")
+            if request.httpMethod == "GET" {
+                return (200, Data("[]".utf8))
+            }
             let data = try XCTUnwrap(request.bodyData())
             capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [[String: Any]])
-            return (200, Self.profilePayload())
+            return (201, Self.profilePayload())
         }
 
         _ = try await service.upsertProfile(using: .fixture)
 
         let payload = try XCTUnwrap(capturedBody.first)
+        XCTAssertEqual(requestMethods, ["GET", "POST"])
         XCTAssertEqual(payload["id"] as? String, "user-1")
         XCTAssertEqual(payload["email"] as? String, "member@example.com")
         XCTAssertNotNil(payload["last_login_at"] as? String)
+        XCTAssertNil(payload["is_pro"])
+        XCTAssertNil(payload["pro_platform"])
+    }
+
+    func testProfileUpsertPatchesSafeFieldsWhenProfileExists() async throws {
+        let service = SupabaseProfileService(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: makeURLSession()
+        )
+        var capturedBody: [String: Any] = [:]
+        var requestMethods: [String] = []
+        URLProtocolStub.requestHandler = { request in
+            requestMethods.append(request.httpMethod ?? "")
+            XCTAssertEqual(request.url?.path, "/rest/v1/profiles")
+            if request.httpMethod == "GET" {
+                return (200, Self.profilePayload())
+            }
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (200, Self.profilePayload())
+        }
+
+        _ = try await service.upsertProfile(using: .fixture)
+
+        XCTAssertEqual(requestMethods, ["GET", "PATCH"])
+        XCTAssertEqual(capturedBody["email"] as? String, "member@example.com")
+        XCTAssertNotNil(capturedBody["last_login_at"] as? String)
+        XCTAssertNil(capturedBody["is_pro"])
+        XCTAssertNil(capturedBody["pro_platform"])
+    }
+
+    func testProfileOnboardingPatchSendsOnlySafeField() async throws {
+        let service = SupabaseProfileService(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: makeURLSession()
+        )
+        var capturedBody: [String: Any] = [:]
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "PATCH")
+            XCTAssertEqual(request.url?.path, "/rest/v1/profiles")
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (200, Self.profilePayload(onboardingCompleted: true))
+        }
+
+        _ = try await service.updateOnboardingCompleted(true, using: .fixture)
+
+        XCTAssertEqual(Set(capturedBody.keys), ["onboarding_completed"])
+        XCTAssertEqual(capturedBody["onboarding_completed"] as? Bool, true)
     }
 
     func testAnonymousLinkRetriesOnServerFailureAndClearsOnDuplicate() async {
@@ -675,12 +884,70 @@ private actor ProfileServiceSpy: ProfileServicing {
         try await upsertProfile(using: session)
     }
 
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
+    func upsertedUserIDs() -> [String] {
+        upsertedSessions.map(\.user.id)
+    }
+}
+
+private actor BlockingProfileServiceSpy: ProfileServicing {
+    private var didStartUpsert = false
+    private var completedUpserts = 0
+    private var continuation: CheckedContinuation<Void, Never>?
+
+    func fetchProfile(using session: AuthSession) async throws -> Profile? { nil }
+
+    func upsertProfile(using session: AuthSession) async throws -> Profile {
+        didStartUpsert = true
+        await withCheckedContinuation { continuation in
+            self.continuation = continuation
+        }
+        completedUpserts += 1
+        return Profile(
+            id: session.user.id,
+            email: session.user.email,
+            createdAt: Date(),
+            updatedAt: Date(),
+            isPro: false,
+            proPlatform: nil,
+            onboardingCompleted: false,
+            lastLoginAt: Date()
+        )
+    }
+
+    func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile {
         try await upsertProfile(using: session)
     }
 
-    func upsertedUserIDs() -> [String] {
-        upsertedSessions.map(\.user.id)
+    func upsertStarted() -> Bool {
+        didStartUpsert
+    }
+
+    func completedUpsertCount() -> Int {
+        completedUpserts
+    }
+
+    func resumeUpsert() {
+        continuation?.resume()
+        continuation = nil
+    }
+}
+
+private actor FailingProfileServiceSpy: ProfileServicing {
+    private var attempts = 0
+
+    func fetchProfile(using session: AuthSession) async throws -> Profile? { nil }
+
+    func upsertProfile(using session: AuthSession) async throws -> Profile {
+        attempts += 1
+        throw ProfileServiceError.invalidResponse
+    }
+
+    func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile {
+        throw ProfileServiceError.invalidResponse
+    }
+
+    func upsertAttempts() -> Int {
+        attempts
     }
 }
 

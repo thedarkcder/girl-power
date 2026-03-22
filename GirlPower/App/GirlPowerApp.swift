@@ -61,8 +61,7 @@ struct GirlPowerApp: App {
                 repository: repository,
                 demoQuotaCoordinator: coordinator,
                 entitlementService: entitlementService,
-                authService: authService,
-                profileService: profileService
+                authService: authService
             )
         )
         Task {

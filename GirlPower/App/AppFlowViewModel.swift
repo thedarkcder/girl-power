@@ -89,18 +89,15 @@ final class AppFlowViewModel: ObservableObject {
     private let demoQuotaCoordinator: DemoQuotaCoordinating
     private let entitlementService: any EntitlementServicing
     private let authService: any AuthServicing
-    private let profileService: any ProfileServicing
     private var stateTask: Task<Void, Never>?
     private var entitlementTask: Task<Void, Never>?
     private var authTask: Task<Void, Never>?
     private var profileSyncTask: Task<Void, Never>?
-    private var entitlementMirrorTask: Task<Void, Never>?
     private var currentAttemptIndex: Int = 1
     private var activeAnonymousSessionID: UUID?
     private var pendingProtectedAction: ProtectedAction?
     private var appleSignInNonce: String?
     private var skipOnboardingAfterSplash: Bool
-    private var lastMirroredEntitlement: MirroredEntitlement?
     private let logger = Logger(subsystem: "com.girlpower.app", category: "AppFlow")
 
     private enum ProtectedAction {
@@ -108,18 +105,11 @@ final class AppFlowViewModel: ObservableObject {
         case paywall
     }
 
-    private struct MirroredEntitlement: Equatable {
-        let userID: String
-        let isPro: Bool
-        let platform: ProPlatform?
-    }
-
     init(
         repository: OnboardingCompletionRepository,
         demoQuotaCoordinator: DemoQuotaCoordinating,
         entitlementService: any EntitlementServicing,
         authService: (any AuthServicing)? = nil,
-        profileService: any ProfileServicing = DisabledProfileService(),
         slides: [OnboardingSlide] = OnboardingSlide.defaultSlides,
         stateMachine: AppFlowStateMachine? = nil
     ) {
@@ -127,7 +117,6 @@ final class AppFlowViewModel: ObservableObject {
         self.demoQuotaCoordinator = demoQuotaCoordinator
         self.entitlementService = entitlementService
         self.authService = authService ?? DisabledAuthService()
-        self.profileService = profileService
         self.slides = slides
         self.stateMachine = stateMachine ?? AppFlowStateMachine(slideCount: slides.count)
         self.state = self.stateMachine.initialState()
@@ -146,7 +135,6 @@ final class AppFlowViewModel: ObservableObject {
         entitlementTask?.cancel()
         authTask?.cancel()
         profileSyncTask?.cancel()
-        entitlementMirrorTask?.cancel()
     }
 
     func handleSplashFinished() {
@@ -394,9 +382,6 @@ final class AppFlowViewModel: ObservableObject {
                     if isProUser && !previouslyPro {
                         handleProUnlocked()
                     }
-                    if let session = authState.session {
-                        scheduleEntitlementMirror(for: session)
-                    }
                 }
             }
         }
@@ -418,9 +403,7 @@ final class AppFlowViewModel: ObservableObject {
                         authPrompt = AuthPrompt(context: context, message: message)
                     }
                     if newState.session == nil {
-                        lastMirroredEntitlement = nil
                         profileSyncTask?.cancel()
-                        entitlementMirrorTask?.cancel()
                     }
                 }
             }
@@ -612,38 +595,6 @@ final class AppFlowViewModel: ObservableObject {
                     }
                 }
             }
-            guard Task.isCancelled == false else { return }
-            await self.mirrorEntitlementIfNeeded(for: session)
-        }
-    }
-
-    private func scheduleEntitlementMirror(for session: AuthSession) {
-        entitlementMirrorTask?.cancel()
-        entitlementMirrorTask = Task { [weak self] in
-            await self?.mirrorEntitlementIfNeeded(for: session)
-        }
-    }
-
-    private func mirrorEntitlementIfNeeded(for session: AuthSession) async {
-        let snapshot = MirroredEntitlement(
-            userID: session.user.id,
-            isPro: self.isProUser,
-            platform: self.isProUser ? .apple : nil
-        )
-        guard snapshot != self.lastMirroredEntitlement else {
-            return
-        }
-        do {
-            _ = try await self.profileService.mirrorEntitlement(
-                isPro: snapshot.isPro,
-                platform: snapshot.platform,
-                using: session
-            )
-            await MainActor.run {
-                self.lastMirroredEntitlement = snapshot
-            }
-        } catch {
-            self.logger.warning("Profile entitlement mirror failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 }

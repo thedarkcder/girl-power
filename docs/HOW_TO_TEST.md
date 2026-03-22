@@ -167,3 +167,85 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
    ```sh
    xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,OS=17.0.1,name=iPhone 15 Pro'
    ```
+
+## GP-123 Profiles Contract Hardening
+
+1. Reset the local Supabase stack onto the latest migration set:
+   ```sh
+   scripts/supabase-reset.sh
+   ```
+2. Run the targeted auth/profile regressions:
+   ```sh
+   xcodebuild test \
+     -scheme GirlPower \
+     -destination 'platform=iOS Simulator,name=iPhone 15' \
+     -only-testing:GirlPowerTests/AuthSystemTests \
+     -only-testing:GirlPowerTests/AppFlowViewModelProTests \
+     -only-testing:GirlPowerTests/OnboardingCompletionRepositoryTests
+   ```
+3. Replay the `profiles` REST contract locally:
+   ```sh
+   eval "$(supabase status -o env | sed '/^Stopped services/d;/^A new version/d;/^We recommend/d')"
+   EMAIL='gp123-verify@example.com'
+   PASSWORD='Password-123!'
+   LOGIN_ONE='2026-03-22T21:00:00Z'
+   LOGIN_TWO='2026-03-22T21:05:00Z'
+
+   CREATE_RESPONSE=$(curl -sS -X POST "$API_URL/auth/v1/admin/users" \
+     -H "apikey: $SERVICE_ROLE_KEY" \
+     -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+     -H 'Content-Type: application/json' \
+     -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"email_confirm\":true}")
+   USER_ID=$(printf '%s' "$CREATE_RESPONSE" | jq -r '.id')
+   SIGN_IN_RESPONSE=$(curl -sS -X POST "$API_URL/auth/v1/token?grant_type=password" \
+     -H "apikey: $ANON_KEY" \
+     -H 'Content-Type: application/json' \
+     -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\"}")
+   ACCESS_TOKEN=$(printf '%s' "$SIGN_IN_RESPONSE" | jq -r '.access_token')
+
+   curl -sS -X POST "$REST_URL/profiles?select=id,email,is_pro,pro_platform,onboarding_completed,last_login_at" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
+     -d "[{\"id\":\"$USER_ID\",\"email\":\"$EMAIL\",\"last_login_at\":\"$LOGIN_ONE\"}]" | jq
+
+   curl -sS "$REST_URL/profiles?id=eq.$USER_ID&select=id,email,is_pro,pro_platform,onboarding_completed,last_login_at" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" | jq
+
+   curl -sS -X PATCH "$REST_URL/profiles?id=eq.$USER_ID&select=id,email,last_login_at,is_pro,pro_platform" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
+     -d "{\"email\":\"updated-$EMAIL\",\"last_login_at\":\"$LOGIN_TWO\"}" | jq
+
+   curl -sS -X PATCH "$REST_URL/profiles?id=eq.$USER_ID&select=id,onboarding_completed,is_pro,pro_platform" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
+     -d '{"onboarding_completed":true}' | jq
+
+   curl -sS -X PATCH "$REST_URL/profiles?id=eq.$USER_ID&select=id,is_pro,pro_platform" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
+     -d '{"is_pro":true,"pro_platform":"apple"}' | jq
+
+   curl -sS -X PATCH "$REST_URL/profiles?id=eq.$USER_ID&select=id,is_pro,pro_platform" \
+     -H "apikey: $SERVICE_ROLE_KEY" \
+     -H "Authorization: Bearer $SERVICE_ROLE_KEY" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
+     -d '{"is_pro":true,"pro_platform":"apple"}' | jq
+   ```
+   - Expect the insert/read/login/onboarding calls to succeed.
+   - Expect the client entitlement PATCH to fail with `code = "42501"`.
+   - Expect the service-role entitlement PATCH to succeed.
+4. Run the full app suite:
+   ```sh
+   xcodebuild test -scheme GirlPower -destination 'platform=iOS Simulator,name=iPhone 15'
+   ```

@@ -507,6 +507,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private let profileService: any ProfileServicing
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
     private var sessionRecoveryTask: Task<AuthSession?, Never>?
+    private var postAuthenticationTask: Task<Void, Never>?
     private var sessionRecoveryContext: AuthRequirementContext?
     private let logger = Logger(subsystem: "com.route25.GirlPower", category: "Auth")
 
@@ -606,6 +607,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func signOut() async {
+        postAuthenticationTask?.cancel()
         try? sessionStore.clear()
         anonymousSessionStore.clear()
         apply(.signOut)
@@ -630,12 +632,11 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         do {
             let session = try await action()
             try sessionStore.save(session)
-            await syncProfile(for: session)
             apply(.authenticationSucceeded(session))
-            let linked = await linker.linkPendingSession(with: session)
-            if linked == false {
-                logger.warning("Anonymous session link will retry on the next authenticated launch")
-            }
+            schedulePostAuthenticationWork(
+                for: session,
+                linkFailureMessage: "Anonymous session link will retry on the next authenticated launch"
+            )
         } catch let error as SupabaseAuthAPIError {
             if error == .refreshRejected {
                 try? sessionStore.clear()
@@ -651,12 +652,11 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         do {
             let refreshed = try await api.refresh(refreshToken: session.refreshToken)
             try sessionStore.save(refreshed)
-            await syncProfile(for: refreshed)
             apply(.authenticationSucceeded(refreshed))
-            let linked = await linker.linkPendingSession(with: refreshed)
-            if linked == false {
-                logger.warning("Anonymous session link still pending after refresh")
-            }
+            schedulePostAuthenticationWork(
+                for: refreshed,
+                linkFailureMessage: "Anonymous session link still pending after refresh"
+            )
             return refreshed
         } catch let error as SupabaseAuthAPIError {
             switch error {
@@ -694,9 +694,8 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
                 if session.shouldRefreshSoon {
                     return await self.refresh(session: session, context: .restore)
                 }
-                await self.syncProfile(for: session)
                 self.apply(.restoreSession(session))
-                _ = await self.linker.linkPendingSession(with: session)
+                self.schedulePostAuthenticationWork(for: session)
                 return session
             } catch {
                 self.apply(.authenticationFailed(context: .restore, message: "Stored session could not be restored.", reason: .unexpectedResponse))
@@ -737,11 +736,25 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         continuations.values.forEach { $0.yield(nextState) }
     }
 
-    private func syncProfile(for session: AuthSession) async {
-        do {
-            _ = try await profileService.upsertProfile(using: session)
-        } catch {
-            logger.warning("Profile sync after authentication failed: \(error.localizedDescription, privacy: .public)")
+    private func schedulePostAuthenticationWork(
+        for session: AuthSession,
+        linkFailureMessage: String? = nil
+    ) {
+        postAuthenticationTask?.cancel()
+        let profileService = self.profileService
+        let linker = self.linker
+        let logger = self.logger
+        postAuthenticationTask = Task {
+            do {
+                _ = try await profileService.upsertProfile(using: session)
+            } catch {
+                logger.warning("Profile sync after authentication failed: \(error.localizedDescription, privacy: .public)")
+            }
+            guard Task.isCancelled == false else { return }
+            let linked = await linker.linkPendingSession(with: session)
+            if linked == false, let linkFailureMessage {
+                logger.warning("\(linkFailureMessage, privacy: .public)")
+            }
         }
     }
 
