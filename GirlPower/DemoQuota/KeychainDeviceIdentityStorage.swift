@@ -5,7 +5,7 @@ final class KeychainDeviceIdentityStorage: KeychainPersisting {
     private let service: String
     private let accessGroup: String?
 
-    init(service: String = "com.route25.girlpower.deviceid", accessGroup: String? = nil) {
+    init(service: String = "com.route25.GirlPower.deviceid", accessGroup: String? = nil) {
         self.service = service
         self.accessGroup = accessGroup
     }

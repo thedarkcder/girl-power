@@ -60,7 +60,7 @@ create table if not exists public.demo_attempts (
   ),
   reason text,
   fallback_used boolean not null default false,
-  rate_limit_window_start timestamptz,
+  rate_limit_payload jsonb not null,
   created_at timestamptz not null default timezone('utc', now()),
   expires_at timestamptz not null default timezone('utc', now()) + interval '30 days'
 );
@@ -232,7 +232,7 @@ begin
     state,
     reason,
     fallback_used,
-    rate_limit_window_start
+    rate_limit_payload
   )
   values (
     v_session_record.id,
@@ -245,7 +245,13 @@ begin
     p_state,
     p_reason,
     coalesce(p_fallback_used, false),
-    v_window_start
+    jsonb_build_object(
+      'allowed', true,
+      'attempt_count', v_attempts + 1,
+      'window_start', v_window_start,
+      'limit', v_limit,
+      'window_seconds', v_window_seconds
+    )
   )
   returning * into v_attempt_record;
 

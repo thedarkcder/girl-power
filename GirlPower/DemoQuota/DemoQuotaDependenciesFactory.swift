@@ -35,7 +35,7 @@ enum DemoQuotaDependenciesFactory {
         let persistence = UserDefaultsDemoAttemptRepository(prefix: "demo.quota.mock")
         let sessionLogger = ConsoleDemoSessionLogger()
         let evaluationService = MockDemoEvaluationService()
-        let keychain = KeychainDeviceIdentityStorage(service: "com.route25.girlpower.deviceid.mock")
+        let keychain = KeychainDeviceIdentityStorage(service: "com.route25.GirlPower.deviceid.mock")
         let identityProvider = DeviceIdentityProvider(keychain: keychain)
         return DemoQuotaCoordinator(
             persistence: persistence,

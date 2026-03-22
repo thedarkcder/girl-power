@@ -27,6 +27,7 @@ type DuplicateAttempt = {
   llm_response: Record<string, unknown>;
   moderation_payload: Record<string, unknown>;
   reason: string | null;
+  rate_limit_payload: RateLimitSnapshot;
 };
 
 type PersistResult = {
@@ -100,7 +101,7 @@ export function buildEvaluateSessionHandler(deps: EvaluateSessionHandlerDependen
       const duplicate = await deps.sessionRepository.findAttempt(parsed.device_id, parsed.attempt_index);
       if (duplicate) {
         return jsonResponse(
-          buildDuplicateResponse(parsed, duplicate, correlationId, existingSnapshot, await deps.rateLimiter.evaluate(parsed.device_id)),
+          buildDuplicateResponse(parsed, duplicate, correlationId, existingSnapshot),
           409,
         );
       }
@@ -296,7 +297,6 @@ function buildDuplicateResponse(
   duplicate: DuplicateAttempt,
   correlationId: string,
   snapshot: DemoQuotaSnapshot | null,
-  rateLimit: RateLimitSnapshot,
 ): EvaluateSessionResponse {
   const persistedDecision = parsePersistedDecision(duplicate.llm_response);
   const lastDecision = persistedDecision ?? persistedDecisionFromSnapshot(snapshot);
@@ -315,7 +315,7 @@ function buildDuplicateResponse(
     request: duplicate.request_payload,
     response: duplicate.llm_response,
     moderation: duplicate.moderation_payload,
-    rate_limit: rateLimit,
+    rate_limit: duplicate.rate_limit_payload,
   };
 }
 

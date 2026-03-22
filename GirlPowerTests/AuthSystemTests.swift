@@ -57,7 +57,7 @@ final class AuthSystemTests: XCTestCase {
                 projectURL: URL(string: "https://example.test")!,
                 anonKey: "anon-key",
                 authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-                appleServiceID: "com.route25.girlpower.auth",
+                appleServiceID: "com.route25.GirlPower.auth",
                 urlScheme: "girlpower"
             ),
             urlSession: session,
@@ -90,7 +90,7 @@ final class AuthSystemTests: XCTestCase {
                 projectURL: URL(string: "https://example.test")!,
                 anonKey: "anon-key",
                 authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-                appleServiceID: "com.route25.girlpower.auth",
+                appleServiceID: "com.route25.GirlPower.auth",
                 urlScheme: "girlpower"
             ),
             urlSession: session,
@@ -114,7 +114,7 @@ final class AuthSystemTests: XCTestCase {
                 "SupabaseProjectURL": "https://example.test",
                 "SupabaseAnonKey": "anon-key",
                 "SupabaseAuthRedirectURL": "girlpower://auth/callback",
-                "SupabaseAppleServiceID": "com.route25.girlpower.auth",
+                "SupabaseAppleServiceID": "com.route25.GirlPower.auth",
                 "SupabaseCallbackScheme": "girlpower",
             ]
         )
@@ -122,7 +122,7 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(configuration.projectURL.absoluteString, "https://example.test")
         XCTAssertEqual(configuration.anonKey, "anon-key")
         XCTAssertEqual(configuration.authRedirectURL.absoluteString, "girlpower://auth/callback")
-        XCTAssertEqual(configuration.appleServiceID, "com.route25.girlpower.auth")
+        XCTAssertEqual(configuration.appleServiceID, "com.route25.GirlPower.auth")
         XCTAssertEqual(configuration.urlScheme, "girlpower")
     }
 
@@ -479,7 +479,7 @@ final class AuthSystemTests: XCTestCase {
             projectURL: URL(string: "https://example.test")!,
             anonKey: "anon-key",
             authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
-            appleServiceID: "com.route25.girlpower.auth",
+            appleServiceID: "com.route25.GirlPower.auth",
             urlScheme: "girlpower"
         )
         let sessionStore = InMemoryAuthSessionStore(initial: initialSession)

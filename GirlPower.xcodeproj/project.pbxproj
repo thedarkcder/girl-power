@@ -769,10 +769,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPABASE_ANON_KEY = sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl;
-				SUPABASE_APPLE_SERVICE_ID = com.route25.girlpower.auth;
+				SUPABASE_APPLE_SERVICE_ID = com.route25.GirlPower.auth;
 				SUPABASE_AUTH_REDIRECT_URL = "girlpower://auth/callback";
 				SUPABASE_CALLBACK_SCHEME = girlpower;
 				SUPABASE_PROJECT_URL = "https://ktgapnamhpdbmhhgydnl.supabase.co";
@@ -797,10 +797,10 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPABASE_ANON_KEY = sb_publishable_5_jb650P-ERhB-qX3Msm0w_bU93VdQl;
-				SUPABASE_APPLE_SERVICE_ID = com.route25.girlpower.auth;
+				SUPABASE_APPLE_SERVICE_ID = com.route25.GirlPower.auth;
 				SUPABASE_AUTH_REDIRECT_URL = "girlpower://auth/callback";
 				SUPABASE_CALLBACK_SCHEME = girlpower;
 				SUPABASE_PROJECT_URL = "https://ktgapnamhpdbmhhgydnl.supabase.co";
@@ -823,7 +823,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -844,7 +844,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.tests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -864,7 +864,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -884,7 +884,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.route25.girlpower.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.route25.GirlPower.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;

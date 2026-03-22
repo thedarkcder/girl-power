@@ -248,7 +248,7 @@ final class KeychainAuthSessionStore: AuthSessionStoring {
     private let service: String
     private let account: String
 
-    init(service: String = "com.route25.girlpower.auth.session", account: String = "supabase-session") {
+    init(service: String = "com.route25.GirlPower.auth.session", account: String = "supabase-session") {
         self.service = service
         self.account = account
     }
@@ -507,7 +507,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
     private var sessionRecoveryTask: Task<AuthSession?, Never>?
     private var sessionRecoveryContext: AuthRequirementContext?
-    private let logger = Logger(subsystem: "com.route25.girlpower", category: "Auth")
+    private let logger = Logger(subsystem: "com.route25.GirlPower", category: "Auth")
 
     init(
         api: SupabaseAuthAPI,

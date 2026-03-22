@@ -1,6 +1,7 @@
 import { assertEquals } from 'std/assert';
 import { buildEvaluateSessionHandler } from './handler.ts';
 import type { DemoQuotaAttemptLog, DemoQuotaSnapshot } from '../demo-quota/types.ts';
+import type { RateLimitSnapshot } from './types.ts';
 
 type DependencyOverrides = {
   duplicateAttempt?: {
@@ -13,6 +14,7 @@ type DependencyOverrides = {
     llm_response: Record<string, unknown>;
     moderation_payload: Record<string, unknown>;
     reason: string | null;
+    rate_limit_payload: RateLimitSnapshot;
   } | null;
   snapshot?: DemoQuotaSnapshot | null;
   attemptLog?: DemoQuotaAttemptLog | null;
@@ -81,6 +83,13 @@ Deno.test('evaluate-session returns 409 duplicate response with the persisted ca
       },
       moderation_payload: { flagged: false },
       reason: null,
+      rate_limit_payload: {
+        allowed: true,
+        attempt_count: 1,
+        window_start: '2026-03-14T00:00:00.000Z',
+        limit: 3,
+        window_seconds: 60,
+      },
     },
     snapshot: {
       attempts_used: 1,
@@ -98,6 +107,14 @@ Deno.test('evaluate-session returns 409 duplicate response with the persisted ca
   assertEquals(response.status, 409);
   assertEquals(body.reason, 'duplicate_attempt');
   assertEquals(body.decision, { outcome: 'allow' });
+  assertEquals(body.rate_limit, {
+    allowed: true,
+    attempt_count: 1,
+    window_start: '2026-03-14T00:00:00.000Z',
+    limit: 3,
+    window_seconds: 60,
+  });
+  assertEquals(harness.calls.rateLimitEvaluations, 0);
 });
 
 Deno.test('evaluate-session fails closed when the LLM decision path times out', async () => {
