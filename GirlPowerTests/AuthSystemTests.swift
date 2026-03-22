@@ -276,11 +276,10 @@ final class AuthSystemTests: XCTestCase {
 
         let payload = try XCTUnwrap(capturedBody.first)
         XCTAssertEqual(requestMethods, ["GET", "POST"])
+        XCTAssertEqual(Set(payload.keys), ["id", "email", "last_login_at"])
         XCTAssertEqual(payload["id"] as? String, "user-1")
         XCTAssertEqual(payload["email"] as? String, "member@example.com")
         XCTAssertNotNil(payload["last_login_at"] as? String)
-        XCTAssertNil(payload["is_pro"])
-        XCTAssertNil(payload["pro_platform"])
     }
 
     func testProfileUpsertPatchesSafeFieldsWhenProfileExists() async throws {
@@ -310,10 +309,9 @@ final class AuthSystemTests: XCTestCase {
         _ = try await service.upsertProfile(using: .fixture)
 
         XCTAssertEqual(requestMethods, ["GET", "PATCH"])
+        XCTAssertEqual(Set(capturedBody.keys), ["email", "last_login_at"])
         XCTAssertEqual(capturedBody["email"] as? String, "member@example.com")
         XCTAssertNotNil(capturedBody["last_login_at"] as? String)
-        XCTAssertNil(capturedBody["is_pro"])
-        XCTAssertNil(capturedBody["pro_platform"])
     }
 
     func testProfileOnboardingPatchSendsOnlySafeField() async throws {

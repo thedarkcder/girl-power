@@ -208,6 +208,13 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
      -H "Authorization: Bearer $ACCESS_TOKEN" \
      -H 'Content-Type: application/json' \
      -H 'Prefer: return=representation' \
+     -d "[{\"id\":\"$USER_ID\",\"email\":\"$EMAIL\",\"is_pro\":true,\"pro_platform\":\"apple\",\"last_login_at\":\"$LOGIN_ONE\"}]" | jq
+
+   curl -sS -X POST "$REST_URL/profiles?select=id,email,is_pro,pro_platform,onboarding_completed,last_login_at" \
+     -H "apikey: $ANON_KEY" \
+     -H "Authorization: Bearer $ACCESS_TOKEN" \
+     -H 'Content-Type: application/json' \
+     -H 'Prefer: return=representation' \
      -d "[{\"id\":\"$USER_ID\",\"email\":\"$EMAIL\",\"last_login_at\":\"$LOGIN_ONE\"}]" | jq
 
    curl -sS "$REST_URL/profiles?id=eq.$USER_ID&select=id,email,is_pro,pro_platform,onboarding_completed,last_login_at" \
@@ -242,7 +249,8 @@ Use the shared `GirlPower` scheme with the explicit simulator destination `platf
      -H 'Prefer: return=representation' \
      -d '{"is_pro":true,"pro_platform":"apple"}' | jq
    ```
-   - Expect the insert/read/login/onboarding calls to succeed.
+   - Expect the authenticated entitlement insert to fail with `code = "42501"`.
+   - Expect the safe insert/read/login/onboarding calls to succeed.
    - Expect the client entitlement PATCH to fail with `code = "42501"`.
    - Expect the service-role entitlement PATCH to succeed.
 4. Run the full app suite:
