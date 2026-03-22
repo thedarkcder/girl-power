@@ -126,10 +126,6 @@ private actor OnboardingProfileServiceStub: ProfileServicing {
         )
     }
 
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
-        try await upsertProfile(using: session)
-    }
-
     func updatedOnboardingStates() -> [Bool] {
         onboardingUpdates
     }

@@ -31,13 +31,13 @@ struct Profile: Codable, Equatable {
 enum ProfileServiceError: Error, Equatable {
     case invalidResponse
     case networkUnavailable
+    case conflict
 }
 
 protocol ProfileServicing {
     func fetchProfile(using session: AuthSession) async throws -> Profile?
     func upsertProfile(using session: AuthSession) async throws -> Profile
     func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile
 }
 
 struct DisabledProfileService: ProfileServicing {
@@ -59,20 +59,6 @@ struct DisabledProfileService: ProfileServicing {
             isPro: profile.isPro,
             proPlatform: profile.proPlatform,
             onboardingCompleted: completed,
-            lastLoginAt: profile.lastLoginAt
-        )
-    }
-
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
-        let profile = makeFallbackProfile(using: session)
-        return Profile(
-            id: profile.id,
-            email: profile.email,
-            createdAt: profile.createdAt,
-            updatedAt: profile.updatedAt,
-            isPro: isPro,
-            proPlatform: platform,
-            onboardingCompleted: profile.onboardingCompleted,
             lastLoginAt: profile.lastLoginAt
         )
     }
@@ -121,23 +107,15 @@ final class SupabaseProfileService: ProfileServicing {
     }
 
     func upsertProfile(using session: AuthSession) async throws -> Profile {
-        let request = try makeRequest(
-            session: session,
-            method: "POST",
-            queryItems: [
-                URLQueryItem(name: "on_conflict", value: "id"),
-                URLQueryItem(name: "select", value: Self.selectClause)
-            ],
-            prefer: "resolution=merge-duplicates,return=representation",
-            body: try encoder.encode([
-                ProfileUpsertPayload(
-                    id: session.user.id,
-                    email: session.user.email,
-                    lastLoginAt: Date()
-                )
-            ])
-        )
-        return try await decodeSingleProfile(from: request)
+        if try await fetchProfile(using: session) == nil {
+            do {
+                return try await insertProfile(using: session)
+            } catch ProfileServiceError.conflict {
+                return try await updateLoginMetadata(using: session)
+            }
+        }
+
+        return try await updateLoginMetadata(using: session)
     }
 
     func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile {
@@ -150,20 +128,6 @@ final class SupabaseProfileService: ProfileServicing {
             ],
             prefer: "return=representation",
             body: try encoder.encode(ProfileOnboardingPatch(onboardingCompleted: completed))
-        )
-        return try await decodeSingleProfile(from: request)
-    }
-
-    func mirrorEntitlement(isPro: Bool, platform: ProPlatform?, using session: AuthSession) async throws -> Profile {
-        let request = try makeRequest(
-            session: session,
-            method: "PATCH",
-            queryItems: [
-                URLQueryItem(name: "id", value: "eq.\(session.user.id)"),
-                URLQueryItem(name: "select", value: Self.selectClause)
-            ],
-            prefer: "return=representation",
-            body: try encoder.encode(ProfileEntitlementPatch(isPro: isPro, proPlatform: platform))
         )
         return try await decodeSingleProfile(from: request)
     }
@@ -182,6 +146,9 @@ final class SupabaseProfileService: ProfileServicing {
             let (data, response) = try await urlSession.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse,
                   (200...299).contains(httpResponse.statusCode) else {
+                if (response as? HTTPURLResponse)?.statusCode == 409 {
+                    throw ProfileServiceError.conflict
+                }
                 throw ProfileServiceError.invalidResponse
             }
             return data
@@ -262,6 +229,44 @@ final class SupabaseProfileService: ProfileServicing {
         formatter.formatOptions = [.withInternetDateTime]
         return formatter
     }()
+
+    private func insertProfile(using session: AuthSession) async throws -> Profile {
+        let request = try makeRequest(
+            session: session,
+            method: "POST",
+            queryItems: [
+                URLQueryItem(name: "select", value: Self.selectClause)
+            ],
+            prefer: "return=representation",
+            body: try encoder.encode([
+                ProfileUpsertPayload(
+                    id: session.user.id,
+                    email: session.user.email,
+                    lastLoginAt: Date()
+                )
+            ])
+        )
+        return try await decodeSingleProfile(from: request)
+    }
+
+    private func updateLoginMetadata(using session: AuthSession) async throws -> Profile {
+        let request = try makeRequest(
+            session: session,
+            method: "PATCH",
+            queryItems: [
+                URLQueryItem(name: "id", value: "eq.\(session.user.id)"),
+                URLQueryItem(name: "select", value: Self.selectClause)
+            ],
+            prefer: "return=representation",
+            body: try encoder.encode(
+                ProfileLoginPatch(
+                    email: session.user.email,
+                    lastLoginAt: Date()
+                )
+            )
+        )
+        return try await decodeSingleProfile(from: request)
+    }
 }
 
 private struct ProfileUpsertPayload: Encodable {
@@ -293,23 +298,21 @@ private struct ProfileOnboardingPatch: Encodable {
     }
 }
 
-private struct ProfileEntitlementPatch: Encodable {
-    let isPro: Bool
-    let proPlatform: ProPlatform?
+private struct ProfileLoginPatch: Encodable {
+    let email: String?
+    let lastLoginAt: Date
 
     enum CodingKeys: String, CodingKey {
-        case isPro = "is_pro"
-        case proPlatform = "pro_platform"
+        case email
+        case lastLoginAt = "last_login_at"
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(isPro, forKey: .isPro)
-        if let proPlatform {
-            try container.encode(proPlatform, forKey: .proPlatform)
-        } else {
-            try container.encodeNil(forKey: .proPlatform)
+        if let email {
+            try container.encode(email, forKey: .email)
         }
+        try container.encode(lastLoginAt, forKey: .lastLoginAt)
     }
 }
 

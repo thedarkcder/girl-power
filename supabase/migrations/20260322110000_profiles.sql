@@ -20,7 +20,10 @@ create trigger profiles_touch_updated
 before update on public.profiles
 for each row execute function public.touch_updated_at();
 
-grant select, insert, update on public.profiles to authenticated;
+revoke all on public.profiles from authenticated;
+grant select on public.profiles to authenticated;
+grant insert (id, email, last_login_at) on public.profiles to authenticated;
+grant update (email, onboarding_completed, last_login_at) on public.profiles to authenticated;
 grant select, insert, update on public.profiles to service_role;
 
 alter table public.profiles enable row level security;
@@ -42,7 +45,11 @@ drop policy if exists "profiles-authenticated-insert-own" on public.profiles;
 
 create policy "profiles-authenticated-insert-own" on public.profiles
 for insert
-with check (auth.uid() = id);
+with check (
+  auth.uid() = id
+  and is_pro = false
+  and pro_platform is null
+);
 
 drop policy if exists "profiles-authenticated-update-own" on public.profiles;
 
