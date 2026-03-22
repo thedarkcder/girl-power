@@ -300,7 +300,7 @@ max_frequency = "5s"
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
 [auth.external.apple]
 enabled = false
-client_id = "com.route25.girlpower.auth"
+client_id = "com.route25.GirlPower.auth"
 # DO NOT commit your OAuth provider secret to git. Use environment variable substitution instead:
 secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Enable Apple locally only for manual verification after exporting SUPABASE_AUTH_EXTERNAL_APPLE_SECRET.
