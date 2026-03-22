@@ -761,7 +761,7 @@
 				CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"GirlPower/Preview Content\"";
-				DEVELOPMENT_TEAM = VKRTFP5C3W;
+				DEVELOPMENT_TEAM = 9CGENKKT99;
 				INFOPLIST_FILE = GirlPower/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -789,7 +789,7 @@
 				CODE_SIGN_ENTITLEMENTS = GirlPower/GirlPower.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"GirlPower/Preview Content\"";
-				DEVELOPMENT_TEAM = VKRTFP5C3W;
+				DEVELOPMENT_TEAM = 9CGENKKT99;
 				INFOPLIST_FILE = GirlPower/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
