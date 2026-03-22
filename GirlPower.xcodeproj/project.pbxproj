@@ -48,6 +48,7 @@
 		D31963896E654B37BBE126B0 /* SupabaseSessionLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */; };
 		A1B2C3D4E5F60718293A4B50 /* AuthSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */; };
 		A1B2C3D4E5F60718293A4B52 /* AuthGateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */; };
+		A7B1C2D3E4F5061728394050 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7B1C2D3E4F5061728394051 /* ProfileService.swift */; };
 		B1C9B34D2BB9E8B100B8B310 /* GirlPowerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34C2BB9E8B100B8B310 /* GirlPowerApp.swift */; };
 		B1C9B34F2BB9E8B100B8B310 /* AppFlowStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B34E2BB9E8B100B8B310 /* AppFlowStateMachine.swift */; };
 		B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3502BB9E8B100B8B310 /* AppFlowViewModel.swift */; };
@@ -135,6 +136,7 @@
 		95BBCCDAD98649DC8CF30F83 /* SupabaseSessionLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSessionLogger.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSystem.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthGateView.swift; sourceTree = "<group>"; };
+		A7B1C2D3E4F5061728394051 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
 		8E0C5B6E95FA4663885F9387 /* DemoQuotaStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaStateMachineTests.swift; sourceTree = "<group>"; };
 		F4CE4758E2E64D1CA34E74D0 /* DemoQuotaCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQuotaCoordinatorTests.swift; sourceTree = "<group>"; };
 		B1C9B3052BB9E8AB00B8B310 /* GirlPower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GirlPower.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -251,6 +253,7 @@
 				B1C9B3502BB9E8B100B8B310 /* AppFlowViewModel.swift */,
 				A1B2C3D4E5F60718293A4B51 /* AuthSystem.swift */,
 				A1B2C3D4E5F60718293A4B53 /* AuthGateView.swift */,
+				A7B1C2D3E4F5061728394051 /* ProfileService.swift */,
 				B1C9B3522BB9E8B100B8B310 /* OnboardingSlide.swift */,
 				B1C9B3542BB9E8B100B8B310 /* OnboardingCompletionRepository.swift */,
 			);
@@ -577,6 +580,7 @@
 				B1C9B3512BB9E8B100B8B310 /* AppFlowViewModel.swift in Sources */,
 				A1B2C3D4E5F60718293A4B50 /* AuthSystem.swift in Sources */,
 				A1B2C3D4E5F60718293A4B52 /* AuthGateView.swift in Sources */,
+				A7B1C2D3E4F5061728394050 /* ProfileService.swift in Sources */,
 				B1C9B3552BB9E8B100B8B310 /* OnboardingCompletionRepository.swift in Sources */,
 				B1C9B3532BB9E8B100B8B310 /* OnboardingSlide.swift in Sources */,
 				B1C9B3572BB9E8B100B8B310 /* SplashView.swift in Sources */,

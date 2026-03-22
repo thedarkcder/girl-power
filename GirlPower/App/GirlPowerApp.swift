@@ -20,14 +20,7 @@ struct GirlPowerApp: App {
     private let quotaCoordinator: DemoQuotaCoordinating
 
     init() {
-        let repository = UserDefaultsOnboardingCompletionRepository()
         let arguments = ProcessInfo.processInfo.arguments
-        if arguments.contains("-resetOnboarding") {
-            repository.reset()
-        }
-        if arguments.contains("-returningUser") {
-            repository.markCompleted()
-        }
         let coordinator: DemoQuotaCoordinating
         if arguments.contains("-uiTesting") {
             coordinator = DemoQuotaCoordinatorDisabled()
@@ -35,19 +28,30 @@ struct GirlPowerApp: App {
             coordinator = DemoQuotaDependenciesFactory.makeCoordinator()
         }
         let authService: any AuthServicing
+        let profileService: any ProfileServicing
         if arguments.contains("-uiTesting") {
+            profileService = DisabledProfileService()
             authService = DisabledAuthService()
         } else {
             let configuration = SupabaseProjectConfiguration.live()
             let anonymousSessionStore = UserDefaultsPendingAnonymousSessionStore()
+            profileService = SupabaseProfileService(configuration: configuration)
             authService = SupabaseAuthService(
                 api: SupabaseAuthRESTAPI(configuration: configuration),
                 anonymousSessionStore: anonymousSessionStore,
                 linker: SupabaseAnonymousSessionLinker(
                     configuration: configuration,
                     pendingStore: anonymousSessionStore
-                )
+                ),
+                profileService: profileService
             )
+        }
+        let repository = UserDefaultsOnboardingCompletionRepository(profileService: profileService)
+        if arguments.contains("-resetOnboarding") {
+            repository.reset()
+        }
+        if arguments.contains("-returningUser") {
+            repository.markCompleted()
         }
         let entitlementService = StoreKitEntitlementService(productIDs: ["com.girlpower.app.pro.monthly"])
         self.quotaCoordinator = coordinator
@@ -57,7 +61,8 @@ struct GirlPowerApp: App {
                 repository: repository,
                 demoQuotaCoordinator: coordinator,
                 entitlementService: entitlementService,
-                authService: authService
+                authService: authService,
+                profileService: profileService
             )
         )
         Task {

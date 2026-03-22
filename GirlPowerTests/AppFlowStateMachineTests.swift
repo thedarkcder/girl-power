@@ -15,8 +15,7 @@ final class AppFlowStateMachineTests: XCTestCase {
     }
 
     func testSplashFinishedSkipsDirectlyToCTAWhenOnboardingCompleted() {
-        stateMachine = AppFlowStateMachine(skipOnboardingAfterSplash: true)
-        let afterSplash = stateMachine.transition(from: .splash, event: .splashFinished)
+        let afterSplash = stateMachine.transition(from: .splash, event: .restoreCompletedOnboarding)
         XCTAssertEqual(afterSplash, .demoCTA)
     }
 
@@ -337,6 +336,10 @@ private final class FakeOnboardingCompletionRepository: OnboardingCompletionRepo
     func markCompleted() {
         markCompletedCallCount += 1
         completed = true
+    }
+
+    func syncWithProfile(using session: AuthSession) async -> Bool {
+        completed
     }
 }
 

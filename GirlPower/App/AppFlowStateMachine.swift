@@ -10,6 +10,7 @@ struct AppFlowStateMachine {
 
     enum Event: Equatable {
         case splashFinished
+        case restoreCompletedOnboarding
         case slideAdvance(to: Int)
         case onboardingCompleted
         case startDemo
@@ -20,14 +21,9 @@ struct AppFlowStateMachine {
 
     private let onboardingRange: ClosedRange<Int>
     private let hasSlides: Bool
-    private let skipOnboardingAfterSplash: Bool
 
-    init(
-        slideCount: Int = OnboardingSlide.defaultSlides.count,
-        skipOnboardingAfterSplash: Bool = false
-    ) {
+    init(slideCount: Int = OnboardingSlide.defaultSlides.count) {
         self.hasSlides = slideCount > 0
-        self.skipOnboardingAfterSplash = skipOnboardingAfterSplash
         let upperBound = max(slideCount - 1, 0)
         onboardingRange = 0...upperBound
     }
@@ -40,10 +36,11 @@ struct AppFlowStateMachine {
         switch (state, event) {
         case (.splash, .splashFinished):
             guard hasSlides else { return .demoCTA }
-            if skipOnboardingAfterSplash {
-                return .demoCTA
-            }
             return .onboarding(index: onboardingRange.lowerBound)
+
+        case (.splash, .restoreCompletedOnboarding),
+             (.onboarding, .restoreCompletedOnboarding):
+            return .demoCTA
 
         case (.onboarding(let currentIndex), .slideAdvance(let targetIndex)):
             guard onboardingRange.contains(targetIndex),
