@@ -93,6 +93,7 @@ final class AppFlowViewModel: ObservableObject {
     private var entitlementTask: Task<Void, Never>?
     private var authTask: Task<Void, Never>?
     private var profileSyncTask: Task<Void, Never>?
+    private var authenticatedContextTask: Task<Void, Never>?
     private var currentAttemptIndex: Int = 1
     private var activeAnonymousSessionID: UUID?
     private var pendingProtectedAction: ProtectedAction?
@@ -135,6 +136,7 @@ final class AppFlowViewModel: ObservableObject {
         entitlementTask?.cancel()
         authTask?.cancel()
         profileSyncTask?.cancel()
+        authenticatedContextTask?.cancel()
     }
 
     func handleSplashFinished() {
@@ -186,7 +188,11 @@ final class AppFlowViewModel: ObservableObject {
                 .secondDemo(reason: reason),
                 context: .secondDemo,
                 onAuthorized: { viewModel in
-                    viewModel.startTrackedDemo(reason: reason)
+                    if viewModel.isProUser {
+                        viewModel.startUnlimitedSession(reason: reason)
+                    } else {
+                        viewModel.startTrackedDemo(reason: reason)
+                    }
                 }
             )
             return
@@ -317,7 +323,11 @@ final class AppFlowViewModel: ObservableObject {
             .paywall,
             context: .paywall,
             onAuthorized: { viewModel in
-                viewModel.presentPaywall()
+                if viewModel.isProUser {
+                    viewModel.handleProUnlocked()
+                } else {
+                    viewModel.presentPaywall()
+                }
             }
         )
     }
@@ -395,15 +405,25 @@ final class AppFlowViewModel: ObservableObject {
                     authState = newState
                     if case .authenticated(let session) = newState {
                         authPrompt = nil
-                        resumePendingProtectedActionIfNeeded()
-                        scheduleAuthenticatedProfileSync(for: session)
+                        authenticatedContextTask?.cancel()
+                        authenticatedContextTask = Task { [weak self] in
+                            guard let self else { return }
+                            await self.refreshAuthenticatedContext(for: session)
+                            guard Task.isCancelled == false else { return }
+                            await MainActor.run {
+                                self.resumePendingProtectedActionIfNeeded()
+                                self.scheduleAuthenticatedProfileSync(for: session)
+                            }
+                        }
                     } else if case .authRequired(let context, let message) = newState {
                         authPrompt = AuthPrompt(context: context, message: message)
                     } else if case .authFailed(let context, let message, _) = newState {
                         authPrompt = AuthPrompt(context: context, message: message)
                     }
                     if newState.session == nil {
+                        authenticatedContextTask?.cancel()
                         profileSyncTask?.cancel()
+                        Task { await self.entitlementService.updateAuthenticatedContext(session: nil, profile: nil) }
                     }
                 }
             }
@@ -528,13 +548,14 @@ final class AppFlowViewModel: ObservableObject {
         onAuthorized: @escaping @MainActor (AppFlowViewModel) -> Void
     ) {
         Task {
-            guard await authService.ensureValidSession(for: context) != nil else {
+            guard let session = await authService.ensureValidSession(for: context) else {
                 await MainActor.run {
                     self.pendingProtectedAction = protectedAction
                     self.presentAuthPrompt(context: context, message: self.promptMessage(for: context))
                 }
                 return
             }
+            await refreshAuthenticatedContext(for: session)
             await MainActor.run {
                 onAuthorized(self)
             }
@@ -546,9 +567,35 @@ final class AppFlowViewModel: ObservableObject {
         pendingProtectedAction = nil
         switch action {
         case .secondDemo(let reason):
+            if isProUser {
+                startUnlimitedSession(reason: reason)
+                return
+            }
             startTrackedDemo(reason: reason)
         case .paywall:
+            guard isProUser == false else {
+                handleProUnlocked()
+                return
+            }
             presentPaywall()
+        }
+    }
+
+    private func refreshAuthenticatedContext(for session: AuthSession) async {
+        let syncResult = await authService.synchronizeAuthenticatedContext(for: session)
+        await entitlementService.updateAuthenticatedContext(session: session, profile: syncResult?.profile)
+        let previouslyPro = isProUser
+        isProUser = entitlementService.isPro
+        if let summaryVM = summaryViewModel {
+            let attempt = summaryVM.context.summary.attemptIndex
+            let ctaState = summaryCTAState(for: demoQuotaState, attemptIndex: attempt)
+            summaryVM.updateCTAState(ctaState)
+        }
+        if isProUser && !previouslyPro {
+            handleProUnlocked()
+        }
+        if let snapshot = syncResult?.mergedDemoQuotaSnapshot {
+            await demoQuotaCoordinator.resetFromServer(snapshot: snapshot)
         }
     }
 
