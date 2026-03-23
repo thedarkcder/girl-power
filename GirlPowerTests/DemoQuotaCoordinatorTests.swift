@@ -1,5 +1,6 @@
 import XCTest
 import Combine
+import Security
 @testable import GirlPower
 
 final class DemoQuotaCoordinatorTests: XCTestCase {
@@ -408,6 +409,18 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
 }
 
 final class DeviceIdentityProviderTests: XCTestCase {
+    func testDeviceIDPersistsAcrossReinstallStyleKeychainStorage() async throws {
+        let service = "com.route25.GirlPower.deviceid.tests.\(UUID().uuidString)"
+        defer { deleteKeychainItem(service: service) }
+        let firstProvider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let originalID = try await firstProvider.deviceID()
+
+        let relaunchedProvider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let restoredID = try await relaunchedProvider.deviceID()
+
+        XCTAssertEqual(restoredID, originalID)
+    }
+
     func testReturnsExistingKeychainDeviceID() async throws {
         let expected = UUID(uuidString: "00000000-0000-0000-0000-000000000777")!
         let keychain = DemoQuotaTestKeychain()
@@ -426,6 +439,14 @@ final class DeviceIdentityProviderTests: XCTestCase {
         let deviceID = try await provider.deviceID()
 
         XCTAssertEqual(keychain.storedUUID, deviceID)
+    }
+
+    private func deleteKeychainItem(service: String) {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
 

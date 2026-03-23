@@ -262,6 +262,39 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertNotEqual(viewModel.state, .paywall)
     }
 
+    func testReinstallStyleFreshEntitlementStateRestoresProAfterAuthenticatedProfileSync() async {
+        let entitlement = EntitlementServiceStub(initialState: .ready(product: .mock), isPro: false)
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        auth.synchronizedContextResult = PostAuthenticationSyncResult(
+            profile: Profile(
+                id: "user-2",
+                email: "reinstall@example.com",
+                createdAt: Date(),
+                updatedAt: Date(),
+                isPro: true,
+                proPlatform: .apple,
+                onboardingCompleted: true,
+                lastLoginAt: Date()
+            ),
+            mergedDemoQuotaSnapshot: nil
+        )
+        let viewModel = makeViewModel(
+            entitlement: entitlement,
+            auth: auth
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.state == .demoCTA }
+        XCTAssertFalse(entitlement.isPro)
+
+        auth.send(.authenticated(.fixture))
+
+        await waitForCondition { viewModel.demoButtonTitle == "Start Coaching" }
+        XCTAssertTrue(entitlement.isPro)
+        XCTAssertEqual(entitlement.authenticatedProfile?.isPro, true)
+        XCTAssertEqual(entitlement.authenticatedProfile?.proPlatform, .apple)
+    }
+
     func testAuthFailureKeepsPromptIdentityStable() async {
         let auth = AuthServiceStub(initialState: .anonymousEligible)
         let coordinator = DemoQuotaCoordinatorStub(initialState: .secondAttemptEligible)
