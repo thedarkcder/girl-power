@@ -583,6 +583,10 @@ final class AppFlowViewModel: ObservableObject {
 
     private func refreshAuthenticatedContext(for session: AuthSession) async {
         let syncResult = await authService.synchronizeAuthenticatedContext(for: session)
+        if let snapshot = syncResult?.mergedDemoQuotaSnapshot {
+            demoQuotaState = DemoQuotaStateMachine().state(from: snapshot)
+            await demoQuotaCoordinator.resetFromServer(snapshot: snapshot)
+        }
         await entitlementService.updateAuthenticatedContext(session: session, profile: syncResult?.profile)
         let previouslyPro = isProUser
         isProUser = entitlementService.isPro
@@ -593,9 +597,6 @@ final class AppFlowViewModel: ObservableObject {
         }
         if isProUser && !previouslyPro {
             handleProUnlocked()
-        }
-        if let snapshot = syncResult?.mergedDemoQuotaSnapshot {
-            await demoQuotaCoordinator.resetFromServer(snapshot: snapshot)
         }
     }
 
