@@ -199,7 +199,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
                 expirationDate: transaction.expirationDate
             )
             apply(.entitlementVerified(info))
-            persistSnapshot(for: info)
+            persistSnapshot(for: info, signedTransactionInfo: result.jwsRepresentation)
             if finishTransaction {
                 await transaction.finish()
             }
@@ -257,12 +257,12 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
         return nil
     }
 
-    private func persistSnapshot(for info: SubscriptionInfo) {
+    private func persistSnapshot(for info: SubscriptionInfo, signedTransactionInfo: String) {
         let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: Date())
         snapshotStore.save(snapshot)
         cachedIsPro = true
         refreshIsPro()
-        persistProfileEntitlementIfNeeded()
+        persistProfileEntitlementIfNeeded(signedTransactionInfo: signedTransactionInfo)
     }
 
     private func clearSnapshot() {
@@ -293,12 +293,15 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
         }
     }
 
-    private func persistProfileEntitlementIfNeeded() {
+    private func persistProfileEntitlementIfNeeded(signedTransactionInfo: String) {
         guard let authenticatedSession else { return }
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                let profile = try await profileEntitlementSync.markPro(platform: .apple, using: authenticatedSession)
+                let profile = try await profileEntitlementSync.markPro(
+                    signedTransactionInfo: signedTransactionInfo,
+                    using: authenticatedSession
+                )
                 profileIsPro = profile.isPro
                 refreshIsPro()
             } catch {

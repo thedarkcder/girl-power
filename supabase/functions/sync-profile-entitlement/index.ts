@@ -1,23 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
-import { z } from 'zod';
 import { getRuntimeConfig } from '../evaluate-session/config.ts';
 import { createLogger } from '../evaluate-session/logger.ts';
-import { HttpError, jsonResponse, parseJson } from '../demo-quota/http.ts';
-
-const RequestSchema = z.object({
-  pro_platform: z.enum(['apple', 'external']),
-});
-
-type ProfileRow = {
-  id: string;
-  email: string | null;
-  created_at: string;
-  updated_at: string;
-  is_pro: boolean;
-  pro_platform: 'apple' | 'external' | null;
-  onboarding_completed: boolean;
-  last_login_at: string | null;
-};
+import { HttpError } from '../demo-quota/http.ts';
+import { createSyncProfileEntitlementHandler, type ProfileRow } from './handler.ts';
+import { createEntitlementVerifier } from './verifier.ts';
 
 const config = getRuntimeConfig();
 const supabase = createClient(config.supabaseUrl, config.serviceRoleKey, {
@@ -25,44 +11,16 @@ const supabase = createClient(config.supabaseUrl, config.serviceRoleKey, {
   global: { headers: { 'X-Client-Info': 'sync-profile-entitlement/1.0.0' } },
 });
 const logger = createLogger('sync-profile-entitlement');
+const entitlementVerifier = createEntitlementVerifier();
 
-Deno.serve(async (req) => {
-  const correlationId = crypto.randomUUID();
-
-  try {
-    if (req.method !== 'POST') {
-      throw new HttpError(405, 'Only POST supported');
-    }
-
-    const accessToken = bearerToken(req);
-    if (!accessToken) {
-      throw new HttpError(401, 'Authenticated Supabase session required');
-    }
-
-    const payload = RequestSchema.parse(await parseJson(req));
-    const authUser = await authenticatedUser(accessToken);
-    const profile = await upsertProProfile(authUser.id, authUser.email, payload.pro_platform);
-    return jsonResponse({ profile }, 200);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return jsonResponse({ correlation_id: correlationId, error: 'invalid_body', details: error.issues }, 400);
-    }
-    if (error instanceof HttpError) {
-      return jsonResponse({ correlation_id: correlationId, error: error.message }, error.status);
-    }
+Deno.serve(createSyncProfileEntitlementHandler({
+  authenticate: authenticatedUser,
+  verifyActiveEntitlement: (transactionJws) => entitlementVerifier.verifyActiveEntitlement(transactionJws),
+  syncProfile: (userId, email) => upsertProProfile(userId, email, 'apple'),
+  onUnexpectedError: (correlationId, error) => {
     logger.error('Unhandled sync-profile-entitlement error', { correlationId, error: `${error}` });
-    return jsonResponse({ correlation_id: correlationId, error: 'internal_error' }, 500);
-  }
-});
-
-function bearerToken(req: Request): string | null {
-  const header = req.headers.get('Authorization')?.trim() ?? '';
-  if (!header.startsWith('Bearer ')) {
-    return null;
-  }
-  const token = header.slice('Bearer '.length).trim();
-  return token.length === 0 ? null : token;
-}
+  },
+}));
 
 async function authenticatedUser(accessToken: string) {
   const { data, error } = await supabase.auth.getUser(accessToken);

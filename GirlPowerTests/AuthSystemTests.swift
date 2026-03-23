@@ -371,6 +371,52 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(capturedBody["onboarding_completed"] as? Bool, true)
     }
 
+    func testProfileEntitlementSyncPostsSignedTransactionOnly() async throws {
+        let service = SupabaseProfileEntitlementSyncService(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: makeURLSession()
+        )
+        var capturedBody: [String: Any] = [:]
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/functions/v1/sync-profile-entitlement")
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (
+                200,
+                Data(
+                    """
+                    {
+                      "profile": {
+                        "id": "user-1",
+                        "email": "member@example.com",
+                        "created_at": "2026-03-22T10:00:00Z",
+                        "updated_at": "2026-03-22T10:05:00Z",
+                        "is_pro": true,
+                        "pro_platform": "apple",
+                        "onboarding_completed": false,
+                        "last_login_at": "2026-03-22T10:05:00Z"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let profile = try await service.markPro(signedTransactionInfo: "signed-transaction-jws", using: .fixture)
+
+        XCTAssertEqual(Set(capturedBody.keys), ["transaction_jws"])
+        XCTAssertEqual(capturedBody["transaction_jws"] as? String, "signed-transaction-jws")
+        XCTAssertEqual(profile.proPlatform, .apple)
+        XCTAssertTrue(profile.isPro)
+    }
+
     func testAuthenticatedDeviceLinkRetriesOnServerFailureAndClearsPendingSessionAfterSuccess() async {
         let pendingStore = InMemoryPendingAnonymousSessionStore()
         let pendingID = UUID()

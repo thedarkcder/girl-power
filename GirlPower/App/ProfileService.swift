@@ -46,7 +46,7 @@ protocol ProfileServicing {
 }
 
 protocol ProfileEntitlementSyncing {
-    func markPro(platform: ProPlatform, using session: AuthSession) async throws -> Profile
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile
 }
 
 struct DisabledProfileService: ProfileServicing {
@@ -88,7 +88,7 @@ struct DisabledProfileService: ProfileServicing {
 }
 
 struct DisabledProfileEntitlementSyncService: ProfileEntitlementSyncing {
-    func markPro(platform: ProPlatform, using session: AuthSession) async throws -> Profile {
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile {
         let now = Date()
         return Profile(
             id: session.user.id,
@@ -96,7 +96,7 @@ struct DisabledProfileEntitlementSyncService: ProfileEntitlementSyncing {
             createdAt: now,
             updatedAt: now,
             isPro: true,
-            proPlatform: platform,
+            proPlatform: .apple,
             onboardingCompleted: false,
             lastLoginAt: now
         )
@@ -274,7 +274,7 @@ final class SupabaseProfileEntitlementSyncService: ProfileEntitlementSyncing {
         self.encoder = makeProfileEncoder()
     }
 
-    func markPro(platform: ProPlatform, using session: AuthSession) async throws -> Profile {
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile {
         var request = URLRequest(url: configuration.profileEntitlementSyncURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 8
@@ -282,7 +282,7 @@ final class SupabaseProfileEntitlementSyncService: ProfileEntitlementSyncing {
         request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = try encoder.encode(ProfileEntitlementSyncPayload(proPlatform: platform))
+        request.httpBody = try encoder.encode(ProfileEntitlementSyncPayload(transactionJWS: signedTransactionInfo))
 
         do {
             let (data, response) = try await urlSession.data(for: request)
@@ -359,10 +359,10 @@ extension SupabaseProjectConfiguration {
 }
 
 private struct ProfileEntitlementSyncPayload: Encodable {
-    let proPlatform: ProPlatform
+    let transactionJWS: String
 
     enum CodingKeys: String, CodingKey {
-        case proPlatform = "pro_platform"
+        case transactionJWS = "transaction_jws"
     }
 }
 
