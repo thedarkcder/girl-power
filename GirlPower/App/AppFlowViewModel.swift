@@ -571,6 +571,9 @@ final class AppFlowViewModel: ObservableObject {
                 startUnlimitedSession(reason: reason)
                 return
             }
+            guard demoQuotaState == .secondAttemptEligible else {
+                return
+            }
             startTrackedDemo(reason: reason)
         case .paywall:
             guard isProUser == false else {

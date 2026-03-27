@@ -819,6 +819,10 @@ final class AuthSystemTests: XCTestCase {
         }
 
         let ensuredTask = Task { await service.ensureValidSession(for: .paywall) }
+        await Task.yield()
+        if case .authRequired = service.state {
+            XCTFail("Expected refresh rejection to stay in flight until the joined request completes")
+        }
         await api.resumeRefresh()
         let ensuredSession = await ensuredTask.value
         await restoreTask.value
