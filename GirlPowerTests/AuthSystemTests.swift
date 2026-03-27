@@ -519,6 +519,45 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(linked?.mergedDemoQuotaSnapshot?.serverLockReason, .quotaExhausted)
     }
 
+    func testAuthenticatedDeviceLinkReturnsTerminalRelinkRejectionWithoutClearingPendingSession() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        let pendingID = UUID()
+        pendingStore.save(pendingID)
+        let session = makeURLSession()
+        let linker = SupabaseAnonymousSessionLinker(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: session,
+            pendingStore: pendingStore,
+            deviceIdentityProvider: FakeDeviceIdentityProvider(uuid: UUID())
+        )
+
+        URLProtocolStub.requestHandler = { _ in
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "status": "relink_rejected",
+                      "snapshot": null
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let result = await linker.linkCurrentDevice(with: .fixture)
+
+        XCTAssertEqual(result?.status, "relink_rejected")
+        XCTAssertNil(result?.mergedDemoQuotaSnapshot)
+        XCTAssertEqual(pendingStore.load(), pendingID)
+    }
+
     func testConfigurationLoadsFromInfoDictionary() throws {
         let configuration = try SupabaseProjectConfiguration(
             infoDictionary: [
@@ -783,6 +822,12 @@ final class AuthSystemTests: XCTestCase {
         await api.resumeRefresh()
         let ensuredSession = await ensuredTask.value
         await restoreTask.value
+        await waitForCondition {
+            if case .authFailed = service.state {
+                return true
+            }
+            return false
+        }
 
         XCTAssertNil(ensuredSession)
         XCTAssertNil(store.savedSession)

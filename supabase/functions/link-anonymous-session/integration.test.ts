@@ -7,12 +7,12 @@ const integrationEnabled = supabaseUrl.length > 0 && serviceRoleKey.length > 0;
 
 type LinkResult = {
   status: string;
-  attempts_used: number;
+  attempts_used: number | null;
   active_attempt_index: number | null;
   last_decision: unknown;
   server_lock_reason: string | null;
   last_sync_at: string | null;
-  linked_at: string;
+  linked_at: string | null;
 };
 
 Deno.test({
@@ -105,6 +105,74 @@ Deno.test({
       await client.from('demo_quota_snapshots').delete().in('device_id', [deviceA, deviceB]);
       await client.from('device_links').delete().eq('user_id', userId);
       await client.auth.admin.deleteUser(userId);
+    }
+  },
+});
+
+Deno.test({
+  name: 'link_authenticated_device rejects cross-account relink attempts and preserves the original device binding',
+  ignore: !integrationEnabled,
+  sanitizeOps: false,
+  sanitizeResources: false,
+  fn: async () => {
+    const client = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false },
+    });
+    const deviceID = crypto.randomUUID();
+    const firstEmail = `gp124-owner-${crypto.randomUUID()}@example.com`;
+    const secondEmail = `gp124-other-${crypto.randomUUID()}@example.com`;
+    const password = 'Password123!';
+
+    const { data: firstUser, error: firstUserError } = await client.auth.admin.createUser({
+      email: firstEmail,
+      password,
+      email_confirm: true,
+    });
+    if (firstUserError) throw firstUserError;
+    const { data: secondUser, error: secondUserError } = await client.auth.admin.createUser({
+      email: secondEmail,
+      password,
+      email_confirm: true,
+    });
+    if (secondUserError) throw secondUserError;
+    const firstUserID = firstUser.user?.id;
+    const secondUserID = secondUser.user?.id;
+    assertExists(firstUserID);
+    assertExists(secondUserID);
+
+    try {
+      const initialLink = await client.rpc('link_authenticated_device', {
+        p_device_id: deviceID,
+        p_auth_user_id: firstUserID,
+        p_anon_session_id: null,
+      });
+      if (initialLink.error) throw initialLink.error;
+      const initialPayload = initialLink.data?.[0] as LinkResult | undefined;
+      if (!initialPayload) throw new Error('Expected initial link payload');
+      assertEquals(initialPayload.status, 'linked');
+
+      const rejectedRelink = await client.rpc('link_authenticated_device', {
+        p_device_id: deviceID,
+        p_auth_user_id: secondUserID,
+        p_anon_session_id: null,
+      });
+      if (rejectedRelink.error) throw rejectedRelink.error;
+      const rejectedPayload = rejectedRelink.data?.[0] as LinkResult | undefined;
+      if (!rejectedPayload) throw new Error('Expected rejected relink payload');
+      assertEquals(rejectedPayload.status, 'relink_rejected');
+      assertEquals(rejectedPayload.attempts_used, null);
+      assertEquals(rejectedPayload.server_lock_reason, null);
+
+      const linkedRows = await client
+        .from('device_links')
+        .select('device_id, user_id')
+        .eq('device_id', deviceID);
+      if (linkedRows.error) throw linkedRows.error;
+      assertEquals(linkedRows.data, [{ device_id: deviceID, user_id: firstUserID }]);
+    } finally {
+      await client.from('device_links').delete().eq('device_id', deviceID);
+      await client.auth.admin.deleteUser(firstUserID);
+      await client.auth.admin.deleteUser(secondUserID);
     }
   },
 });

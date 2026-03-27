@@ -441,6 +441,27 @@ final class DeviceIdentityProviderTests: XCTestCase {
         XCTAssertEqual(keychain.storedUUID, deviceID)
     }
 
+    func testMigratesLegacyKeychainDeviceIDIntoScopedQuery() async throws {
+        let service = "com.route25.GirlPower.deviceid.tests.\(UUID().uuidString)"
+        let originalID = UUID()
+        defer { deleteKeychainItem(service: service) }
+
+        let legacyQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+            kSecValueData as String: originalID.uuidString.data(using: .utf8)!
+        ]
+        XCTAssertEqual(SecItemAdd(legacyQuery as CFDictionary, nil), errSecSuccess)
+
+        let provider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let restoredID = try await provider.deviceID()
+        let secondRead = try await provider.deviceID()
+
+        XCTAssertEqual(restoredID, originalID)
+        XCTAssertEqual(secondRead, originalID)
+    }
+
     private func deleteKeychainItem(service: String) {
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
