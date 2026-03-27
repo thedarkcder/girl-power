@@ -379,20 +379,28 @@ final class SupabaseAnonymousSessionLinker: AnonymousSessionLinking {
                 return nil
             }
 
-            guard 200..<300 ~= httpResponse.statusCode else {
-                return nil
-            }
-
             let decoder = JSONDecoder()
             decoder.dateDecodingStrategy = .iso8601
             let result = try decoder.decode(AnonymousSessionLinkResult.self, from: data)
-            if pendingStore.load() != nil {
-                pendingStore.clear()
+
+            if 200..<300 ~= httpResponse.statusCode {
+                if pendingStore.load() != nil {
+                    pendingStore.clear()
+                }
+                return CurrentDeviceLinkResult(
+                    status: result.status,
+                    mergedDemoQuotaSnapshot: result.snapshot?.makeRemoteSnapshot()
+                )
             }
-            return CurrentDeviceLinkResult(
-                status: result.status,
-                mergedDemoQuotaSnapshot: result.snapshot?.makeRemoteSnapshot()
-            )
+
+            if httpResponse.statusCode == 409, result.status == "relink_rejected" {
+                return CurrentDeviceLinkResult(
+                    status: result.status,
+                    mergedDemoQuotaSnapshot: nil
+                )
+            }
+
+            return nil
         } catch {
             return nil
         }
