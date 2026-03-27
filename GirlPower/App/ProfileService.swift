@@ -34,10 +34,19 @@ enum ProfileServiceError: Error, Equatable {
     case conflict
 }
 
+enum ProfileEntitlementSyncError: Error, Equatable {
+    case invalidResponse
+    case networkUnavailable
+}
+
 protocol ProfileServicing {
     func fetchProfile(using session: AuthSession) async throws -> Profile?
     func upsertProfile(using session: AuthSession) async throws -> Profile
     func updateOnboardingCompleted(_ completed: Bool, using session: AuthSession) async throws -> Profile
+}
+
+protocol ProfileEntitlementSyncing {
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile
 }
 
 struct DisabledProfileService: ProfileServicing {
@@ -78,6 +87,22 @@ struct DisabledProfileService: ProfileServicing {
     }
 }
 
+struct DisabledProfileEntitlementSyncService: ProfileEntitlementSyncing {
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile {
+        let now = Date()
+        return Profile(
+            id: session.user.id,
+            email: session.user.email,
+            createdAt: now,
+            updatedAt: now,
+            isPro: true,
+            proPlatform: .apple,
+            onboardingCompleted: false,
+            lastLoginAt: now
+        )
+    }
+}
+
 final class SupabaseProfileService: ProfileServicing {
     private let configuration: SupabaseProjectConfiguration
     private let urlSession: URLSession
@@ -88,8 +113,8 @@ final class SupabaseProfileService: ProfileServicing {
     init(configuration: SupabaseProjectConfiguration, urlSession: URLSession = .shared) {
         self.configuration = configuration
         self.urlSession = urlSession
-        self.decoder = Self.makeDecoder()
-        self.encoder = Self.makeEncoder()
+        self.decoder = makeProfileDecoder()
+        self.encoder = makeProfileEncoder()
     }
 
     func fetchProfile(using session: AuthSession) async throws -> Profile? {
@@ -194,41 +219,7 @@ final class SupabaseProfileService: ProfileServicing {
         return request
     }
 
-    private static func makeDecoder() -> JSONDecoder {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .custom { decoder in
-            let container = try decoder.singleValueContainer()
-            let rawValue = try container.decode(String.self)
-            if let date = fractionalDateFormatter.date(from: rawValue) ?? internetDateFormatter.date(from: rawValue) {
-                return date
-            }
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unsupported date format: \(rawValue)")
-        }
-        return decoder
-    }
-
-    private static func makeEncoder() -> JSONEncoder {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .custom { date, encoder in
-            var container = encoder.singleValueContainer()
-            try container.encode(fractionalDateFormatter.string(from: date))
-        }
-        return encoder
-    }
-
     private static let selectClause = "id,email,created_at,updated_at,is_pro,pro_platform,onboarding_completed,last_login_at"
-
-    private static let fractionalDateFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    private static let internetDateFormatter: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
 
     private func insertProfile(using session: AuthSession) async throws -> Profile {
         let request = try makeRequest(
@@ -266,6 +257,47 @@ final class SupabaseProfileService: ProfileServicing {
             )
         )
         return try await decodeSingleProfile(from: request)
+    }
+}
+
+final class SupabaseProfileEntitlementSyncService: ProfileEntitlementSyncing {
+    private let configuration: SupabaseProjectConfiguration
+    private let urlSession: URLSession
+    private let decoder: JSONDecoder
+    private let encoder: JSONEncoder
+    private let logger = Logger(subsystem: "com.route25.GirlPower", category: "ProfileEntitlements")
+
+    init(configuration: SupabaseProjectConfiguration, urlSession: URLSession = .shared) {
+        self.configuration = configuration
+        self.urlSession = urlSession
+        self.decoder = makeProfileDecoder()
+        self.encoder = makeProfileEncoder()
+    }
+
+    func markPro(signedTransactionInfo: String, using session: AuthSession) async throws -> Profile {
+        var request = URLRequest(url: configuration.profileEntitlementSyncURL)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 8
+        request.setValue(configuration.anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("Bearer \(session.accessToken)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.httpBody = try encoder.encode(ProfileEntitlementSyncPayload(transactionJWS: signedTransactionInfo))
+
+        do {
+            let (data, response) = try await urlSession.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                throw ProfileEntitlementSyncError.invalidResponse
+            }
+            let payload = try decoder.decode(ProfileEntitlementSyncResponse.self, from: data)
+            return payload.profile
+        } catch let error as ProfileEntitlementSyncError {
+            throw error
+        } catch {
+            logger.warning("Profile entitlement sync failed: \(error.localizedDescription, privacy: .public)")
+            throw ProfileEntitlementSyncError.networkUnavailable
+        }
     }
 }
 
@@ -320,4 +352,54 @@ extension SupabaseProjectConfiguration {
     var profilesURL: URL {
         projectURL.appendingPathComponent("rest/v1/profiles")
     }
+
+    var profileEntitlementSyncURL: URL {
+        projectURL.appendingPathComponent("functions/v1/sync-profile-entitlement")
+    }
 }
+
+private struct ProfileEntitlementSyncPayload: Encodable {
+    let transactionJWS: String
+
+    enum CodingKeys: String, CodingKey {
+        case transactionJWS = "transaction_jws"
+    }
+}
+
+private struct ProfileEntitlementSyncResponse: Decodable {
+    let profile: Profile
+}
+
+private func makeProfileDecoder() -> JSONDecoder {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .custom { decoder in
+        let container = try decoder.singleValueContainer()
+        let rawValue = try container.decode(String.self)
+        if let date = profileFractionalDateFormatter.date(from: rawValue) ?? profileInternetDateFormatter.date(from: rawValue) {
+            return date
+        }
+        throw DecodingError.dataCorruptedError(in: container, debugDescription: "Unsupported date format: \(rawValue)")
+    }
+    return decoder
+}
+
+private func makeProfileEncoder() -> JSONEncoder {
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .custom { date, encoder in
+        var container = encoder.singleValueContainer()
+        try container.encode(profileFractionalDateFormatter.string(from: date))
+    }
+    return encoder
+}
+
+private let profileFractionalDateFormatter: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter
+}()
+
+private let profileInternetDateFormatter: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime]
+    return formatter
+}()

@@ -386,6 +386,7 @@ private final class BlockingStartupAuthService: ObservableObject, AuthServicing 
     func requireAuthentication(context: AuthRequirementContext, message: String) async {}
     func dismissFailure() async {}
     func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? { nil }
+    func synchronizeAuthenticatedContext(for session: AuthSession) async -> PostAuthenticationSyncResult? { nil }
     func signIn(email: String, password: String, context: AuthRequirementContext) async {}
     func signUp(email: String, password: String, context: AuthRequirementContext) async {}
     func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async {}
@@ -405,6 +406,7 @@ private final class StartupEntitlementServiceSpy: ObservableObject, EntitlementS
 
     func purchase() async {}
     func restore() async {}
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {}
 
     func observeStates() -> AsyncStream<EntitlementState> {
         AsyncStream { continuation in

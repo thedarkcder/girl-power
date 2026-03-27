@@ -191,6 +191,110 @@ final class AppFlowViewModelProTests: XCTestCase {
         XCTAssertEqual(countAfterAuthentication, 1)
     }
 
+    func testMergedAuthenticatedQuotaPreventsReplayingSecondDemoAfterSignIn() async {
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        auth.synchronizedContextResult = PostAuthenticationSyncResult(
+            profile: nil,
+            mergedDemoQuotaSnapshot: DemoQuotaStateMachine.RemoteSnapshot(
+                attemptsUsed: 2,
+                activeAttemptIndex: nil,
+                lastDecision: nil,
+                serverLockReason: .quotaExhausted
+            )
+        )
+        let coordinator = DemoQuotaCoordinatorStub(
+            initialState: .secondAttemptEligible,
+            startedState: .secondAttemptActive
+        )
+        let viewModel = makeViewModel(
+            entitlement: EntitlementServiceStub(initialState: .ready(product: .mock)),
+            auth: auth,
+            coordinator: coordinator
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.demoQuotaState == .secondAttemptEligible }
+        viewModel.startDemo(reason: "cta_second_demo_merge_guard")
+        await waitForCondition { viewModel.authPrompt?.context == .secondDemo }
+
+        auth.ensuredSession = .fixture
+        auth.send(.authenticated(.fixture))
+
+        await waitForCondition { await coordinator.lastResetSnapshot()?.attemptsUsed == 2 }
+        let startedCount = await coordinator.recordedStartCount()
+        XCTAssertEqual(startedCount, 0)
+        XCTAssertEqual(viewModel.demoQuotaState, .locked(reason: .quotaExhausted))
+        XCTAssertEqual(viewModel.state, .demoCTA)
+    }
+
+    func testProfileBackedProEntitlementSkipsPendingPaywallAfterAuthentication() async {
+        let entitlement = EntitlementServiceStub(initialState: .ready(product: .mock), isPro: false)
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        auth.synchronizedContextResult = PostAuthenticationSyncResult(
+            profile: Profile(
+                id: "user-1",
+                email: "member@example.com",
+                createdAt: Date(),
+                updatedAt: Date(),
+                isPro: true,
+                proPlatform: .apple,
+                onboardingCompleted: false,
+                lastLoginAt: Date()
+            ),
+            mergedDemoQuotaSnapshot: nil
+        )
+        let viewModel = makeViewModel(
+            entitlement: entitlement,
+            auth: auth
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.state == .demoCTA }
+        viewModel.continueToPaywall()
+        await waitForCondition { viewModel.authPrompt?.context == .paywall }
+
+        auth.ensuredSession = .fixture
+        auth.send(.authenticated(.fixture))
+
+        await waitForCondition { viewModel.demoButtonTitle == "Start Coaching" }
+        XCTAssertTrue(entitlement.isPro)
+        XCTAssertEqual(entitlement.authenticatedProfile?.proPlatform, .apple)
+        XCTAssertNotEqual(viewModel.state, .paywall)
+    }
+
+    func testReinstallStyleFreshEntitlementStateRestoresProAfterAuthenticatedProfileSync() async {
+        let entitlement = EntitlementServiceStub(initialState: .ready(product: .mock), isPro: false)
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        auth.synchronizedContextResult = PostAuthenticationSyncResult(
+            profile: Profile(
+                id: "user-2",
+                email: "reinstall@example.com",
+                createdAt: Date(),
+                updatedAt: Date(),
+                isPro: true,
+                proPlatform: .apple,
+                onboardingCompleted: true,
+                lastLoginAt: Date()
+            ),
+            mergedDemoQuotaSnapshot: nil
+        )
+        let viewModel = makeViewModel(
+            entitlement: entitlement,
+            auth: auth
+        )
+
+        viewModel.handleSplashFinished()
+        await waitForCondition { viewModel.state == .demoCTA }
+        XCTAssertFalse(entitlement.isPro)
+
+        auth.send(.authenticated(.fixture))
+
+        await waitForCondition { viewModel.demoButtonTitle == "Start Coaching" }
+        XCTAssertTrue(entitlement.isPro)
+        XCTAssertEqual(entitlement.authenticatedProfile?.isPro, true)
+        XCTAssertEqual(entitlement.authenticatedProfile?.proPlatform, .apple)
+    }
+
     func testAuthFailureKeepsPromptIdentityStable() async {
         let auth = AuthServiceStub(initialState: .anonymousEligible)
         let coordinator = DemoQuotaCoordinatorStub(initialState: .secondAttemptEligible)
@@ -311,6 +415,7 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
     private let initialState: DemoQuotaStateMachine.State
     private let startedState: DemoQuotaStateMachine.State
     private var startCallCount = 0
+    private var latestResetSnapshot: DemoQuotaStateMachine.RemoteSnapshot?
 
     init(
         initialState: DemoQuotaStateMachine.State = .fresh,
@@ -335,9 +440,13 @@ private actor DemoQuotaCoordinatorStub: DemoQuotaCoordinating {
         return startedState
     }
     func markAttemptCompleted(resultMetadata: [String : Any]) async -> DemoQuotaStateMachine.State { .gatePending }
-    func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {}
+    func resetFromServer(snapshot: DemoQuotaStateMachine.RemoteSnapshot) async {
+        latestResetSnapshot = snapshot
+        continuation?.yield(DemoQuotaStateMachine().state(from: snapshot))
+    }
 
     func recordedStartCount() -> Int { startCallCount }
+    func lastResetSnapshot() -> DemoQuotaStateMachine.RemoteSnapshot? { latestResetSnapshot }
 }
 
 @MainActor

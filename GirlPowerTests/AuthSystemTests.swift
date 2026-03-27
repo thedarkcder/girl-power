@@ -92,6 +92,37 @@ final class AuthSystemTests: XCTestCase {
         }
     }
 
+    func testSignInTriggersAuthenticatedDeviceLinkAndExposesMergedQuotaContext() async {
+        let linker = AuthenticatedDeviceLinkerSpy(
+            result: CurrentDeviceLinkResult(
+                status: "linked",
+                mergedDemoQuotaSnapshot: DemoQuotaStateMachine.RemoteSnapshot(
+                    attemptsUsed: 2,
+                    activeAttemptIndex: nil,
+                    lastDecision: nil,
+                    serverLockReason: .quotaExhausted
+                )
+            )
+        )
+        let service = SupabaseAuthService(
+            api: SuccessfulSignInAuthAPI(session: .fixture),
+            sessionStore: InMemoryAuthSessionStore(),
+            anonymousSessionStore: InMemoryPendingAnonymousSessionStore(),
+            linker: linker,
+            profileService: ProfileServiceSpy()
+        )
+
+        await service.signIn(email: "member@example.com", password: "Password-123!", context: .paywall)
+        await waitForCondition {
+            await linker.linkedUserIDs() == ["user-1"]
+        }
+
+        let synchronized = await service.synchronizeAuthenticatedContext(for: .fixture)
+
+        XCTAssertEqual(synchronized?.mergedDemoQuotaSnapshot?.attemptsUsed, 2)
+        XCTAssertEqual(synchronized?.mergedDemoQuotaSnapshot?.serverLockReason, .quotaExhausted)
+    }
+
     func testSignInPublishesAuthenticatedStateBeforeBackgroundProfileSyncCompletes() async {
         let profileService = BlockingProfileServiceSpy()
         let store = InMemoryAuthSessionStore()
@@ -340,7 +371,53 @@ final class AuthSystemTests: XCTestCase {
         XCTAssertEqual(capturedBody["onboarding_completed"] as? Bool, true)
     }
 
-    func testAnonymousLinkRetriesOnServerFailureAndClearsOnDuplicate() async {
+    func testProfileEntitlementSyncPostsSignedTransactionOnly() async throws {
+        let service = SupabaseProfileEntitlementSyncService(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: makeURLSession()
+        )
+        var capturedBody: [String: Any] = [:]
+        URLProtocolStub.requestHandler = { request in
+            XCTAssertEqual(request.httpMethod, "POST")
+            XCTAssertEqual(request.url?.path, "/functions/v1/sync-profile-entitlement")
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (
+                200,
+                Data(
+                    """
+                    {
+                      "profile": {
+                        "id": "user-1",
+                        "email": "member@example.com",
+                        "created_at": "2026-03-22T10:00:00Z",
+                        "updated_at": "2026-03-22T10:05:00Z",
+                        "is_pro": true,
+                        "pro_platform": "apple",
+                        "onboarding_completed": false,
+                        "last_login_at": "2026-03-22T10:05:00Z"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let profile = try await service.markPro(signedTransactionInfo: "signed-transaction-jws", using: .fixture)
+
+        XCTAssertEqual(Set(capturedBody.keys), ["transaction_jws"])
+        XCTAssertEqual(capturedBody["transaction_jws"] as? String, "signed-transaction-jws")
+        XCTAssertEqual(profile.proPlatform, .apple)
+        XCTAssertTrue(profile.isPro)
+    }
+
+    func testAuthenticatedDeviceLinkRetriesOnServerFailureAndClearsPendingSessionAfterSuccess() async {
         let pendingStore = InMemoryPendingAnonymousSessionStore()
         let pendingID = UUID()
         pendingStore.save(pendingID)
@@ -356,25 +433,93 @@ final class AuthSystemTests: XCTestCase {
             ),
             urlSession: session,
             pendingStore: pendingStore,
-            deviceIdentityStorage: FakeKeychainPersisting(uuid: deviceID)
+            deviceIdentityProvider: FakeDeviceIdentityProvider(uuid: deviceID)
         )
 
         URLProtocolStub.requestHandler = { _ in
             (500, Data("{\"status\":\"retry_later\"}".utf8))
         }
-        let firstAttempt = await linker.linkPendingSession(with: .fixture)
-        XCTAssertFalse(firstAttempt)
+        let firstAttempt = await linker.linkCurrentDevice(with: .fixture)
+        XCTAssertNil(firstAttempt)
         XCTAssertEqual(pendingStore.load(), pendingID)
 
         URLProtocolStub.requestHandler = { _ in
-            (409, Data("{\"status\":\"duplicate\"}".utf8))
+            (
+                200,
+                Data(
+                    """
+                    {
+                      "status": "already_linked",
+                      "snapshot": {
+                        "attempts_used": 1,
+                        "active_attempt_index": null,
+                        "last_decision": {
+                          "type": "allow",
+                          "ts": "2026-03-23T10:00:00Z"
+                        },
+                        "server_lock_reason": null,
+                        "last_sync_at": "2026-03-23T10:00:00Z"
+                      }
+                    }
+                    """.utf8
+                )
+            )
         }
-        let secondAttempt = await linker.linkPendingSession(with: .fixture)
-        XCTAssertTrue(secondAttempt)
+        let secondAttempt = await linker.linkCurrentDevice(with: .fixture)
+        XCTAssertEqual(secondAttempt?.status, "already_linked")
+        XCTAssertEqual(secondAttempt?.mergedDemoQuotaSnapshot?.attemptsUsed, 1)
         XCTAssertNil(pendingStore.load())
     }
 
-    func testAnonymousLinkClearsPendingSessionWhenServerRejectsStaleSession() async {
+    func testAuthenticatedDeviceLinkIncludesDeviceIdentityWithoutPendingAnonymousSession() async {
+        let pendingStore = InMemoryPendingAnonymousSessionStore()
+        let session = makeURLSession()
+        let deviceID = UUID()
+        var capturedBody: [String: Any] = [:]
+        let linker = SupabaseAnonymousSessionLinker(
+            configuration: SupabaseProjectConfiguration(
+                projectURL: URL(string: "https://example.test")!,
+                anonKey: "anon-key",
+                authRedirectURL: URL(string: "https://example.test/auth/v1/callback")!,
+                appleServiceID: "com.route25.GirlPower.auth",
+                urlScheme: "girlpower"
+            ),
+            urlSession: session,
+            pendingStore: pendingStore,
+            deviceIdentityProvider: FakeDeviceIdentityProvider(uuid: deviceID)
+        )
+
+        URLProtocolStub.requestHandler = { request in
+            let data = try XCTUnwrap(request.bodyData())
+            capturedBody = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+            return (
+                200,
+                Data(
+                    """
+                    {
+                      "status": "linked",
+                      "snapshot": {
+                        "attempts_used": 2,
+                        "active_attempt_index": null,
+                        "last_decision": null,
+                        "server_lock_reason": "quota",
+                        "last_sync_at": "2026-03-23T11:00:00Z"
+                      }
+                    }
+                    """.utf8
+                )
+            )
+        }
+
+        let linked = await linker.linkCurrentDevice(with: .fixture)
+
+        XCTAssertEqual(capturedBody["device_id"] as? String, deviceID.uuidString)
+        XCTAssertNil(capturedBody["anon_session_id"])
+        XCTAssertEqual(linked?.mergedDemoQuotaSnapshot?.attemptsUsed, 2)
+        XCTAssertEqual(linked?.mergedDemoQuotaSnapshot?.serverLockReason, .quotaExhausted)
+    }
+
+    func testAuthenticatedDeviceLinkReturnsTerminalRelinkRejectionWithoutClearingPendingSession() async {
         let pendingStore = InMemoryPendingAnonymousSessionStore()
         let pendingID = UUID()
         pendingStore.save(pendingID)
@@ -389,17 +534,28 @@ final class AuthSystemTests: XCTestCase {
             ),
             urlSession: session,
             pendingStore: pendingStore,
-            deviceIdentityStorage: FakeKeychainPersisting(uuid: UUID())
+            deviceIdentityProvider: FakeDeviceIdentityProvider(uuid: UUID())
         )
 
         URLProtocolStub.requestHandler = { _ in
-            (412, Data("{\"status\":\"stale_session\"}".utf8))
+            (
+                409,
+                Data(
+                    """
+                    {
+                      "status": "relink_rejected",
+                      "snapshot": null
+                    }
+                    """.utf8
+                )
+            )
         }
 
-        let linked = await linker.linkPendingSession(with: .fixture)
+        let result = await linker.linkCurrentDevice(with: .fixture)
 
-        XCTAssertTrue(linked)
-        XCTAssertNil(pendingStore.load())
+        XCTAssertEqual(result?.status, "relink_rejected")
+        XCTAssertNil(result?.mergedDemoQuotaSnapshot)
+        XCTAssertEqual(pendingStore.load(), pendingID)
     }
 
     func testConfigurationLoadsFromInfoDictionary() throws {
@@ -663,9 +819,19 @@ final class AuthSystemTests: XCTestCase {
         }
 
         let ensuredTask = Task { await service.ensureValidSession(for: .paywall) }
+        await Task.yield()
+        if case .authRequired = service.state {
+            XCTFail("Expected refresh rejection to stay in flight until the joined request completes")
+        }
         await api.resumeRefresh()
         let ensuredSession = await ensuredTask.value
         await restoreTask.value
+        await waitForCondition {
+            if case .authFailed = service.state {
+                return true
+            }
+            return false
+        }
 
         XCTAssertNil(ensuredSession)
         XCTAssertNil(store.savedSession)
@@ -856,7 +1022,27 @@ private final class InMemoryPendingAnonymousSessionStore: PendingAnonymousSessio
 }
 
 private final class AnonymousSessionLinkerStub: AnonymousSessionLinking {
-    func linkPendingSession(with authSession: AuthSession) async -> Bool { true }
+    func linkCurrentDevice(with authSession: AuthSession) async -> CurrentDeviceLinkResult? {
+        CurrentDeviceLinkResult(status: "linked", mergedDemoQuotaSnapshot: nil)
+    }
+}
+
+private actor AuthenticatedDeviceLinkerSpy: AnonymousSessionLinking {
+    private let result: CurrentDeviceLinkResult?
+    private var sessions: [AuthSession] = []
+
+    init(result: CurrentDeviceLinkResult?) {
+        self.result = result
+    }
+
+    func linkCurrentDevice(with authSession: AuthSession) async -> CurrentDeviceLinkResult? {
+        sessions.append(authSession)
+        return result
+    }
+
+    func linkedUserIDs() -> [String] {
+        sessions.map(\.user.id)
+    }
 }
 
 private actor ProfileServiceSpy: ProfileServicing {
@@ -1075,15 +1261,10 @@ private actor RefreshNetworkFailingAuthAPI: SupabaseAuthAPI {
     }
 }
 
-private final class FakeKeychainPersisting: KeychainPersisting {
+private struct FakeDeviceIdentityProvider: DeviceIdentityProviding {
     let uuid: UUID
 
-    init(uuid: UUID) {
-        self.uuid = uuid
-    }
-
-    func readUUID() throws -> UUID? { uuid }
-    func store(uuid: UUID) throws {}
+    func deviceID() async throws -> UUID { uuid }
 }
 
 private final class URLProtocolStub: URLProtocol {
