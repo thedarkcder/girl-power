@@ -24,3 +24,11 @@ This repo hosts the Girl Power iOS app plus supporting Supabase Edge Functions. 
 | `scripts/serve-evaluate-session.sh` | Serves `evaluate-session` with hot reload using `supabase/functions/.env.local`. Start the companion `demo-session-log`, `demo-snapshot-*`, and `demo-identity-*` functions with `supabase functions serve ... --env-file supabase/functions/.env.local`. |
 
 See [`docs/evaluate-session.md`](docs/evaluate-session.md) for the API contract, curl examples, rate-limit expectations, and additional operational notes.
+
+## iOS TestFlight Delivery
+
+Fastlane automation for PR TestFlight delivery is documented in [`docs/ios-testflight-runbook.md`](docs/ios-testflight-runbook.md). The lane entrypoint is:
+
+```bash
+bundle exec fastlane pr_testflight
+```

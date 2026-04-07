@@ -1,0 +1,294 @@
+fastlane_version "2.226.0"
+default_platform(:ios)
+
+class PrTestflightError < StandardError
+  attr_reader :category
+
+  def initialize(category, message)
+    super(message)
+    @category = category
+  end
+end
+
+def prtf_state_start(state_name)
+  UI.important("[PR_TESTFLIGHT][STATE=#{state_name}][START]")
+end
+
+def prtf_state_done(state_name)
+  UI.success("[PR_TESTFLIGHT][STATE=#{state_name}][DONE]")
+end
+
+def prtf_project_root
+  File.expand_path("..", __dir__)
+end
+
+def prtf_resolve_repo_path(path)
+  return path if path.nil? || path.empty?
+  return path if File.absolute_path(path) == path
+
+  File.expand_path(path, prtf_project_root)
+rescue StandardError
+  path
+end
+
+def prtf_required_env!(env_key, category)
+  value = ENV[env_key]
+  return value unless value.nil? || value.strip.empty?
+
+  raise PrTestflightError.new(category, "Missing required environment variable: #{env_key}")
+end
+
+def prtf_classify_error(error, fallback:)
+  text = error.to_s.downcase
+
+  return "auth" if [
+    "app store connect",
+    "authentication",
+    "unauthorized",
+    "forbidden",
+    "invalid api key",
+    "issuer",
+    "401",
+    "403"
+  ].any? { |token| text.include?(token) }
+
+  return "signing" if [
+    "code signing",
+    "provisioning profile",
+    "no signing certificate",
+    "signing certificate",
+    "codesign",
+    "requires a provisioning profile",
+    "development team"
+  ].any? { |token| text.include?(token) }
+
+  return "upload" if [
+    "pilot",
+    "testflight",
+    "transporter",
+    "upload"
+  ].any? { |token| text.include?(token) }
+
+  return "build" if [
+    "archive",
+    "xcodebuild",
+    "gym",
+    "compile"
+  ].any? { |token| text.include?(token) }
+
+  fallback.to_s
+end
+
+def prtf_validate_signing_style!(style)
+  normalized = (style || "automatic").strip.downcase
+  return normalized if ["automatic", "manual"].include?(normalized)
+
+  raise PrTestflightError.new("signing", "IOS_SIGNING_STYLE must be either 'automatic' or 'manual'")
+end
+
+def prtf_preflight_validation(context)
+  xcodeproj = context[:xcodeproj]
+  scheme = context[:scheme]
+  unless File.exist?(xcodeproj)
+    raise PrTestflightError.new("build", "Configured project file does not exist: #{xcodeproj}")
+  end
+
+  dry_run = ENV["PR_TESTFLIGHT_DRY_RUN"] == "1"
+  context[:dry_run] = dry_run
+
+  key_id = prtf_required_env!("APP_STORE_CONNECT_API_KEY_ID", "auth")
+  issuer_id = prtf_required_env!("APP_STORE_CONNECT_ISSUER_ID", "auth")
+  key_content = prtf_required_env!("APP_STORE_CONNECT_API_KEY_BASE64", "auth")
+
+  context[:api_key] = if dry_run
+    UI.important("[PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation")
+    nil
+  else
+    app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_content: key_content,
+      is_key_content_base64: true,
+      duration: 1200
+    )
+  end
+
+  team_id = prtf_required_env!("APPLE_TEAM_ID", "signing")
+  signing_style = prtf_validate_signing_style!(ENV["IOS_SIGNING_STYLE"] || "automatic")
+
+  context[:team_id] = team_id
+  context[:signing_style] = signing_style
+
+  if signing_style == "manual"
+    context[:provisioning_profile_specifier] = prtf_required_env!("IOS_PROVISIONING_PROFILE_SPECIFIER", "signing")
+    context[:code_sign_identity] = prtf_required_env!("IOS_CODE_SIGN_IDENTITY", "signing")
+  end
+
+  UI.message(
+    "[PR_TESTFLIGHT][PRECHECK] project=#{xcodeproj} scheme=#{scheme} signing=#{signing_style} dry_run=#{dry_run}"
+  )
+
+  context
+rescue PrTestflightError
+  raise
+rescue StandardError => error
+  raise PrTestflightError.new(prtf_classify_error(error, fallback: "auth"), "Preflight failed: #{error.message}")
+end
+
+def prtf_version_build_prep(context)
+  version = ENV["IOS_MARKETING_VERSION"]
+  version = get_version_number(xcodeproj: context[:xcodeproj], target: context[:scheme]) if version.nil? || version.strip.empty?
+
+  build_number = ENV["IOS_BUILD_NUMBER"]
+  build_number = Time.now.utc.strftime("%Y%m%d%H%M") if build_number.nil? || build_number.strip.empty?
+
+  context[:version] = version
+  context[:build_number] = build_number
+
+  xcargs = [
+    "MARKETING_VERSION=#{version}",
+    "CURRENT_PROJECT_VERSION=#{build_number}",
+    "INFOPLIST_KEY_CFBundleShortVersionString=#{version}",
+    "INFOPLIST_KEY_CFBundleVersion=#{build_number}",
+    "DEVELOPMENT_TEAM=#{context[:team_id]}",
+    "CODE_SIGN_STYLE=#{context[:signing_style].capitalize}"
+  ]
+
+  if context[:signing_style] == "manual"
+    xcargs << "PROVISIONING_PROFILE_SPECIFIER=#{context[:provisioning_profile_specifier]}"
+    xcargs << "CODE_SIGN_IDENTITY=#{context[:code_sign_identity]}"
+  end
+
+  context[:xcargs] = xcargs.join(" ")
+
+  UI.message("[PR_TESTFLIGHT][VERSION_BUILD_PREP] version=#{version} build=#{build_number}")
+
+  context
+rescue PrTestflightError
+  raise
+rescue StandardError => error
+  raise PrTestflightError.new(prtf_classify_error(error, fallback: "build"), "Version/build prep failed: #{error.message}")
+end
+
+def prtf_archive_build(context)
+  if context[:dry_run]
+    context[:ipa_path] = File.join(
+      context[:build_output_dir],
+      "#{context[:scheme]}-#{context[:build_number]}-dry-run.ipa"
+    )
+    UI.success("[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)")
+    return context
+  end
+
+  export_options = {
+    method: context[:export_method],
+    signingStyle: context[:signing_style],
+    teamID: context[:team_id]
+  }
+
+  if context[:signing_style] == "manual"
+    export_options[:provisioningProfiles] = {
+      context[:app_identifier] => context[:provisioning_profile_specifier]
+    }
+  end
+
+  gym(
+    project: context[:xcodeproj],
+    scheme: context[:scheme],
+    configuration: "Release",
+    clean: true,
+    export_method: context[:export_method],
+    export_options: export_options,
+    output_directory: context[:build_output_dir],
+    output_name: "#{context[:scheme]}-#{context[:build_number]}.ipa",
+    xcargs: context[:xcargs]
+  )
+
+  ipa_path = lane_context[SharedValues::IPA_OUTPUT_PATH]
+  if ipa_path.nil? || ipa_path.strip.empty?
+    raise PrTestflightError.new("build", "Archive/build did not produce an IPA output path")
+  end
+
+  context[:ipa_path] = ipa_path
+
+  UI.success("[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] ipa=#{ipa_path}")
+
+  context
+rescue PrTestflightError
+  raise
+rescue StandardError => error
+  raise PrTestflightError.new(prtf_classify_error(error, fallback: "build"), "Archive/build failed: #{error.message}")
+end
+
+def prtf_upload_testflight(context)
+  if context[:dry_run]
+    UI.success("[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)")
+    return context
+  end
+
+  pilot(
+    api_key: context[:api_key],
+    ipa: context[:ipa_path],
+    skip_waiting_for_build_processing: true,
+    distribute_external: false
+  )
+
+  UI.success("[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] ipa=#{context[:ipa_path]}")
+
+  context
+rescue PrTestflightError
+  raise
+rescue StandardError => error
+  raise PrTestflightError.new(prtf_classify_error(error, fallback: "upload"), "TestFlight upload failed: #{error.message}")
+end
+
+def prtf_completion(context)
+  UI.success(
+    "[PR_TESTFLIGHT][COMPLETE] version=#{context[:version]} build=#{context[:build_number]} scheme=#{context[:scheme]}"
+  )
+
+  context
+end
+
+platform :ios do
+  desc "Build and upload iOS app to TestFlight for PR validation"
+  lane :pr_testflight do
+    xcodeproj_input = ENV["IOS_XCODEPROJ"] || "GirlPower.xcodeproj"
+    context = {
+      xcodeproj: prtf_resolve_repo_path(xcodeproj_input),
+      scheme: ENV["IOS_SCHEME"] || "GirlPower",
+      app_identifier: ENV["IOS_APP_IDENTIFIER"] || "com.route25.GirlPower",
+      export_method: ENV["IOS_EXPORT_METHOD"] || "app-store",
+      build_output_dir: File.join(prtf_project_root, "build")
+    }
+
+    begin
+      prtf_state_start("preflight_validation")
+      context = prtf_preflight_validation(context)
+      prtf_state_done("preflight_validation")
+
+      prtf_state_start("version_build_prep")
+      context = prtf_version_build_prep(context)
+      prtf_state_done("version_build_prep")
+
+      prtf_state_start("archive_build")
+      context = prtf_archive_build(context)
+      prtf_state_done("archive_build")
+
+      prtf_state_start("upload_testflight")
+      context = prtf_upload_testflight(context)
+      prtf_state_done("upload_testflight")
+
+      prtf_state_start("completion")
+      prtf_completion(context)
+      prtf_state_done("completion")
+    rescue PrTestflightError => error
+      UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
+      UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
+    rescue StandardError => error
+      category = prtf_classify_error(error, fallback: "build")
+      UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
+      UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
+    end
+  end
+end
