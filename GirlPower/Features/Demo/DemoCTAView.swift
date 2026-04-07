@@ -70,6 +70,7 @@ struct DemoCTAView: View {
     }
 }
 
+#if DEBUG
 struct DemoCTAView_Previews: PreviewProvider {
     static var previews: some View {
         DemoCTAView(viewModel: AppFlowViewModel(
@@ -81,7 +82,6 @@ struct DemoCTAView_Previews: PreviewProvider {
     }
 }
 
-#if DEBUG
 @MainActor
 private final class PreviewEntitlementService: ObservableObject, EntitlementServicing {
     @Published var state: EntitlementState = .loading
