@@ -62,6 +62,7 @@
 		E3D7F4C61F1D4A7A94A7F75C /* EntitlementStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */; };
 		E3D7F4C71F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */; };
 		E3D7F4C81F1D4A7A94A7F75C /* StoreKitEntitlementService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */; };
+		F1A0E8B1C2D34E5F90123457 /* EntitlementGracePolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0E8B1C2D34E5F90123456 /* EntitlementGracePolicy.swift */; };
 		E3E1EF931F1D4CC7A2D80111 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF911F1D4CC7A2D80111 /* PaywallView.swift */; };
 		E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */; };
 		18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C1F3B00D5B64C4DA58F72F3 /* SquatPostSetSummaryViewModel.swift */; };
@@ -74,6 +75,7 @@
 		B1C9B3742BB9E8B100B8B310 /* GirlPowerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C9B3732BB9E8B100B8B310 /* GirlPowerUITests.swift */; };
 		A1B2C3D4E5F60718293A4B54 /* AuthSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F60718293A4B55 /* AuthSystemTests.swift */; };
 		E3F4C0A21F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */; };
+		F1A0E8B1C2D34E5F90123459 /* EntitlementGracePolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1A0E8B1C2D34E5F90123458 /* EntitlementGracePolicyTests.swift */; };
 		E3F4C0A41F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */; };
 		E3F4C0A61F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */; };
 		E3F4C0A81F1D51F8F72AB0D1 /* EntitlementServiceStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */; };
@@ -167,9 +169,11 @@
 		E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementStateMachine.swift; sourceTree = "<group>"; };
 		E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementSnapshotStore.swift; sourceTree = "<group>"; };
 		E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitEntitlementService.swift; sourceTree = "<group>"; };
+		F1A0E8B1C2D34E5F90123456 /* EntitlementGracePolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementGracePolicy.swift; sourceTree = "<group>"; };
 		E3E1EF911F1D4CC7A2D80111 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		E3E1EF921F1D4CC7A2D80111 /* PaywallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallViewModel.swift; sourceTree = "<group>"; };
 		E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementStateMachineTests.swift; sourceTree = "<group>"; };
+		F1A0E8B1C2D34E5F90123458 /* EntitlementGracePolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementGracePolicyTests.swift; sourceTree = "<group>"; };
 		E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallViewModelTests.swift; sourceTree = "<group>"; };
 		E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppFlowViewModelProTests.swift; sourceTree = "<group>"; };
 		E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementServiceStub.swift; sourceTree = "<group>"; };
@@ -233,6 +237,7 @@
 				E3D7F4C21F1D4A7A94A7F75C /* EntitlementStateMachine.swift */,
 				E3D7F4C31F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift */,
 				E3D7F4C41F1D4A7A94A7F75C /* StoreKitEntitlementService.swift */,
+				F1A0E8B1C2D34E5F90123456 /* EntitlementGracePolicy.swift */,
 			);
 			path = Subscriptions;
 			sourceTree = "<group>";
@@ -391,6 +396,7 @@
 				228AA97DA3574A559715B17D /* SquatSessionCoordinatorSpeechTests.swift */,
 				077A9F4F859D4CB4B9CFA6C4 /* SquatPostSetSummaryViewModelTests.swift */,
 				E3F4C0A11F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift */,
+				F1A0E8B1C2D34E5F90123458 /* EntitlementGracePolicyTests.swift */,
 				E3F4C0A31F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift */,
 				E3F4C0A51F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift */,
 				E3F4C0A71F1D51F8F72AB0D1 /* EntitlementServiceStub.swift */,
@@ -591,6 +597,7 @@
 				E3D7F4C61F1D4A7A94A7F75C /* EntitlementStateMachine.swift in Sources */,
 				E3D7F4C71F1D4A7A94A7F75C /* EntitlementSnapshotStore.swift in Sources */,
 				E3D7F4C81F1D4A7A94A7F75C /* StoreKitEntitlementService.swift in Sources */,
+				F1A0E8B1C2D34E5F90123457 /* EntitlementGracePolicy.swift in Sources */,
 				E3E1EF931F1D4CC7A2D80111 /* PaywallView.swift in Sources */,
 				E3E1EF941F1D4CC7A2D80111 /* PaywallViewModel.swift in Sources */,
 				18AAE4828FC445BFA3CB2FE6 /* SquatPostSetSummaryViewModel.swift in Sources */,
@@ -618,6 +625,7 @@
 				ABCBCACD285D43A3AC6E79CE /* SquatSessionCoordinatorSpeechTests.swift in Sources */,
 				B0F1A0CA0E6B4D7D94464033 /* SquatPostSetSummaryViewModelTests.swift in Sources */,
 				E3F4C0A21F1D4F6EB72AB0D1 /* EntitlementStateMachineTests.swift in Sources */,
+				F1A0E8B1C2D34E5F90123459 /* EntitlementGracePolicyTests.swift in Sources */,
 				E3F4C0A41F1D4FBEF72AB0D1 /* PaywallViewModelTests.swift in Sources */,
 				E3F4C0A61F1D509BF72AB0D1 /* AppFlowViewModelProTests.swift in Sources */,
 				E3F4C0A81F1D51F8F72AB0D1 /* EntitlementServiceStub.swift in Sources */,

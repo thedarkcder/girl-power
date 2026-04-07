@@ -24,23 +24,32 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     private let snapshotStore: EntitlementSnapshotPersisting
     private var continuations: [UUID: AsyncStream<EntitlementState>.Continuation] = [:]
     private var updatesTask: Task<Void, Never>?
-    private var cachedIsPro: Bool
+    private var graceExpiryTask: Task<Void, Never>?
+    private var cachedSnapshot: EntitlementSnapshot?
+    private var revalidationGraceDeadline: Date?
+    private let nowProvider: () -> Date
+    private let revalidationGracePeriod: TimeInterval
     private let logger = Logger(subsystem: "com.girlpower.app", category: "Entitlements")
 
     init(
         productIDs: [String],
-        snapshotStore: EntitlementSnapshotPersisting = UserDefaultsEntitlementSnapshotStore()
+        snapshotStore: EntitlementSnapshotPersisting = UserDefaultsEntitlementSnapshotStore(),
+        revalidationGracePeriod: TimeInterval = 12,
+        nowProvider: @escaping () -> Date = Date.init
     ) {
         self.productIDs = productIDs
         self.snapshotStore = snapshotStore
+        self.revalidationGracePeriod = revalidationGracePeriod
+        self.nowProvider = nowProvider
         self.state = .loading
         let snapshot = snapshotStore.load()
-        self.cachedIsPro = snapshot?.isPro ?? false
+        self.cachedSnapshot = snapshot
         self.isPro = snapshot?.isPro ?? false
     }
 
     deinit {
         updatesTask?.cancel()
+        graceExpiryTask?.cancel()
     }
 
     func observeStates() -> AsyncStream<EntitlementState> {
@@ -60,6 +69,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     func load() async {
+        beginRevalidationGraceWindow()
         await loadProductsIfNeeded()
         await refreshCurrentEntitlements()
         startTransactionListenerIfNeeded()
@@ -138,8 +148,11 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
                 clearSnapshot()
                 refreshIsPro()
             }
+            endRevalidationGraceWindow()
         } catch {
             logger.error("Failed to refresh current entitlements: \(error.localizedDescription)")
+            // Keep the last validated entitlement only until the active grace window expires.
+            refreshIsPro()
         }
     }
 
@@ -231,15 +244,53 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     private func persistSnapshot(for info: SubscriptionInfo) {
-        let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: Date())
+        let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: nowProvider())
         snapshotStore.save(snapshot)
-        cachedIsPro = true
+        cachedSnapshot = snapshot
         refreshIsPro()
     }
 
     private func clearSnapshot() {
         snapshotStore.clear()
-        cachedIsPro = false
+        cachedSnapshot = nil
+    }
+
+    private func beginRevalidationGraceWindow() {
+        guard let deadline = EntitlementGracePolicy.graceDeadline(
+            hasValidatedSnapshot: cachedSnapshot?.isPro == true,
+            now: nowProvider(),
+            gracePeriod: revalidationGracePeriod
+        ) else {
+            endRevalidationGraceWindow()
+            return
+        }
+        revalidationGraceDeadline = deadline
+        scheduleGraceWindowExpiry(for: deadline)
+        refreshIsPro()
+    }
+
+    private func endRevalidationGraceWindow() {
+        revalidationGraceDeadline = nil
+        graceExpiryTask?.cancel()
+        graceExpiryTask = nil
+        refreshIsPro()
+    }
+
+    private func scheduleGraceWindowExpiry(for deadline: Date) {
+        graceExpiryTask?.cancel()
+        let delay = max(0, deadline.timeIntervalSince(nowProvider()))
+        graceExpiryTask = Task { [weak self] in
+            if delay > 0 {
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+            await MainActor.run {
+                guard let self else { return }
+                guard self.revalidationGraceDeadline == deadline else { return }
+                self.revalidationGraceDeadline = nil
+                self.graceExpiryTask = nil
+                self.refreshIsPro()
+            }
+        }
     }
 
     private func apply(_ event: EntitlementStateMachine.Event) {
@@ -259,7 +310,12 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     private func refreshIsPro() {
-        let effective = cachedIsPro || state.isSubscribed
+        let policy = EntitlementGracePolicy(
+            isSubscribed: state.isSubscribed,
+            hasValidatedSnapshot: cachedSnapshot?.isPro == true,
+            revalidationGraceDeadline: revalidationGraceDeadline
+        )
+        let effective = policy.effectiveIsPro(now: nowProvider())
         if isPro != effective {
             isPro = effective
         }

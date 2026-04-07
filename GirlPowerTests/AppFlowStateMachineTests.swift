@@ -253,6 +253,26 @@ final class AppFlowViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.navigationPath.count, 1)
     }
 
+    func testHandleAppDidBecomeActiveRefreshesAuthAndEntitlements() async {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: true)
+        let entitlement = EntitlementServiceStub(initialState: .loading, isPro: false)
+        let auth = AuthServiceStub(initialState: .anonymousEligible)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: entitlement,
+            authService: auth
+        )
+
+        viewModel.handleAppDidBecomeActive()
+        await waitForCondition {
+            entitlement.loadCallCount == 1 && auth.handleAppDidBecomeActiveCallCount == 1
+        }
+
+        XCTAssertEqual(entitlement.loadCallCount, 1)
+        XCTAssertEqual(auth.handleAppDidBecomeActiveCallCount, 1)
+    }
+
     private func makeSummary(attemptIndex: Int) -> SessionSummary {
         SessionSummary(
             attemptIndex: attemptIndex,
