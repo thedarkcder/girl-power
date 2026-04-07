@@ -90,6 +90,7 @@ private final class PreviewEntitlementService: ObservableObject, EntitlementServ
     func load() async {}
     func purchase() async {}
     func restore() async {}
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {}
     func observeStates() -> AsyncStream<EntitlementState> {
         AsyncStream { continuation in
             continuation.yield(state)

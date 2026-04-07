@@ -10,6 +10,7 @@ protocol EntitlementServicing: ObservableObject {
     func load() async
     func purchase() async
     func restore() async
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async
     func observeStates() -> AsyncStream<EntitlementState>
 }
 
@@ -22,20 +23,26 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     private var currentProduct: Product?
     private let stateMachine = EntitlementStateMachine()
     private let snapshotStore: EntitlementSnapshotPersisting
+    private let profileEntitlementSync: any ProfileEntitlementSyncing
     private var continuations: [UUID: AsyncStream<EntitlementState>.Continuation] = [:]
     private var updatesTask: Task<Void, Never>?
     private var cachedIsPro: Bool
+    private var profileIsPro: Bool
+    private var authenticatedSession: AuthSession?
     private let logger = Logger(subsystem: "com.girlpower.app", category: "Entitlements")
 
     init(
         productIDs: [String],
-        snapshotStore: EntitlementSnapshotPersisting = UserDefaultsEntitlementSnapshotStore()
+        snapshotStore: EntitlementSnapshotPersisting = UserDefaultsEntitlementSnapshotStore(),
+        profileEntitlementSync: any ProfileEntitlementSyncing = DisabledProfileEntitlementSyncService()
     ) {
         self.productIDs = productIDs
         self.snapshotStore = snapshotStore
+        self.profileEntitlementSync = profileEntitlementSync
         self.state = .loading
         let snapshot = snapshotStore.load()
         self.cachedIsPro = snapshot?.isPro ?? false
+        self.profileIsPro = false
         self.isPro = snapshot?.isPro ?? false
     }
 
@@ -101,11 +108,31 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
             }
             if !restored {
                 clearSnapshot()
+                if profileIsPro, let product = await currentPaywallProduct() {
+                    updateState(.ready(product: product))
+                    return
+                }
                 apply(.restoreFailed(message: "No active subscription found."))
             }
         } catch {
             apply(.restoreFailed(message: error.localizedDescription))
         }
+    }
+
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {
+        authenticatedSession = session
+        profileIsPro = profile?.isPro ?? false
+        if profile?.isPro == true {
+            cachedIsPro = true
+            snapshotStore.save(
+                EntitlementSnapshot(
+                    isPro: true,
+                    productID: snapshotStore.load()?.productID,
+                    lastUpdated: Date()
+                )
+            )
+        }
+        refreshIsPro()
     }
 
     // MARK: - Private helpers
@@ -172,7 +199,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
                 expirationDate: transaction.expirationDate
             )
             apply(.entitlementVerified(info))
-            persistSnapshot(for: info)
+            persistSnapshot(for: info, signedTransactionInfo: result.jwsRepresentation)
             if finishTransaction {
                 await transaction.finish()
             }
@@ -230,11 +257,12 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
         return nil
     }
 
-    private func persistSnapshot(for info: SubscriptionInfo) {
+    private func persistSnapshot(for info: SubscriptionInfo, signedTransactionInfo: String) {
         let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: Date())
         snapshotStore.save(snapshot)
         cachedIsPro = true
         refreshIsPro()
+        persistProfileEntitlementIfNeeded(signedTransactionInfo: signedTransactionInfo)
     }
 
     private func clearSnapshot() {
@@ -259,9 +287,26 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     private func refreshIsPro() {
-        let effective = cachedIsPro || state.isSubscribed
+        let effective = cachedIsPro || profileIsPro || state.isSubscribed
         if isPro != effective {
             isPro = effective
+        }
+    }
+
+    private func persistProfileEntitlementIfNeeded(signedTransactionInfo: String) {
+        guard let authenticatedSession else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                let profile = try await profileEntitlementSync.markPro(
+                    signedTransactionInfo: signedTransactionInfo,
+                    using: authenticatedSession
+                )
+                profileIsPro = profile.isPro
+                refreshIsPro()
+            } catch {
+                logger.warning("Profile entitlement persistence failed: \(error.localizedDescription, privacy: .public)")
+            }
         }
     }
 
