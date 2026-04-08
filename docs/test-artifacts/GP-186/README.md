@@ -39,6 +39,26 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24152730438.log`
   - `docs/test-artifacts/GP-186/pr-testflight-run-24152730438-metadata.json`
 
+## CI PR-Triggered Validation After Auth Parsing Hardening (Observed)
+
+- PR: https://github.com/thedarkcder/girl-power/pull/26
+- Workflow: `PR TestFlight`
+- Run ID: `24152908095`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24152908095
+- Trigger: `pull_request` synchronize on `feature/GP-186` to `main`
+- Job start/end: `2026-04-08T18:56:04Z` -> `2026-04-08T18:56:23Z`
+- Conclusion: `failure`
+- Observed markers:
+  - `[CI_PRECHECK] Required secret/env key presence validated (values redacted).`
+  - `[PR_TESTFLIGHT][AUTH] api_key_content_source=raw-pem base64=false`
+  - `[PR_TESTFLIGHT][FAILED][CATEGORY=signing] IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`
+- Interpretation:
+  - Auth parsing issue is resolved by lane hardening.
+  - Next blocker moved to `IOS_SIGNING_STYLE` empty-string handling.
+- Log captures in repo:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24152908095.log`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24152908095-metadata.json`
+
 ## Local Lane Evidence (Observed)
 
 Environment used for local validation in this run:
@@ -62,7 +82,7 @@ bundle _2.4.22_ exec fastlane pr_testflight
 Observed markers in `local-pr-testflight-dry-run-ruby27.log`:
 - `[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)`
 - `[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)`
-- `[PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081855 scheme=GirlPower`
+- `[PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081900 scheme=GirlPower`
 
 ### Local failure-path verification
 
@@ -81,6 +101,8 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24149572001.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24152730438.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24152730438-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24152908095.log`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24152908095-metadata.json`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -95,6 +117,6 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Current blocker marker from latest run (`24152730438`):
-  - `[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Preflight failed: string contains null byte`
-- Next required remediation: rotate/fix `APP_STORE_CONNECT_API_KEY_BASE64` to valid base64-encoded `.p8`, then re-run PR workflow.
+- Current blocker marker from latest run (`24152908095`):
+  - `[PR_TESTFLIGHT][FAILED][CATEGORY=signing] IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`
+- Next required remediation: merge the empty-string normalization fix for `IOS_SIGNING_STYLE` and re-run PR workflow.

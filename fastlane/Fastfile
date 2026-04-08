@@ -136,7 +136,8 @@ def prtf_classify_error(error, fallback:)
 end
 
 def prtf_validate_signing_style!(style)
-  normalized = (style || "automatic").strip.downcase
+  normalized = style.to_s.strip.downcase
+  normalized = "automatic" if normalized.empty?
   return normalized if ["automatic", "manual"].include?(normalized)
 
   raise PrTestflightError.new("signing", "IOS_SIGNING_STYLE must be either 'automatic' or 'manual'")

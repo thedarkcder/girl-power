@@ -1,30 +1,30 @@
-[19:55:24]: ----------------------------------------
-[19:55:24]: --- Step: Verifying fastlane version ---
-[19:55:24]: ----------------------------------------
-[19:55:24]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
-[19:55:24]: ------------------------------
-[19:55:24]: --- Step: default_platform ---
-[19:55:24]: ------------------------------
-[19:55:24]: Driving the lane 'ios pr_testflight' 🚀
-[19:55:24]: [PR_TESTFLIGHT][STATE=preflight_validation][START]
-[19:55:24]: [PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation
-[19:55:24]: [PR_TESTFLIGHT][PRECHECK] project=/private/tmp/gp186/GirlPower.xcodeproj scheme=GirlPower signing=automatic dry_run=true
-[19:55:24]: [PR_TESTFLIGHT][STATE=preflight_validation][DONE]
-[19:55:24]: [PR_TESTFLIGHT][STATE=version_build_prep][START]
-[19:55:24]: --------------------------------
-[19:55:24]: --- Step: get_version_number ---
-[19:55:24]: --------------------------------
-[19:55:24]: [PR_TESTFLIGHT][VERSION_BUILD_PREP] version=1.0 build=202604081855
-[19:55:24]: [PR_TESTFLIGHT][STATE=version_build_prep][DONE]
-[19:55:24]: [PR_TESTFLIGHT][STATE=archive_build][START]
-[19:55:24]: [PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)
-[19:55:24]: [PR_TESTFLIGHT][STATE=archive_build][DONE]
-[19:55:24]: [PR_TESTFLIGHT][STATE=upload_testflight][START]
-[19:55:24]: [PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)
-[19:55:24]: [PR_TESTFLIGHT][STATE=upload_testflight][DONE]
-[19:55:24]: [PR_TESTFLIGHT][STATE=completion][START]
-[19:55:24]: [PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081855 scheme=GirlPower
-[19:55:24]: [PR_TESTFLIGHT][STATE=completion][DONE]
+[20:00:22]: ----------------------------------------
+[20:00:22]: --- Step: Verifying fastlane version ---
+[20:00:22]: ----------------------------------------
+[20:00:22]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
+[20:00:22]: ------------------------------
+[20:00:22]: --- Step: default_platform ---
+[20:00:22]: ------------------------------
+[20:00:22]: Driving the lane 'ios pr_testflight' 🚀
+[20:00:22]: [PR_TESTFLIGHT][STATE=preflight_validation][START]
+[20:00:22]: [PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation
+[20:00:22]: [PR_TESTFLIGHT][PRECHECK] project=/private/tmp/gp186/GirlPower.xcodeproj scheme=GirlPower signing=automatic dry_run=true
+[20:00:22]: [PR_TESTFLIGHT][STATE=preflight_validation][DONE]
+[20:00:22]: [PR_TESTFLIGHT][STATE=version_build_prep][START]
+[20:00:22]: --------------------------------
+[20:00:22]: --- Step: get_version_number ---
+[20:00:22]: --------------------------------
+[20:00:22]: [PR_TESTFLIGHT][VERSION_BUILD_PREP] version=1.0 build=202604081900
+[20:00:22]: [PR_TESTFLIGHT][STATE=version_build_prep][DONE]
+[20:00:22]: [PR_TESTFLIGHT][STATE=archive_build][START]
+[20:00:22]: [PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)
+[20:00:22]: [PR_TESTFLIGHT][STATE=archive_build][DONE]
+[20:00:22]: [PR_TESTFLIGHT][STATE=upload_testflight][START]
+[20:00:22]: [PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)
+[20:00:22]: [PR_TESTFLIGHT][STATE=upload_testflight][DONE]
+[20:00:22]: [PR_TESTFLIGHT][STATE=completion][START]
+[20:00:22]: [PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081900 scheme=GirlPower
+[20:00:22]: [PR_TESTFLIGHT][STATE=completion][DONE]
 
 +------------------------------------------+
 |             fastlane summary             |
@@ -37,7 +37,7 @@
 | 3    | get_version_number  | 0           |
 +------+---------------------+-------------+
 
-[19:55:24]: fastlane.tools finished successfully 🎉
+[20:00:22]: fastlane.tools finished successfully 🎉
 
 #######################################################################
 # fastlane 2.232.2 is available. You are on 2.226.0.

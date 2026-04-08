@@ -171,6 +171,7 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 - `auth`: verify API key ID, issuer ID, and key content are configured and valid.
 - `auth` null-byte preflight error (`Preflight failed: string contains null byte`): secret value is usually malformed base64. Recreate `APP_STORE_CONNECT_API_KEY_BASE64` as single-line base64 of the `.p8` file.
 - `signing`: verify team ID, signing style, certs, and provisioning profile mapping.
+- `signing` invalid-style error (`IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`): if GitHub variable is unset/blank, ensure lane normalizes blank to `automatic` or set repository variable `IOS_SIGNING_STYLE=automatic`.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.
 - CI preflight secret-name failure (before Fastlane lane starts): look for `Missing required CI secret/env keys: ...` in the `Preflight CI secret presence check` step.
