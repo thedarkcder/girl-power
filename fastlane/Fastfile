@@ -1,5 +1,6 @@
 fastlane_version "2.226.0"
 default_platform(:ios)
+require "base64"
 
 class PrTestflightError < StandardError
   attr_reader :category
@@ -36,6 +37,61 @@ def prtf_required_env!(env_key, category)
   return value unless value.nil? || value.strip.empty?
 
   raise PrTestflightError.new(category, "Missing required environment variable: #{env_key}")
+end
+
+def prtf_resolve_api_key_content(raw_value)
+  normalized = raw_value.to_s.strip
+  if normalized.include?("BEGIN PRIVATE KEY")
+    return {
+      key_content: normalized,
+      is_key_content_base64: false,
+      source: "raw-pem"
+    }
+  end
+
+  begin
+    decoded = Base64.strict_decode64(normalized)
+    if decoded.include?("BEGIN PRIVATE KEY")
+      return {
+        key_content: normalized,
+        is_key_content_base64: true,
+        source: "base64-pem"
+      }
+    end
+  rescue ArgumentError
+    # Fall through and preserve original behavior (treat as base64 payload).
+  end
+
+  {
+    key_content: normalized,
+    is_key_content_base64: true,
+    source: "base64-opaque"
+  }
+end
+
+def prtf_build_asc_api_key(key_id:, issuer_id:, key_payload:)
+  app_store_connect_api_key(
+    key_id: key_id,
+    issuer_id: issuer_id,
+    key_content: key_payload[:key_content],
+    is_key_content_base64: key_payload[:is_key_content_base64],
+    duration: 1200
+  )
+rescue StandardError => error
+  if key_payload[:is_key_content_base64] && error.message.to_s.downcase.include?("null byte")
+    UI.important(
+      "[PR_TESTFLIGHT][AUTH] ASC key parse failed as base64 (null byte); retrying with raw PEM interpretation"
+    )
+    app_store_connect_api_key(
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_content: key_payload[:key_content],
+      is_key_content_base64: false,
+      duration: 1200
+    )
+  else
+    raise
+  end
 end
 
 def prtf_classify_error(error, fallback:)
@@ -99,17 +155,19 @@ def prtf_preflight_validation(context)
   key_id = prtf_required_env!("APP_STORE_CONNECT_API_KEY_ID", "auth")
   issuer_id = prtf_required_env!("APP_STORE_CONNECT_ISSUER_ID", "auth")
   key_content = prtf_required_env!("APP_STORE_CONNECT_API_KEY_BASE64", "auth")
+  key_payload = prtf_resolve_api_key_content(key_content)
 
   context[:api_key] = if dry_run
     UI.important("[PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation")
     nil
   else
-    app_store_connect_api_key(
+    UI.message(
+      "[PR_TESTFLIGHT][AUTH] api_key_content_source=#{key_payload[:source]} base64=#{key_payload[:is_key_content_base64]}"
+    )
+    prtf_build_asc_api_key(
       key_id: key_id,
       issuer_id: issuer_id,
-      key_content: key_content,
-      is_key_content_base64: true,
-      duration: 1200
+      key_payload: key_payload
     )
   end
 

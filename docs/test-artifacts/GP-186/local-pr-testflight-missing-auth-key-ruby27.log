@@ -1,13 +1,13 @@
-[19:50:16]: ----------------------------------------
-[19:50:16]: --- Step: Verifying fastlane version ---
-[19:50:16]: ----------------------------------------
-[19:50:16]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
-[19:50:16]: ------------------------------
-[19:50:16]: --- Step: default_platform ---
-[19:50:16]: ------------------------------
-[19:50:16]: Driving the lane 'ios pr_testflight' 🚀
-[19:50:16]: [PR_TESTFLIGHT][STATE=preflight_validation][START]
-[19:50:16]: [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID
+[19:55:25]: ----------------------------------------
+[19:55:25]: --- Step: Verifying fastlane version ---
+[19:55:25]: ----------------------------------------
+[19:55:25]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
+[19:55:25]: ------------------------------
+[19:55:25]: --- Step: default_platform ---
+[19:55:25]: ------------------------------
+[19:55:25]: Driving the lane 'ios pr_testflight' 🚀
+[19:55:25]: [PR_TESTFLIGHT][STATE=preflight_validation][START]
+[19:55:25]: [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID
 +--------------------------------------+
 |             Lane Context             |
 +------------------+-------------------+
@@ -15,15 +15,15 @@
 | PLATFORM_NAME    | ios               |
 | LANE_NAME        | ios pr_testflight |
 +------------------+-------------------+
-[19:50:16]: Called from Fastfile at line 287
-[19:50:16]: ```
-[19:50:16]:     285:	    rescue PrTestflightError => error
-[19:50:16]:     286:	      UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
-[19:50:16]:  => 287:	      UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
-[19:50:16]:     288:	    rescue StandardError => error
-[19:50:16]:     289:	      category = prtf_classify_error(error, fallback: "build")
-[19:50:16]: ```
-[19:50:16]: [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID
+[19:55:25]: Called from Fastfile at line 345
+[19:55:25]: ```
+[19:55:25]:     343:	    rescue PrTestflightError => error
+[19:55:25]:     344:	      UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
+[19:55:25]:  => 345:	      UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
+[19:55:25]:     346:	    rescue StandardError => error
+[19:55:25]:     347:	      category = prtf_classify_error(error, fallback: "build")
+[19:55:25]: ```
+[19:55:25]: [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID
 
 +------------------------------------------+
 |             fastlane summary             |
@@ -35,7 +35,7 @@
 | 2    | default_platform    | 0           |
 +------+---------------------+-------------+
 
-[19:50:16]: fastlane finished with errors
+[19:55:25]: fastlane finished with errors
 
 [!] [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID
 
