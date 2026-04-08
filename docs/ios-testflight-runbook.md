@@ -114,6 +114,12 @@ Configure the following repository-level CI values before non-dry-run uploads:
 
 The workflow has a preflight shell check that fails fast when required CI key names are missing.
 
+`APP_STORE_CONNECT_API_KEY_BASE64` must contain base64-encoded `.p8` contents, not raw PEM text. Example (macOS):
+
+```bash
+base64 -i AuthKey_XXXXXX.p8 | tr -d '\n'
+```
+
 ## GitHub PR Workflow Behavior (Exact)
 
 The workflow behavior below matches `.github/workflows/pr-testflight.yml` exactly:
@@ -163,6 +169,7 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 ## Triage Guide
 
 - `auth`: verify API key ID, issuer ID, and key content are configured and valid.
+- `auth` null-byte preflight error (`Preflight failed: string contains null byte`): secret value is usually raw PEM or malformed base64. Recreate `APP_STORE_CONNECT_API_KEY_BASE64` as single-line base64 of the `.p8` file.
 - `signing`: verify team ID, signing style, certs, and provisioning profile mapping.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.

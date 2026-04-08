@@ -1,0 +1,854 @@
+Build and Upload (Fastlane pr_testflight)	Set up job	﻿2026-04-08T18:51:52.5024300Z Current runner version: '2.333.1'
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5039550Z ##[group]Runner Image Provisioner
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5040130Z Hosted Compute Agent
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5040560Z Version: 20260213.493
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5041010Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5041620Z Build Date: 2026-02-13T00:28:41Z
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5042120Z Worker ID: {7032c904-dacb-41a7-8b58-9bfa03b10bbc}
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5042620Z Azure Region: westus
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5043030Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5044060Z ##[group]Operating System
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5044630Z macOS
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5044990Z 15.7.4
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5045350Z 24G517
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5045720Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5046220Z ##[group]Runner Image
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5046630Z Image: macos-15-arm64
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5047210Z Version: 20260330.0243.1
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5048040Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260330.0243/images/macos/macos-15-arm64-Readme.md
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5049290Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260330.0243
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5050100Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5050990Z ##[group]GITHUB_TOKEN Permissions
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5052090Z Contents: read
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5052490Z Metadata: read
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5052880Z Packages: read
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5053290Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5054620Z Secret source: Actions
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5055120Z Prepare workflow directory
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5411080Z Prepare all required actions
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:52.5462210Z Getting action download info
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:53.0592610Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:53.2418470Z Download action repository 'ruby/setup-ruby@v1' (SHA:e65c17d16e57e481586a6a5a0282698790062f92)
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:53.9308750Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build and Upload (Fastlane pr_testflight)	Set up job	2026-04-08T18:51:54.2750100Z Complete job name: Build and Upload (Fastlane pr_testflight)
+Build and Upload (Fastlane pr_testflight)	Checkout	﻿2026-04-08T18:51:54.3231320Z ##[group]Run actions/checkout@v4
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3234400Z with:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3235390Z   repository: thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3236940Z   token: ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3237850Z   ssh-strict: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3238800Z   ssh-user: git
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3239760Z   persist-credentials: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3240790Z   clean: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3241740Z   sparse-checkout-cone-mode: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3242850Z   fetch-depth: 1
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3243760Z   fetch-tags: false
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3244710Z   show-progress: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3245650Z   lfs: false
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3246530Z   submodules: false
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3247490Z   set-safe-directory: true
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3248870Z env:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3249880Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3251310Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3256080Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3257280Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3258430Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3259400Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3260430Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3261990Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3263140Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3264270Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3265360Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3266820Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3267990Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3268980Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.3269900Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7659320Z Syncing repository: thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7661080Z ##[group]Getting Git version info
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7661800Z Working directory is '/Users/runner/work/girl-power/girl-power'
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7663710Z [command]/opt/homebrew/bin/git version
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7867170Z git version 2.53.0
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7897590Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7907270Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/4ac28a29-17ca-4839-a59e-0c5c13943bb4/.gitconfig'
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7914620Z Temporarily overriding HOME='/Users/runner/work/_temp/4ac28a29-17ca-4839-a59e-0c5c13943bb4' before making global git config changes
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7915850Z Adding repository directory to the temporary git global config as a safe directory
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.7918810Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8033550Z Deleting the contents of '/Users/runner/work/girl-power/girl-power'
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8037240Z ##[group]Initializing the repository
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8042700Z [command]/opt/homebrew/bin/git init /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8263680Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8265660Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8266590Z hint: to use in all of your new repositories, which will suppress this warning,
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8267760Z hint: call:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8268600Z hint:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8269480Z hint: 	git config --global init.defaultBranch <name>
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8270880Z hint:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8276270Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8278910Z hint: 'development'. The just-created branch can be renamed via this command:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8280820Z hint:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8281650Z hint: 	git branch -m <name>
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8282550Z hint:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8283430Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8287450Z Initialized empty Git repository in /Users/runner/work/girl-power/girl-power/.git/
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8311030Z [command]/opt/homebrew/bin/git remote add origin https://github.com/thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8424450Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8426150Z ##[group]Disabling automatic garbage collection
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8428150Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8521050Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8521850Z ##[group]Setting up auth
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8529710Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.8596270Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.9540500Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:54.9615970Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.0772720Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.1212950Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.2036100Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.2097020Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.2097800Z ##[group]Fetching the repository
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.2102710Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +610d6c55e1504f1746501e75855bb7ce6c15f04c:refs/remotes/pull/26/merge
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7382770Z From https://github.com/thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7383830Z  * [new ref]         610d6c55e1504f1746501e75855bb7ce6c15f04c -> pull/26/merge
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7508270Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7509650Z ##[group]Determining the checkout info
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7510730Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7514300Z [command]/opt/homebrew/bin/git sparse-checkout disable
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7589720Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7672220Z ##[group]Checking out the ref
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.7674320Z [command]/opt/homebrew/bin/git checkout --progress --force refs/remotes/pull/26/merge
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.8046230Z HEAD is now at 610d6c5 Merge 362527c680ff5766d4c3db39ade8a04b3b5a827e into eb383a6ec404a10da2e1d684fd3b16f5781322e8
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.8056510Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.8123410Z [command]/opt/homebrew/bin/git log -1 --format=%H
+Build and Upload (Fastlane pr_testflight)	Checkout	2026-04-08T18:51:55.8216990Z 610d6c55e1504f1746501e75855bb7ce6c15f04c
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	﻿2026-04-08T18:51:55.8545460Z ##[group]Run ruby/setup-ruby@v1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8546340Z with:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8546990Z   ruby-version: 3.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8547700Z   bundler-cache: true
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8548640Z   token: ***
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8549260Z env:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8549940Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8551050Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8554890Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8555790Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8556630Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8557330Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8558070Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8558950Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8559700Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8560510Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8561270Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8562260Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8562980Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8563670Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:55.8564290Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2374070Z ##[group]Modifying PATH
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2374980Z Entries removed from PATH to avoid conflicts with default Ruby:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2383140Z   /opt/homebrew/lib/ruby/gems/3.3.0/bin
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2400840Z   /opt/homebrew/opt/ruby@3.3/bin
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2401420Z Entries added to PATH to use selected Ruby:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2401930Z   /Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2402630Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2410360Z ##[group]Downloading Ruby
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.2411210Z https://github.com/ruby/ruby-builder/releases/download/ruby-3.1.7/ruby-3.1.7-darwin-arm64.tar.gz
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.6651170Z Took   0.42 seconds
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.6654510Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.6656900Z ##[group]Extracting  Ruby
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:56.6672850Z [command]/usr/bin/tar -xz -C /Users/runner/hostedtoolcache/Ruby/3.1.7 -f /Users/runner/work/_temp/9ad2b329-a0f7-4180-b349-fbbbb2852fe5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2093880Z Took   0.55 seconds
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2094590Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2095160Z ##[group]Print Ruby version
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2107390Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/ruby --version
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2266870Z ruby 3.1.7p261 (2025-03-26 revision 0a3704f218) [arm64-darwin23]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2276850Z Took   0.02 seconds
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2277620Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2278170Z ##[group]Installing Bundler
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2282530Z Using Bundler 2.4.22 from Gemfile.lock BUNDLED WITH 2.4.22
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.2286470Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/gem install bundler -v 2.4.22
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6274930Z Successfully installed bundler-2.4.22
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6284720Z 1 gem installed
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6285530Z Took   0.40 seconds
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6307400Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6310170Z > bundle install
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6310870Z Setting BUNDLER_VERSION=2.4.22 for "bundle config|lock" commands below to ensure Bundler 2.4.22 is used
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.6313860Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle config set --local path /Users/runner/work/girl-power/girl-power/vendor/bundle
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.7536440Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle config set --local deployment true
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8664030Z ##[group]Print lockfile
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8682260Z [command]/bin/cat Gemfile.lock
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8716080Z GEM
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8716610Z   remote: https://rubygems.org/
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8717030Z   specs:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8717220Z     CFPropertyList (3.0.9)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8717430Z     addressable (2.9.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8717660Z       public_suffix (>= 2.0.2, < 8.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8717910Z     artifactory (3.0.17)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8718140Z     atomos (0.1.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8718450Z     aws-eventstream (1.4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8718780Z     aws-partitions (1.1235.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8720060Z     aws-sdk-core (3.244.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8720350Z       aws-eventstream (~> 1, >= 1.3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8720640Z       aws-partitions (~> 1, >= 1.992.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8720890Z       aws-sigv4 (~> 1.9)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8721090Z       base64
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8721300Z       bigdecimal
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8721480Z       jmespath (~> 1, >= 1.6.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8721680Z       logger
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8721850Z     aws-sdk-kms (1.123.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8722070Z       aws-sdk-core (~> 3, >= 3.244.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8722300Z       aws-sigv4 (~> 1.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8722480Z     aws-sdk-s3 (1.218.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8722770Z       aws-sdk-core (~> 3, >= 3.244.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8723010Z       aws-sdk-kms (~> 1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8723190Z       aws-sigv4 (~> 1.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8723420Z     aws-sigv4 (1.12.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8723650Z       aws-eventstream (~> 1, >= 1.0.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8723910Z     babosa (1.0.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8724140Z     base64 (0.3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8724390Z     bigdecimal (4.1.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8724590Z     claide (1.1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8724800Z     colored (1.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8724990Z     colored2 (3.1.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8725210Z     commander (4.6.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8725450Z       highline (~> 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8741030Z     declarative (0.0.20)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8741320Z     digest-crc (0.7.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8741520Z       rake (>= 12.0.0, < 14.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8741720Z     domain_name (0.6.20240107)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8741930Z     dotenv (2.8.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8742100Z     emoji_regex (3.2.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8742290Z     excon (0.112.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8742470Z     faraday (1.10.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8742660Z       faraday-em_http (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8742890Z       faraday-em_synchrony (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8743110Z       faraday-excon (~> 1.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8743360Z       faraday-httpclient (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8743700Z       faraday-multipart (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8743940Z       faraday-net_http (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8744230Z       faraday-net_http_persistent (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8744520Z       faraday-patron (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8744740Z       faraday-rack (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8744950Z       faraday-retry (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8745190Z       ruby2_keywords (>= 0.0.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8745450Z     faraday-cookie_jar (0.0.8)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8745680Z       faraday (>= 0.8.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8745920Z       http-cookie (>= 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8746120Z     faraday-em_http (1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8746320Z     faraday-em_synchrony (1.0.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8746520Z     faraday-excon (1.1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8746710Z     faraday-httpclient (1.0.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8746920Z     faraday-multipart (1.2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8747130Z       multipart-post (~> 2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8747340Z     faraday-net_http (1.0.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8747610Z     faraday-net_http_persistent (1.2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8747860Z     faraday-patron (1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8748060Z     faraday-rack (1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8748920Z     faraday-retry (1.0.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8749150Z     faraday_middleware (1.2.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8749400Z       faraday (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8749610Z     fastimage (2.4.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8749800Z     fastlane (2.226.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8750000Z       CFPropertyList (>= 2.3, < 4.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8750320Z       addressable (>= 2.8, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8750610Z       artifactory (~> 3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8750950Z       aws-sdk-s3 (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8751190Z       babosa (>= 1.0.3, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8751410Z       bundler (>= 1.12.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8751630Z       colored (~> 1.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8751830Z       commander (~> 4.6)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8752020Z       dotenv (>= 2.1.1, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8752230Z       emoji_regex (>= 0.1, < 4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8752800Z       excon (>= 0.71.0, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8753000Z       faraday (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8753220Z       faraday-cookie_jar (~> 0.0.6)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8753450Z       faraday_middleware (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8753690Z       fastimage (>= 2.1.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8753900Z       fastlane-sirp (>= 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8754110Z       gh_inspector (>= 1.1.2, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8754400Z       google-apis-androidpublisher_v3 (~> 0.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8754680Z       google-apis-playcustomapp_v1 (~> 0.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8754950Z       google-cloud-env (>= 1.6.0, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8755190Z       google-cloud-storage (~> 1.31)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8755420Z       highline (~> 2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8755630Z       http-cookie (~> 1.0.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8755830Z       json (< 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8756030Z       jwt (>= 2.1.0, < 3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8756270Z       mini_magick (>= 4.9.4, < 5.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8756500Z       multipart-post (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8756710Z       naturally (~> 2.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8756900Z       optparse (>= 0.1.1, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8757160Z       plist (>= 3.1.0, < 4.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8757380Z       rubyzip (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8757590Z       security (= 0.1.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8757790Z       simctl (~> 1.6.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8758010Z       terminal-notifier (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8758350Z       terminal-table (~> 3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8758570Z       tty-screen (>= 0.6.3, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8758840Z       tty-spinner (>= 0.8.0, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8759100Z       word_wrap (~> 1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8759290Z       xcodeproj (>= 1.13.0, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8759490Z       xcpretty (~> 0.4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8759740Z       xcpretty-travis-formatter (>= 0.0.3, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8759990Z     fastlane-sirp (1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8760190Z       sysrandom (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8760390Z     gh_inspector (1.1.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8760630Z     google-apis-androidpublisher_v3 (0.54.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8760910Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8761150Z     google-apis-core (0.11.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8761400Z       addressable (~> 2.5, >= 2.5.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8761660Z       googleauth (>= 0.16.2, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8761880Z       httpclient (>= 2.8.1, < 3.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8762100Z       mini_mime (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8762300Z       representable (~> 3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8762560Z       retriable (>= 2.0, < 4.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8762750Z       rexml
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8762950Z     google-apis-iamcredentials_v1 (0.17.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8763200Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8763450Z     google-apis-playcustomapp_v1 (0.13.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8763700Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8763920Z     google-apis-storage_v1 (0.31.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8764240Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8764530Z     google-cloud-core (1.7.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8765090Z       google-cloud-env (>= 1.0, < 3.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8765320Z       google-cloud-errors (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8765530Z     google-cloud-env (1.6.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8765740Z       faraday (>= 0.17.3, < 3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8765940Z     google-cloud-errors (1.4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8766190Z     google-cloud-storage (1.47.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8766530Z       addressable (~> 2.8)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8766730Z       digest-crc (~> 0.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8766950Z       google-apis-iamcredentials_v1 (~> 0.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8767230Z       google-apis-storage_v1 (~> 0.31.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8767530Z       google-cloud-core (~> 1.6)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8767740Z       googleauth (>= 0.16.2, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8767940Z       mini_mime (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8768190Z     googleauth (1.8.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8768700Z       faraday (>= 0.17.3, < 3.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8768910Z       jwt (>= 1.4, < 3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8769120Z       multi_json (~> 1.11)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8769320Z       os (>= 0.9, < 2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8769490Z       signet (>= 0.16, < 2.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8769670Z     highline (2.0.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8769830Z     http-cookie (1.0.8)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770010Z       domain_name (~> 0.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770190Z     httpclient (2.9.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770350Z       mutex_m
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770490Z     jmespath (1.6.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770660Z     json (2.19.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770820Z     jwt (2.10.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8770990Z       base64
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8771130Z     logger (1.7.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8771400Z     mini_magick (4.13.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8771710Z     mini_mime (1.1.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8771890Z     multi_json (1.15.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772080Z     multipart-post (2.4.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772260Z     mutex_m (0.3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772440Z     nanaimo (0.4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772600Z     naturally (2.3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772770Z     optparse (0.8.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8772940Z     os (1.1.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773100Z     plist (3.7.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773270Z     public_suffix (5.1.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773440Z     rake (13.3.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773600Z     representable (3.2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773790Z       declarative (< 0.1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8773990Z       trailblazer-option (>= 0.1.1, < 0.2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8774210Z       uber (< 0.2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8774420Z     retriable (3.4.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8774580Z     rexml (3.4.4)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8774790Z     rouge (3.28.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8774950Z     ruby2_keywords (0.0.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8775140Z     rubyzip (2.4.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8775330Z     security (0.1.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8775500Z     signet (0.19.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8775670Z       addressable (~> 2.8)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8775850Z       faraday (>= 0.17.5, < 3.a)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776050Z       jwt (>= 1.5, < 3.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776240Z       multi_json (~> 1.10)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776420Z     simctl (1.6.10)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776580Z       CFPropertyList
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776740Z       naturally
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8776900Z     sysrandom (1.0.5)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8777070Z     terminal-notifier (2.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8777270Z     terminal-table (3.0.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8777480Z       unicode-display_width (>= 1.1.1, < 3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8777720Z     trailblazer-option (0.1.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8777930Z     tty-cursor (0.7.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778090Z     tty-screen (0.8.2)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778260Z     tty-spinner (0.9.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778430Z       tty-cursor (~> 0.7)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778600Z     uber (0.1.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778770Z     unicode-display_width (2.6.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8778970Z     word_wrap (1.0.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8779150Z     xcodeproj (1.27.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8779340Z       CFPropertyList (>= 2.3.3, < 4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8779550Z       atomos (~> 0.1.3)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8779730Z       claide (>= 1.0.2, < 2.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8780230Z       colored2 (~> 3.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8780400Z       nanaimo (~> 0.4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8780580Z       rexml (>= 3.3.6, < 4.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8780760Z     xcpretty (0.4.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8780920Z       rouge (~> 3.28.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781130Z     xcpretty-travis-formatter (1.0.1)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781350Z       xcpretty (~> 0.2, >= 0.0.7)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781480Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781560Z PLATFORMS
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781690Z   ruby
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781780Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8781830Z DEPENDENCIES
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8782080Z   fastlane (~> 2.226.0)
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8782190Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8782260Z BUNDLED WITH
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8782390Z    2.4.22
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8782950Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:57.8783670Z Cache key: setup-ruby-bundler-cache-v6-macos-15-arm64-ruby-3.1.7-wd-/Users/runner/work/girl-power/girl-power-with--without--only--Gemfile.lock-e81430f8585442f0152c8700705771a22c1e86d8a7c3170271cd00968c492072
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:51:58.1044600Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle install --jobs 3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.1596540Z Fetching gem metadata from https://rubygems.org/........
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.2099090Z Fetching rake 13.3.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.2476470Z Installing rake 13.3.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.2726100Z Fetching CFPropertyList 3.0.9
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.2729060Z Fetching artifactory 3.0.17
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.2730660Z Fetching public_suffix 5.1.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3062340Z Installing CFPropertyList 3.0.9
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3124910Z Fetching atomos 0.1.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3228960Z Installing public_suffix 5.1.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3290210Z Fetching aws-eventstream 1.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3503290Z Installing artifactory 3.0.17
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.3603450Z Installing atomos 0.1.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4053090Z Installing aws-eventstream 1.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4225710Z Fetching aws-partitions 1.1235.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4336420Z Fetching base64 0.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4572140Z Fetching bigdecimal 4.1.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4662140Z Installing aws-partitions 1.1235.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4679080Z Installing base64 0.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4747190Z Fetching jmespath 1.6.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4863820Z Installing bigdecimal 4.1.1 with native extensions
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4898700Z Fetching logger 1.7.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.4995170Z Installing jmespath 1.6.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.5100310Z Installing logger 1.7.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.5198320Z Fetching babosa 1.0.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.5460630Z Installing babosa 1.0.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.5466710Z Fetching claide 1.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.7697530Z Fetching colored 1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.7858310Z Installing claide 1.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.7931370Z Installing colored 1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8039010Z Fetching colored2 3.1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8200480Z Fetching highline 2.0.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8404330Z Installing colored2 3.1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8493340Z Fetching declarative 0.0.20
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8677990Z Installing highline 2.0.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.8891920Z Installing declarative 0.0.20
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.9014660Z Fetching digest-crc 0.7.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.9254700Z Fetching domain_name 0.6.20240107
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.9346220Z Installing digest-crc 0.7.0 with native extensions
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.9511940Z Installing domain_name 0.6.20240107
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:03.9834790Z Fetching dotenv 2.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.0100310Z Installing dotenv 2.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.0244610Z Fetching emoji_regex 3.2.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.0452170Z Installing emoji_regex 3.2.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.2344050Z Fetching excon 0.112.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.3885180Z Installing excon 0.112.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.4326260Z Fetching faraday-em_http 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.4540150Z Installing faraday-em_http 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.4644080Z Fetching faraday-em_synchrony 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.4958330Z Installing faraday-em_synchrony 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.5097350Z Fetching faraday-excon 1.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.5361460Z Installing faraday-excon 1.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.5434410Z Fetching faraday-httpclient 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.5611470Z Installing faraday-httpclient 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.5747430Z Fetching multipart-post 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6163460Z Installing multipart-post 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6227330Z Fetching faraday-net_http 1.0.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6612700Z Installing faraday-net_http 1.0.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6661620Z Fetching faraday-net_http_persistent 1.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6910400Z Installing faraday-net_http_persistent 1.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.6979610Z Fetching faraday-patron 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7276710Z Installing faraday-patron 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7398460Z Fetching faraday-rack 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7667410Z Installing faraday-rack 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7711480Z Fetching faraday-retry 1.0.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7905400Z Installing faraday-retry 1.0.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.7943560Z Fetching fastimage 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.8129480Z Installing fastimage 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.8377910Z Fetching sysrandom 1.0.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:04.8565690Z Installing sysrandom 1.0.5 with native extensions
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.1005140Z Fetching gh_inspector 1.1.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.1239870Z Installing gh_inspector 1.1.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.1310860Z Fetching multi_json 1.15.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.1630930Z Installing multi_json 1.15.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.1967360Z Fetching os 1.1.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.2390350Z Installing os 1.1.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.2491880Z Fetching mutex_m 0.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.2782590Z Installing mutex_m 0.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.2883760Z Fetching mini_mime 1.1.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.2957990Z Installing mini_mime 1.1.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.3165970Z Fetching trailblazer-option 0.1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.3610330Z Installing trailblazer-option 0.1.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.3740990Z Fetching uber 0.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.4084640Z Installing uber 0.1.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.4204070Z Fetching retriable 3.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.4439490Z Installing retriable 3.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.5378590Z Fetching rexml 3.4.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.5748750Z Installing rexml 3.4.4
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.6158150Z Fetching google-cloud-errors 1.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.6460080Z Installing google-cloud-errors 1.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.6487020Z Fetching json 2.19.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:07.6766710Z Installing json 2.19.3 with native extensions
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:14.8262580Z Fetching mini_magick 4.13.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:14.8514870Z Installing mini_magick 4.13.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:14.8721630Z Fetching naturally 2.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:14.8868420Z Installing naturally 2.3.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:14.8974010Z Fetching optparse 0.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.2040480Z Installing optparse 0.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.2407860Z Fetching plist 3.7.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.2695160Z Installing plist 3.7.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.2749090Z Fetching rubyzip 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.2852110Z Fetching security 0.1.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3039270Z Installing rubyzip 2.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3039930Z Installing security 0.1.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3227220Z Fetching terminal-notifier 2.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3422190Z Fetching unicode-display_width 2.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3751760Z Installing unicode-display_width 2.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3809170Z Installing terminal-notifier 2.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.3995290Z Fetching tty-screen 0.8.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4466460Z Installing tty-screen 0.8.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4488850Z Fetching tty-cursor 0.7.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4609250Z Fetching word_wrap 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4743050Z Installing tty-cursor 0.7.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4875720Z Installing word_wrap 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.4885240Z Fetching nanaimo 0.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5163400Z Installing nanaimo 0.4.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5256520Z Fetching rouge 3.28.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5436150Z Fetching addressable 2.9.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5642710Z Installing addressable 2.9.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5654510Z Installing rouge 3.28.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.5788840Z Fetching aws-sigv4 1.12.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.6118110Z Installing aws-sigv4 1.12.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.6181400Z Fetching jwt 2.10.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.6371630Z Installing jwt 2.10.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.6735700Z Fetching commander 4.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.7089840Z Installing commander 4.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.7328680Z Fetching http-cookie 1.0.8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.7576490Z Installing http-cookie 1.0.8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.7831300Z Fetching faraday-multipart 1.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8054780Z Installing faraday-multipart 1.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8170280Z Fetching fastlane-sirp 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8388580Z Installing fastlane-sirp 1.0.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8558490Z Fetching httpclient 2.9.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8841130Z Fetching representable 3.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.8969280Z Installing httpclient 2.9.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:15.9848660Z Installing representable 3.2.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.0300570Z Fetching simctl 1.6.10
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.0445370Z Fetching terminal-table 3.0.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.0655840Z Installing simctl 1.6.10
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.0789960Z Installing terminal-table 3.0.2
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.1187660Z Fetching tty-spinner 0.9.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.1430130Z Fetching xcodeproj 1.27.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.1529880Z Installing tty-spinner 0.9.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.1623000Z Fetching aws-sdk-core 3.244.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.1732280Z Installing xcodeproj 1.27.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.2000800Z Fetching faraday 1.10.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.2125730Z Installing aws-sdk-core 3.244.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.2230850Z Installing faraday 1.10.5
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.2825410Z Fetching xcpretty 0.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.3233180Z Installing xcpretty 0.4.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.7855400Z Fetching faraday-cookie_jar 0.0.8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.8381170Z Installing faraday-cookie_jar 0.0.8
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.8525190Z Fetching faraday_middleware 1.2.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.8679680Z Fetching signet 0.19.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.8928920Z Installing signet 0.19.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9061070Z Installing faraday_middleware 1.2.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9112150Z Fetching google-cloud-env 1.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9260070Z Fetching aws-sdk-kms 1.123.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9484950Z Installing google-cloud-env 1.6.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9645440Z Installing aws-sdk-kms 1.123.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:16.9677670Z Fetching xcpretty-travis-formatter 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0055960Z Installing xcpretty-travis-formatter 1.0.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0069590Z Fetching googleauth 1.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0187220Z Fetching google-cloud-core 1.7.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0337510Z Installing googleauth 1.8.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0387900Z Installing google-cloud-core 1.7.1
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0532640Z Fetching aws-sdk-s3 1.218.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.0712110Z Fetching google-apis-core 0.11.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.1045250Z Installing aws-sdk-s3 1.218.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.1203340Z Installing google-apis-core 0.11.3
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.1310960Z Fetching google-apis-androidpublisher_v3 0.54.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.1548950Z Installing google-apis-androidpublisher_v3 0.54.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.1727120Z Fetching google-apis-playcustomapp_v1 0.13.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.2031660Z Installing google-apis-playcustomapp_v1 0.13.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.2338420Z Fetching google-apis-iamcredentials_v1 0.17.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.2545990Z Fetching google-apis-storage_v1 0.31.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.2795120Z Installing google-apis-iamcredentials_v1 0.17.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:17.2842970Z Installing google-apis-storage_v1 0.31.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:23.9043260Z Fetching google-cloud-storage 1.47.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:23.9348380Z Installing google-cloud-storage 1.47.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:23.9559340Z Fetching fastlane 2.226.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.0140930Z Installing fastlane 2.226.0
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4796710Z Bundle complete! 1 Gemfile dependency, 92 gems now installed.
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4828700Z Bundled gems are installed into `./vendor/bundle`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4835390Z Post-install message from rubyzip:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4838100Z RubyZip 3.0 is coming!
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4841170Z **********************
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4842750Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4843670Z The public API of some Rubyzip classes has been modernized to use named
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4844900Z parameters for optional arguments. Please check your usage of the
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4847520Z following classes:
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4880440Z   * `Zip::File`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4901130Z   * `Zip::Entry`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4901800Z   * `Zip::InputStream`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4902560Z   * `Zip::OutputStream`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4903510Z   * `Zip::DOSTime`
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4904110Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4905070Z Run your test suite with the `RUBYZIP_V3_API_WARN` environment
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4906510Z variable set to see warnings about usage of the old API. This will
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4907570Z help you to identify any changes that you need to make to your code.
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4908840Z See https://github.com/rubyzip/rubyzip/wiki/Updating-to-version-3.x for
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4910110Z more information.
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4910340Z 
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4911510Z Please ensure that your Gemfiles and .gemspecs are suitably restrictive
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4924970Z to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4940350Z See https://github.com/rubyzip/rubyzip for details. The Changelog also
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4941770Z lists other enhancements and bugfixes that have been implemented since
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.4943310Z version 2.3.0.
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.5920640Z Saving cache
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:24.6643810Z [command]/opt/homebrew/bin/gtar --posix -cf cache.tzst --exclude cache.tzst -P -C /Users/runner/work/girl-power/girl-power --files-from manifest.txt --delay-directory-restore --use-compress-program zstdmt
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:26.4071900Z Sent 12124160 of 14059146 (86.2%), 11.6 MBs/sec
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:27.2394060Z Sent 14059146 of 14059146 (100.0%), 7.3 MBs/sec
+Build and Upload (Fastlane pr_testflight)	Setup Ruby and Bundler	2026-04-08T18:52:27.5842010Z Took  29.96 seconds
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	﻿2026-04-08T18:52:27.6121200Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6123140Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6124120Z [36;1mrequired_vars=([0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6126180Z [36;1m  APP_STORE_CONNECT_API_KEY_ID[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6127550Z [36;1m  APP_STORE_CONNECT_ISSUER_ID[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6128810Z [36;1m  APP_STORE_CONNECT_API_KEY_BASE64[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6130450Z [36;1m  APPLE_TEAM_ID[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6132880Z [36;1m)[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6134710Z [36;1mmissing_vars=()[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6135560Z [36;1mfor key in "${required_vars[@]}"; do[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6137860Z [36;1m  if [[ -z "${!key:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6139010Z [36;1m    missing_vars+=("$key")[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6140400Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6142490Z [36;1mdone[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6143910Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6144700Z [36;1msigning_style="${IOS_SIGNING_STYLE:-automatic}"[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6147490Z [36;1msigning_style="$(echo "${signing_style}" | tr '[:upper:]' '[:lower:]')"[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6153270Z [36;1mif [[ "${signing_style}" != "automatic" && "${signing_style}" != "manual" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6156150Z [36;1m  echo "::error::IOS_SIGNING_STYLE must be 'automatic' or 'manual'."[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6157310Z [36;1m  exit 1[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6159020Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6161540Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6162750Z [36;1mif [[ "${signing_style}" == "manual" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6164400Z [36;1m  if [[ -z "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6165160Z [36;1m    missing_vars+=("IOS_PROVISIONING_PROFILE_SPECIFIER")[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6166570Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6168120Z [36;1m  if [[ -z "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6169180Z [36;1m    missing_vars+=("IOS_CODE_SIGN_IDENTITY")[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6171330Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6172070Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6172610Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6174060Z [36;1mif (( ${#missing_vars[@]} > 0 )); then[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6175320Z [36;1m  echo "::error::Missing required CI secret/env keys: ${missing_vars[*]}"[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6176750Z [36;1m  exit 1[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6177870Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6179620Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6181330Z [36;1mecho "[CI_PRECHECK] Required secret/env key presence validated (values redacted)."[0m
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6499380Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6500060Z env:
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6500950Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6501420Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6502630Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6502930Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6503260Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6503560Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6503830Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6504200Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6504520Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6504840Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6505120Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6505480Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6505800Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6506030Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6507530Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.6509070Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Preflight CI secret presence check	2026-04-08T18:52:27.7744010Z [CI_PRECHECK] Required secret/env key presence validated (values redacted).
+Build and Upload (Fastlane pr_testflight)	Install dependencies	﻿2026-04-08T18:52:27.7791070Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7791370Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7791610Z [36;1mbundle config set path vendor/bundle[0m
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7791930Z [36;1mbundle install --jobs 4 --retry 3[0m
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7826960Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7827280Z env:
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7827660Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7828020Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7829100Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7829350Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7829590Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7829790Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7830000Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7830250Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7830480Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7830720Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7830940Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7831320Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7831540Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7831720Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7833050Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:27.7834440Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:28.0181480Z You are replacing the current local value of path, which is currently "/Users/runner/work/girl-power/girl-power/vendor/bundle"
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:28.4086400Z Bundle complete! 1 Gemfile dependency, 92 gems now installed.
+Build and Upload (Fastlane pr_testflight)	Install dependencies	2026-04-08T18:52:28.4087400Z Bundled gems are installed into `./vendor/bundle`
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	﻿2026-04-08T18:52:28.4145410Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4145720Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4145960Z [36;1mmkdir -p ci-artifacts/logs[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4146400Z [36;1mbundle exec fastlane pr_testflight | tee ci-artifacts/logs/fastlane-pr-testflight.log[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4182460Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4182830Z env:
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4183370Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4183740Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4184780Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4185040Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4185290Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4185490Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4185700Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4185950Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4186200Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4186440Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4186760Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4187020Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4187230Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4187410Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4188770Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:28.4190140Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7237530Z [18:52:29]: Sending anonymous analytics information
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7238690Z [18:52:29]: Learn more at https://docs.fastlane.tools/#metrics
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7239850Z [18:52:29]: No personal or sensitive data is sent.
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7241320Z [18:52:29]: You can disable this by adding `opt_out_usage` at the top of your Fastfile
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7362240Z [18:52:29]: [32m----------------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7363380Z [18:52:29]: [32m--- Step: Verifying fastlane version ---[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7364380Z [18:52:29]: [32m----------------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7365650Z [18:52:29]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7366780Z [18:52:29]: [32m------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7367620Z [18:52:29]: [32m--- Step: default_platform ---[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7368790Z [18:52:29]: [32m------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7369960Z [18:52:29]: [32mDriving the lane 'ios pr_testflight' 🚀[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7370990Z [18:52:29]: [33m[PR_TESTFLIGHT][STATE=preflight_validation][START][0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7371990Z [18:52:29]: [32m---------------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7372910Z [18:52:29]: [32m--- Step: app_store_connect_api_key ---[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7373810Z [18:52:29]: [32m---------------------------------------[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7375060Z [18:52:29]: [31m[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Preflight failed: string contains null byte[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7376140Z +--------------------------------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7376890Z |             [33mLane Context[0m             |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7377540Z +------------------+-------------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7378180Z | DEFAULT_PLATFORM | ios               |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7378800Z | PLATFORM_NAME    | ios               |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7379450Z | LANE_NAME        | ios pr_testflight |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7380090Z +------------------+-------------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7380830Z [18:52:29]: [31mCalled from Fastfile at line 287[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7381580Z [18:52:29]: [31m```[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7382430Z [18:52:29]: [31m    285:	    rescue PrTestflightError => error[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7385160Z [18:52:29]: [31m    286:	      UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7386070Z [18:52:29]: [31m => 287:	      UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7387040Z [18:52:29]: [31m    288:	    rescue StandardError => error[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7387490Z [18:52:29]: [31m    289:	      category = prtf_classify_error(error, fallback: "build")[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7387840Z [18:52:29]: [31m```[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7388260Z [18:52:29]: [31m[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Preflight failed: string contains null byte[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7428150Z 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7432820Z +-------------------------------------------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7434060Z [31m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7435150Z [!] [PR_TESTFLIGHT][FAILED][CATEGORY=auth] Preflight failed: string contains null byte[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7436560Z |                [32mfastlane summary[0m                 |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7437400Z +------+----------------------------+-------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7438270Z | Step | Action                     | Time (in s) |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7439160Z +------+----------------------------+-------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7439940Z | 1    | Verifying fastlane version | 0           |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7440890Z | 2    | default_platform           | 0           |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7443240Z | 💥   | [31mapp_store_connect_api_key[0m  | 0           |
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7443730Z +------+----------------------------+-------------+
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7443910Z 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.7444170Z [18:52:29]: [31mfastlane finished with errors[0m
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8083690Z 
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8084710Z #######################################################################
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8085920Z # fastlane 2.232.2 is available. You are on 2.226.0.
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8086930Z # You should use the latest version.
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8088170Z # Please update using `bundle update fastlane`.
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:29.8090390Z #######################################################################
+Build and Upload (Fastlane pr_testflight)	Archive/build and upload with Fastlane	2026-04-08T18:52:30.2371050Z ##[error]Process completed with exit code 1.
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	﻿2026-04-08T18:52:30.2654050Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2654360Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2654600Z [36;1mmkdir -p ci-artifacts/fastlane[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2654920Z [36;1mif [[ -f fastlane/report.xml ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2655250Z [36;1m  cp fastlane/report.xml ci-artifacts/fastlane/report.xml[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2655580Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2665650Z [36;1mif [[ -d "$HOME/Library/Logs/gym" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2666080Z [36;1m  cp -R "$HOME/Library/Logs/gym" ci-artifacts/fastlane/gym-logs[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2666470Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2666910Z [36;1mif [[ -d build ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2667410Z [36;1m  find build -maxdepth 3 -type f \( -name "*.ipa" -o -name "*.log" \) -print > ci-artifacts/logs/build-files.txt || true[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2667910Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2699620Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2699940Z env:
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2700300Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2700680Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2701780Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2702050Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2702300Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2702500Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2702790Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2703080Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2703280Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2703510Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2703730Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2704000Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2704190Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2704380Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2705810Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	Collect logs for diagnostics	2026-04-08T18:52:30.2708530Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	﻿2026-04-08T18:52:30.3223950Z ##[group]Run actions/upload-artifact@v4
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3224240Z with:
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3224460Z   name: pr-testflight-26-24152730438
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3224700Z   path: ci-artifacts
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3224900Z   if-no-files-found: warn
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3225120Z   retention-days: 14
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3225320Z   compression-level: 6
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3225520Z   overwrite: false
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3225740Z   include-hidden-files: false
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3225940Z env:
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3226280Z   APP_STORE_CONNECT_API_KEY_ID: ***
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3226620Z   APP_STORE_CONNECT_ISSUER_ID: ***
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3227670Z   APP_STORE_CONNECT_API_KEY_BASE64: ***
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3227960Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3228240Z   APPLE_TEAM_ID: ***
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3228430Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3228650Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3228890Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3229110Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3229400Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3229640Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3229900Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3230110Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3230330Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3231650Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.3233030Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.7354370Z With the provided path, there will be 2 files uploaded
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.7365430Z Artifact name is valid!
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:30.7366090Z Root directory input is valid!
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.0465350Z Beginning upload of artifact content to blob storage
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.3541570Z Uploaded bytes 2103
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.4321450Z Finished uploading artifact content to blob storage!
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.4346520Z SHA256 digest of uploaded artifact zip is 6c072800ff7bbc7af94b1b6bb5ac13e19f1179e10fb5007f3f3df780326c67d7
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.4347070Z Finalizing artifact upload
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.6681250Z Artifact pr-testflight-26-24152730438.zip successfully finalized. Artifact ID 6334807424
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.6682030Z Artifact pr-testflight-26-24152730438 has been successfully uploaded! Final size is 2103 bytes. Artifact ID is 6334807424
+Build and Upload (Fastlane pr_testflight)	Upload CI artifacts	2026-04-08T18:52:31.6715970Z Artifact download URL: https://github.com/thedarkcder/girl-power/actions/runs/24152730438/artifacts/6334807424
+Build and Upload (Fastlane pr_testflight)	Post Checkout	﻿2026-04-08T18:52:31.6834490Z Post job cleanup.
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.7849360Z [command]/opt/homebrew/bin/git version
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8069430Z git version 2.53.0
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8098960Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/73b9eeb2-2c27-4a5d-a5a3-3de573379f55/.gitconfig'
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8108940Z Temporarily overriding HOME='/Users/runner/work/_temp/73b9eeb2-2c27-4a5d-a5a3-3de573379f55' before making global git config changes
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8111710Z Adding repository directory to the temporary git global config as a safe directory
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8113230Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8219600Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.8288290Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.9277400Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.9333490Z http.https://github.com/.extraheader
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.9349930Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:31.9457550Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:32.0416940Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Upload (Fastlane pr_testflight)	Post Checkout	2026-04-08T18:52:32.0480650Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Upload (Fastlane pr_testflight)	Complete job	﻿2026-04-08T18:52:32.1529080Z Cleaning up orphan processes
+Build and Upload (Fastlane pr_testflight)	Complete job	2026-04-08T18:52:32.1831160Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
