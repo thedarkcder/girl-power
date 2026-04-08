@@ -124,7 +124,7 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410.log`
   - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410-metadata.json`
 
-## CI PR-Triggered Validation on Latest PR Head Commit (Observed)
+## CI PR-Triggered Validation on Latest Deployment Trigger Commit (Observed)
 
 - PR: https://github.com/thedarkcder/girl-power/pull/26
 - Workflow: `PR TestFlight`
@@ -141,7 +141,7 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
   - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
 - Interpretation:
-  - Latest PR head confirms the new automatic-provisioning flags are active in CI.
+  - Latest PR deployment-trigger commit confirms the new automatic-provisioning flags are active in CI.
   - Remaining blocker is Apple account/cloud-signing authorization and profile availability, not lane-command mismatch.
 - Log captures in repo:
   - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396.log`
