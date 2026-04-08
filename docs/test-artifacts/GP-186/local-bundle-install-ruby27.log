@@ -1,0 +1,210 @@
+[DEPRECATED] The `--path` flag is deprecated because it relies on being remembered across bundler invocations, which bundler will no longer do in future versions. Instead please use `bundle config set --local path 'vendor/bundle-ruby27'`, and stop using this flag
+Fetching gem metadata from https://rubygems.org/........
+Fetching rake 13.3.1
+Installing rake 13.3.1
+Fetching aws-partitions 1.1235.0
+Fetching logger 1.7.0
+Fetching base64 0.3.0
+Fetching bigdecimal 4.1.1
+Fetching jmespath 1.6.2
+Fetching CFPropertyList 3.0.9
+Fetching public_suffix 5.1.1
+Fetching artifactory 3.0.17
+Fetching atomos 0.1.3
+Fetching aws-eventstream 1.4.0
+Installing base64 0.3.0
+Installing aws-partitions 1.1235.0
+Fetching babosa 1.0.4
+Installing atomos 0.1.3
+Installing jmespath 1.6.2
+Installing CFPropertyList 3.0.9
+Installing aws-eventstream 1.4.0
+Installing logger 1.7.0
+Installing artifactory 3.0.17
+Fetching claide 1.1.0
+Installing public_suffix 5.1.1
+Installing bigdecimal 4.1.1 with native extensions
+Fetching colored 1.2
+Fetching colored2 3.1.2
+Fetching highline 2.0.3
+Fetching declarative 0.0.20
+Installing babosa 1.0.4
+Fetching digest-crc 0.7.0
+Fetching domain_name 0.6.20240107
+Fetching dotenv 2.8.1
+Installing claide 1.1.0
+Installing colored 1.2
+Installing colored2 3.1.2
+Installing declarative 0.0.20
+Fetching emoji_regex 3.2.3
+Fetching excon 0.112.0
+Fetching faraday-em_http 1.0.0
+Fetching faraday-em_synchrony 1.0.1
+Fetching faraday-excon 1.1.0
+Installing dotenv 2.8.1
+Installing digest-crc 0.7.0 with native extensions
+Installing highline 2.0.3
+Installing domain_name 0.6.20240107
+Installing emoji_regex 3.2.3
+Fetching faraday-httpclient 1.0.1
+Fetching multipart-post 2.4.1
+Installing faraday-em_http 1.0.0
+Fetching faraday-net_http 1.0.2
+Installing faraday-excon 1.1.0
+Fetching faraday-net_http_persistent 1.2.0
+Fetching faraday-patron 1.0.0
+Installing faraday-em_synchrony 1.0.1
+Installing faraday-httpclient 1.0.1
+Installing multipart-post 2.4.1
+Installing excon 0.112.0
+Fetching faraday-rack 1.0.0
+Fetching faraday-retry 1.0.4
+Installing faraday-net_http 1.0.2
+Installing faraday-net_http_persistent 1.2.0
+Fetching ruby2_keywords 0.0.5
+Fetching fastimage 2.4.1
+Installing faraday-patron 1.0.0
+Fetching sysrandom 1.0.5
+Installing faraday-rack 1.0.0
+Fetching gh_inspector 1.1.3
+Installing faraday-retry 1.0.4
+Fetching multi_json 1.15.0
+Fetching os 1.1.4
+Installing ruby2_keywords 0.0.5
+Fetching mutex_m 0.3.0
+Fetching mini_mime 1.1.5
+Installing fastimage 2.4.1
+Installing gh_inspector 1.1.3
+Installing sysrandom 1.0.5 with native extensions
+Fetching trailblazer-option 0.1.2
+Installing multi_json 1.15.0
+Installing os 1.1.4
+Fetching uber 0.1.0
+Installing mutex_m 0.3.0
+Fetching retriable 3.4.1
+Installing mini_mime 1.1.5
+Installing trailblazer-option 0.1.2
+Fetching rexml 3.4.4
+Fetching google-cloud-errors 1.4.0
+Installing uber 0.1.0
+Fetching json 2.19.3
+Installing retriable 3.4.1
+Fetching mini_magick 4.13.2
+Fetching naturally 2.3.0
+Installing google-cloud-errors 1.4.0
+Installing rexml 3.4.4
+Fetching optparse 0.8.1
+Fetching plist 3.7.2
+Fetching rubyzip 2.4.1
+Fetching security 0.1.5
+Installing naturally 2.3.0
+Fetching terminal-notifier 2.0.0
+Installing mini_magick 4.13.2
+Installing json 2.19.3 with native extensions
+Installing plist 3.7.2
+Installing rubyzip 2.4.1
+Installing security 0.1.5
+Fetching unicode-display_width 2.6.0
+Installing optparse 0.8.1
+Fetching tty-screen 0.8.2
+Fetching tty-cursor 0.7.1
+Fetching word_wrap 1.0.0
+Installing unicode-display_width 2.6.0
+Fetching nanaimo 0.4.0
+Fetching rouge 3.28.0
+Installing tty-screen 0.8.2
+Fetching jwt 2.10.2
+Installing terminal-notifier 2.0.0
+Fetching aws-sigv4 1.12.1
+Installing tty-cursor 0.7.1
+Fetching addressable 2.9.0
+Installing word_wrap 1.0.0
+Installing nanaimo 0.4.0
+Fetching http-cookie 1.0.8
+Fetching faraday-multipart 1.2.0
+Fetching commander 4.6.0
+Installing aws-sigv4 1.12.1
+Fetching httpclient 2.9.0
+Installing jwt 2.10.2
+Fetching representable 3.2.0
+Installing faraday-multipart 1.2.0
+Installing addressable 2.9.0
+Fetching simctl 1.6.10
+Installing http-cookie 1.0.8
+Installing commander 4.6.0
+Fetching fastlane-sirp 1.0.0
+Installing rouge 3.28.0
+Fetching terminal-table 3.0.2
+Fetching tty-spinner 0.9.3
+Installing representable 3.2.0
+Installing httpclient 2.9.0
+Installing simctl 1.6.10
+Installing fastlane-sirp 1.0.0
+Installing terminal-table 3.0.2
+Installing tty-spinner 0.9.3
+Fetching xcodeproj 1.27.0
+Fetching faraday 1.10.5
+Installing xcodeproj 1.27.0
+Fetching xcpretty 0.4.1
+Installing faraday 1.10.5
+Fetching faraday-cookie_jar 0.0.8
+Fetching faraday_middleware 1.2.1
+Fetching signet 0.19.0
+Fetching google-cloud-env 1.6.0
+Installing faraday_middleware 1.2.1
+Installing faraday-cookie_jar 0.0.8
+Installing signet 0.19.0
+Fetching googleauth 1.8.1
+Installing google-cloud-env 1.6.0
+Fetching google-cloud-core 1.7.1
+Installing xcpretty 0.4.1
+Fetching xcpretty-travis-formatter 1.0.1
+Installing google-cloud-core 1.7.1
+Installing googleauth 1.8.1
+Fetching google-apis-core 0.11.3
+Installing xcpretty-travis-formatter 1.0.1
+Installing google-apis-core 0.11.3
+Fetching google-apis-playcustomapp_v1 0.13.0
+Fetching google-apis-androidpublisher_v3 0.54.0
+Fetching google-apis-iamcredentials_v1 0.17.0
+Fetching google-apis-storage_v1 0.31.0
+Installing google-apis-storage_v1 0.31.0
+Installing google-apis-playcustomapp_v1 0.13.0
+Installing google-apis-iamcredentials_v1 0.17.0
+Installing google-apis-androidpublisher_v3 0.54.0
+Fetching aws-sdk-core 3.244.0
+Installing aws-sdk-core 3.244.0
+Fetching aws-sdk-kms 1.123.0
+Installing aws-sdk-kms 1.123.0
+Fetching aws-sdk-s3 1.218.0
+Installing aws-sdk-s3 1.218.0
+Fetching google-cloud-storage 1.47.0
+Installing google-cloud-storage 1.47.0
+Fetching fastlane 2.226.0
+Installing fastlane 2.226.0
+Bundle complete! 1 Gemfile dependency, 92 gems now installed.
+Bundled gems are installed into `./vendor/bundle-ruby27`
+Post-install message from rubyzip:
+RubyZip 3.0 is coming!
+**********************
+
+The public API of some Rubyzip classes has been modernized to use named
+parameters for optional arguments. Please check your usage of the
+following classes:
+  * `Zip::File`
+  * `Zip::Entry`
+  * `Zip::InputStream`
+  * `Zip::OutputStream`
+  * `Zip::DOSTime`
+
+Run your test suite with the `RUBYZIP_V3_API_WARN` environment
+variable set to see warnings about usage of the old API. This will
+help you to identify any changes that you need to make to your code.
+See https://github.com/rubyzip/rubyzip/wiki/Updating-to-version-3.x for
+more information.
+
+Please ensure that your Gemfiles and .gemspecs are suitably restrictive
+to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
+See https://github.com/rubyzip/rubyzip for details. The Changelog also
+lists other enhancements and bugfixes that have been implemented since
+version 2.3.0.

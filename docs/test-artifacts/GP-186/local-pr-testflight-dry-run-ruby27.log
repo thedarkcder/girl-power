@@ -1,0 +1,74 @@
+[19:50:15]: ----------------------------------------
+[19:50:15]: --- Step: Verifying fastlane version ---
+[19:50:15]: ----------------------------------------
+[19:50:15]: Your fastlane version 2.226.0 matches the minimum requirement of 2.226.0  ✅
+[19:50:15]: ------------------------------
+[19:50:15]: --- Step: default_platform ---
+[19:50:15]: ------------------------------
+[19:50:15]: Driving the lane 'ios pr_testflight' 🚀
+[19:50:15]: [PR_TESTFLIGHT][STATE=preflight_validation][START]
+[19:50:15]: [PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation
+[19:50:15]: [PR_TESTFLIGHT][PRECHECK] project=/private/tmp/gp186/GirlPower.xcodeproj scheme=GirlPower signing=automatic dry_run=true
+[19:50:15]: [PR_TESTFLIGHT][STATE=preflight_validation][DONE]
+[19:50:15]: [PR_TESTFLIGHT][STATE=version_build_prep][START]
+[19:50:15]: --------------------------------
+[19:50:15]: --- Step: get_version_number ---
+[19:50:15]: --------------------------------
+[19:50:15]: [PR_TESTFLIGHT][VERSION_BUILD_PREP] version=1.0 build=202604081850
+[19:50:15]: [PR_TESTFLIGHT][STATE=version_build_prep][DONE]
+[19:50:15]: [PR_TESTFLIGHT][STATE=archive_build][START]
+[19:50:15]: [PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)
+[19:50:15]: [PR_TESTFLIGHT][STATE=archive_build][DONE]
+[19:50:15]: [PR_TESTFLIGHT][STATE=upload_testflight][START]
+[19:50:15]: [PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)
+[19:50:15]: [PR_TESTFLIGHT][STATE=upload_testflight][DONE]
+[19:50:15]: [PR_TESTFLIGHT][STATE=completion][START]
+[19:50:15]: [PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081850 scheme=GirlPower
+[19:50:15]: [PR_TESTFLIGHT][STATE=completion][DONE]
+
++------------------------------------------+
+|             fastlane summary             |
++------+---------------------+-------------+
+| Step | Action              | Time (in s) |
++------+---------------------+-------------+
+| 1    | Verifying fastlane  | 0           |
+|      | version             |             |
+| 2    | default_platform    | 0           |
+| 3    | get_version_number  | 0           |
++------+---------------------+-------------+
+
+[19:50:15]: fastlane.tools finished successfully 🎉
+
+#######################################################################
+# fastlane 2.232.2 is available. You are on 2.226.0.
+# You should use the latest version.
+# Please update using `bundle update fastlane`.
+#######################################################################
+
+2.232.2 Improvements
+* [sigh] fix: prevent empty string as input to codesign on VERBOSE (#29910) via Connor Tumbleson (@iBotPeaches)
+* Fix console command compatibility with Ruby 3.3+ (#29925) via Jerome Lacoste (@lacostej)
+* cli: do not hide the original exception when failing in our ensure block (#29923) via Jerome Lacoste (@lacostej)
+* [core] Fix gemspec bin/console exclusion to subtract "console" not "bin/console" (#29914) via Tachibana waita (@whywaita)
+* [core] Upgrade rack transitive dep to please dependabot (#29911) via Jerome Lacoste (@lacostej)
+* build: move to faraday 1.10.5 (#29906) via Connor Tumbleson (@iBotPeaches)
+
+2.232.1 Improvements
+* [action] Revert to "-uploadedDate" sort order for app_store_build_num… (#29899) via Kai Leonhardt (@Mik4sa)
+
+2.232.0 Improvements
+* Revert "[pilot] Add Support of the BuildAudienceType Field (#29859)" (#29881) via Connor Tumbleson (@iBotPeaches)
+* [match] Download Apple's new Developer ID intermediate certificates (#29890) via Ian G. Maia (@iangmaia)
+* [match] Bump minimum version of `aws-sdk-s3` dependency to `~> 1.197` (#29750) via Olivier Halligon (@AliSoftware)
+* [action] Switch to "build uploads" api for app_store_build_number and latest_testflight_build_number action (#29879) via Kai Leonhardt (@Mik4sa)
+* [appium] Fix appium driver usage (#29882) via Naveed Ahmad (@naveed-ahmad)
+* [gym, scan, snapshot] Allow disabling swift packages fetches when using xcodebuild (#29862) via Alexandre Podlewski (@alexandre-pod)
+* [ci] build: move to m4 runners (#29802) via Connor Tumbleson (@iBotPeaches)
+* [Ruby] Ruby 2.7 is now the minimum (dropping Ruby 2.6) (#29779) via Connor Tumbleson (@iBotPeaches)
+* [ci] Fix CI pipeline to actually lint shell/bash scripts. (#29757) via Connor Tumbleson (@iBotPeaches)
+* [action] Add format switch to the import_certificate action (#29868) via Kai Leonhardt (@Mik4sa)
+* [pilot] Add Support of the BuildAudienceType Field (#29859) via YuantongLu (@YuantongL)
+
+To see all new releases, open https://github.com/fastlane/fastlane/releases
+
+Please update using `bundle update fastlane`
