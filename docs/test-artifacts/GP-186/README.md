@@ -124,6 +124,29 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410.log`
   - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410-metadata.json`
 
+## CI PR-Triggered Validation on Latest PR Head Commit (Observed)
+
+- PR: https://github.com/thedarkcder/girl-power/pull/26
+- Workflow: `PR TestFlight`
+- Run ID: `24153956396`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24153956396
+- Trigger: `pull_request` synchronize on `feature/GP-186` to `main`
+- Job start/end: `2026-04-08T19:20:53Z` -> `2026-04-08T19:22:08Z`
+- Conclusion: `failure`
+- Observed markers:
+  - `[PR_TESTFLIGHT][PRECHECK] ... signing=automatic allow_provisioning_updates=true dry_run=false`
+  - `[PR_TESTFLIGHT][SIGNING] Automatic signing includes xcodebuild auth key flags`
+  - `xcodebuild ... CODE_SIGN_STYLE=Automatic -allowProvisioningUpdates -authenticationKeyPath ... -authenticationKeyID ... -authenticationKeyIssuerID ...`
+  - `error: exportArchive Cloud signing permission error`
+  - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
+  - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
+- Interpretation:
+  - Latest PR head confirms the new automatic-provisioning flags are active in CI.
+  - Remaining blocker is Apple account/cloud-signing authorization and profile availability, not lane-command mismatch.
+- Log captures in repo:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396.log`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396-metadata.json`
+
 ## Local Lane Evidence (Observed)
 
 Environment used for local validation in this run:
@@ -174,6 +197,8 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153241603-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24153956396.log`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24153956396-metadata.json`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -188,7 +213,7 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Current blocker marker from latest run (`24153766410`):
+- Current blocker marker from latest run (`24153956396`):
   - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
   - `error: exportArchive Cloud signing permission error`
   - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
