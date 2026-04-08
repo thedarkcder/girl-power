@@ -128,10 +128,10 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
 
 - PR: https://github.com/thedarkcder/girl-power/pull/26
 - Workflow: `PR TestFlight`
-- Run ID: `24153956396`
-- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24153956396
+- Run ID: `24154089686`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24154089686
 - Trigger: `pull_request` synchronize on `feature/GP-186` to `main`
-- Job start/end: `2026-04-08T19:20:53Z` -> `2026-04-08T19:22:08Z`
+- Job start/end: `2026-04-08T19:24:23Z` -> `2026-04-08T19:26:03Z`
 - Conclusion: `failure`
 - Observed markers:
   - `[PR_TESTFLIGHT][PRECHECK] ... signing=automatic allow_provisioning_updates=true dry_run=false`
@@ -144,8 +144,23 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - Latest PR deployment-trigger commit confirms the new automatic-provisioning flags are active in CI.
   - Remaining blocker is Apple account/cloud-signing authorization and profile availability, not lane-command mismatch.
 - Log captures in repo:
-  - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396.log`
-  - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396-metadata.json`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686.log`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686-metadata.json`
+
+## CI Concurrency Guardrail Evidence (Observed)
+
+- Workflow: `PR TestFlight`
+- Run ID: `24154059288`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24154059288
+- Trigger: `pull_request` synchronize on `feature/GP-186`
+- Conclusion: `cancelled`
+- Observed marker:
+  - `Canceling since a higher priority waiting request for pr-testflight-26 exists`
+- Interpretation:
+  - Workflow-level concurrency (`pr-testflight-${PR_NUMBER}` with `cancel-in-progress: true`) is operating as configured.
+- Log captures in repo:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24154059288.log`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24154059288-metadata.json`
 
 ## Local Lane Evidence (Observed)
 
@@ -199,6 +214,10 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153766410-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24153956396-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24154059288.log`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24154059288-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24154089686.log`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24154089686-metadata.json`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -213,7 +232,7 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Current blocker marker from latest run (`24153956396`):
+- Current blocker marker from latest run (`24154089686`):
   - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
   - `error: exportArchive Cloud signing permission error`
   - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
