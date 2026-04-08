@@ -1,0 +1,128 @@
+name: PR TestFlight
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+    paths:
+      - ".github/workflows/pr-testflight.yml"
+      - "fastlane/**"
+      - "Gemfile"
+      - "Gemfile.lock"
+      - "GirlPower/**"
+      - "GirlPower.xcodeproj/**"
+      - "docs/ios-testflight-runbook.md"
+
+concurrency:
+  group: pr-testflight-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-testflight:
+    name: Build and Upload (Fastlane pr_testflight)
+    runs-on: macos-latest
+    if: ${{ !github.event.pull_request.draft }}
+    timeout-minutes: 75
+    env:
+      APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+      APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+      APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+      APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APP_STORE_CONNECT_TEAM_ID }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      IOS_SIGNING_STYLE: ${{ vars.IOS_SIGNING_STYLE }}
+      IOS_PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROVISIONING_PROFILE_SPECIFIER }}
+      IOS_CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }}
+      IOS_XCODEPROJ: GirlPower.xcodeproj
+      IOS_SCHEME: GirlPower
+      IOS_APP_IDENTIFIER: com.route25.GirlPower
+      IOS_EXPORT_METHOD: app-store
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Ruby and Bundler
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.1"
+          bundler-cache: true
+
+      - name: Preflight CI secret presence check
+        shell: bash
+        run: |
+          set -euo pipefail
+          required_vars=(
+            APP_STORE_CONNECT_API_KEY_ID
+            APP_STORE_CONNECT_ISSUER_ID
+            APP_STORE_CONNECT_API_KEY_BASE64
+            APPLE_TEAM_ID
+          )
+          missing_vars=()
+          for key in "${required_vars[@]}"; do
+            if [[ -z "${!key:-}" ]]; then
+              missing_vars+=("$key")
+            fi
+          done
+
+          signing_style="${IOS_SIGNING_STYLE:-automatic}"
+          signing_style="$(echo "${signing_style}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${signing_style}" != "automatic" && "${signing_style}" != "manual" ]]; then
+            echo "::error::IOS_SIGNING_STYLE must be 'automatic' or 'manual'."
+            exit 1
+          fi
+
+          if [[ "${signing_style}" == "manual" ]]; then
+            if [[ -z "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then
+              missing_vars+=("IOS_PROVISIONING_PROFILE_SPECIFIER")
+            fi
+            if [[ -z "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
+              missing_vars+=("IOS_CODE_SIGN_IDENTITY")
+            fi
+          fi
+
+          if (( ${#missing_vars[@]} > 0 )); then
+            echo "::error::Missing required CI secret/env keys: ${missing_vars[*]}"
+            exit 1
+          fi
+
+          echo "[CI_PRECHECK] Required secret/env key presence validated (values redacted)."
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          bundle config set path vendor/bundle
+          bundle install --jobs 4 --retry 3
+
+      - name: Archive/build and upload with Fastlane
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/logs
+          bundle exec fastlane pr_testflight | tee ci-artifacts/logs/fastlane-pr-testflight.log
+
+      - name: Collect logs for diagnostics
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-artifacts/fastlane
+          if [[ -f fastlane/report.xml ]]; then
+            cp fastlane/report.xml ci-artifacts/fastlane/report.xml
+          fi
+          if [[ -d "$HOME/Library/Logs/gym" ]]; then
+            cp -R "$HOME/Library/Logs/gym" ci-artifacts/fastlane/gym-logs
+          fi
+          if [[ -d build ]]; then
+            find build -maxdepth 3 -type f \( -name "*.ipa" -o -name "*.log" \) -print > ci-artifacts/logs/build-files.txt || true
+          fi
+
+      - name: Upload CI artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-testflight-${{ github.event.pull_request.number }}-${{ github.run_id }}
+          path: ci-artifacts
+          if-no-files-found: warn
+          retention-days: 14

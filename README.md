@@ -32,3 +32,5 @@ Fastlane automation for PR TestFlight delivery is documented in [`docs/ios-testf
 ```bash
 bundle exec fastlane pr_testflight
 ```
+
+GitHub PR automation for this lane is defined in [`.github/workflows/pr-testflight.yml`](.github/workflows/pr-testflight.yml).
