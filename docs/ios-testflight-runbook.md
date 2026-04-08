@@ -44,6 +44,7 @@ export APP_STORE_CONNECT_ISSUER_ID="<issuer-id>"
 export APP_STORE_CONNECT_API_KEY_BASE64="<base64-p8-content>"
 export APPLE_TEAM_ID="<apple-team-id>"
 # Optional: export IOS_SIGNING_STYLE=automatic|manual
+# Optional: export IOS_ALLOW_PROVISIONING_UPDATES=1
 ```
 
 3. Optional dry-run validation (keeps state flow/log markers, skips archive + upload):
@@ -74,6 +75,7 @@ bundle exec fastlane pr_testflight
 | `IOS_SCHEME` | `GirlPower` | Build scheme. |
 | `IOS_APP_IDENTIFIER` | `com.route25.GirlPower` | App bundle identifier. |
 | `IOS_EXPORT_METHOD` | `app-store` | Export method passed to `gym`. |
+| `IOS_ALLOW_PROVISIONING_UPDATES` | `1` | When `automatic` signing is active, pass `-allowProvisioningUpdates` (plus App Store Connect auth-key flags) to `xcodebuild`. Set to `0` to disable. |
 | `IOS_MARKETING_VERSION` | project value | Override marketing version. |
 | `IOS_BUILD_NUMBER` | UTC timestamp (`%Y%m%d%H%M`) | Override build number. |
 | `PR_TESTFLIGHT_DRY_RUN` | unset | Set to `1` to skip archive/upload while validating lane wiring/log signatures. |
@@ -97,6 +99,8 @@ bundle install --jobs 4 --retry 3
 bundle exec fastlane pr_testflight | tee ci-artifacts/logs/fastlane-pr-testflight.log
 ```
 
+When `IOS_SIGNING_STYLE=automatic`, the lane appends `-allowProvisioningUpdates` and App Store Connect auth-key flags (`-authenticationKeyPath`, `-authenticationKeyID`, `-authenticationKeyIssuerID`) to the archive build to allow CI profile generation.
+
 ### Required CI Secret/Variable Keys
 
 Configure the following repository-level CI values before non-dry-run uploads:
@@ -108,6 +112,7 @@ Configure the following repository-level CI values before non-dry-run uploads:
 | `APP_STORE_CONNECT_API_KEY_BASE64` | Secret | Yes | Base64-encoded App Store Connect `.p8` content. |
 | `APPLE_TEAM_ID` | Secret | Yes | Apple Developer Team ID used for signing. |
 | `IOS_SIGNING_STYLE` | Variable | No (defaults `automatic`) | `automatic` or `manual`. |
+| `IOS_ALLOW_PROVISIONING_UPDATES` | Variable | No (defaults `1`) | Enables/disables automatic provisioning updates for `xcodebuild` when signing style is `automatic`. |
 | `IOS_PROVISIONING_PROFILE_SPECIFIER` | Secret | Manual only | Provisioning profile specifier for manual signing. |
 | `IOS_CODE_SIGN_IDENTITY` | Secret | Manual only | Code signing identity for manual signing. |
 | `APP_STORE_CONNECT_TEAM_ID` | Secret | No | Optional App Store Connect team ID for multi-team accounts. |
@@ -173,7 +178,7 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 - `signing`: verify team ID, signing style, certs, and provisioning profile mapping.
 - `signing` invalid-style error (`IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`): if GitHub variable is unset/blank, ensure lane normalizes blank to `automatic` or set repository variable `IOS_SIGNING_STYLE=automatic`.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
-- `build` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): CI runner lacks a usable signing profile/certificate path for archive. Configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) or provide an automatic-signing path that can create profiles in CI.
+- `build` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): verify automatic provisioning is enabled (`IOS_ALLOW_PROVISIONING_UPDATES` not set to `0`) and App Store Connect key values are valid. If CI still cannot provision profiles, configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) with matching certificate/profile assets.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.
 - CI preflight secret-name failure (before Fastlane lane starts): look for `Missing required CI secret/env keys: ...` in the `Preflight CI secret presence check` step.
 
@@ -224,6 +229,8 @@ gh workflow enable pr-testflight.yml --repo thedarkcder/girl-power
   - Mitigation: keep required key list synchronized with workflow `env` and preflight check.
 - Risk: manual-signing mismatch (`IOS_SIGNING_STYLE=manual` without profile/identity) fails signing preflight.
   - Mitigation: set `IOS_PROVISIONING_PROFILE_SPECIFIER` and `IOS_CODE_SIGN_IDENTITY` together.
+- Risk: automatic provisioning requires App Store Connect key permissions capable of profile operations.
+  - Mitigation: use an API key with sufficient role and keep `IOS_ALLOW_PROVISIONING_UPDATES=1` for automatic path.
 - Risk: repeated pushes create concurrent redundant runs.
   - Mitigation: workflow-level `concurrency` with `cancel-in-progress: true`.
 - Risk: PR unintentionally uploads while still under review.

@@ -1,6 +1,8 @@
 fastlane_version "2.226.0"
 default_platform(:ios)
 require "base64"
+require "fileutils"
+require "shellwords"
 
 class PrTestflightError < StandardError
   attr_reader :category
@@ -94,6 +96,54 @@ rescue StandardError => error
   end
 end
 
+def prtf_truthy_env?(env_key, default:)
+  raw_value = ENV[env_key]
+  return default if raw_value.nil? || raw_value.strip.empty?
+
+  !%w[0 false no off].include?(raw_value.strip.downcase)
+end
+
+def prtf_api_key_pem_content(key_payload)
+  return key_payload[:key_content] unless key_payload[:is_key_content_base64]
+
+  Base64.strict_decode64(key_payload[:key_content])
+rescue ArgumentError => error
+  raise PrTestflightError.new(
+    "auth",
+    "APP_STORE_CONNECT_API_KEY_BASE64 must decode to App Store Connect key content: #{error.message}"
+  )
+end
+
+def prtf_prepare_signing_auth_key!(context)
+  return context if context[:dry_run]
+  return context unless context[:signing_style] == "automatic"
+  return context unless context[:allow_provisioning_updates]
+
+  key_payload = context[:key_payload]
+  return context if key_payload.nil?
+
+  pem_content = prtf_api_key_pem_content(key_payload)
+  auth_dir = File.join(context[:build_output_dir], "auth")
+  FileUtils.mkdir_p(auth_dir)
+
+  auth_key_path = File.join(auth_dir, "AuthKey_#{context[:api_key_id]}.p8")
+  File.write(auth_key_path, pem_content)
+  File.chmod(0o600, auth_key_path)
+
+  context[:xcode_auth_key_path] = auth_key_path
+  context
+end
+
+def prtf_cleanup(context)
+  auth_key_path = context[:xcode_auth_key_path]
+  return if auth_key_path.nil? || auth_key_path.strip.empty?
+  return unless File.exist?(auth_key_path)
+
+  File.delete(auth_key_path)
+rescue StandardError => error
+  UI.important("[PR_TESTFLIGHT][CLEANUP] Failed to remove temporary auth key file: #{error.message}")
+end
+
 def prtf_classify_error(error, fallback:)
   text = error.to_s.downcase
 
@@ -158,6 +208,10 @@ def prtf_preflight_validation(context)
   key_content = prtf_required_env!("APP_STORE_CONNECT_API_KEY_BASE64", "auth")
   key_payload = prtf_resolve_api_key_content(key_content)
 
+  context[:api_key_id] = key_id
+  context[:issuer_id] = issuer_id
+  context[:key_payload] = key_payload
+
   context[:api_key] = if dry_run
     UI.important("[PR_TESTFLIGHT][AUTH] Dry-run mode active; skipping App Store Connect token generation")
     nil
@@ -177,6 +231,7 @@ def prtf_preflight_validation(context)
 
   context[:team_id] = team_id
   context[:signing_style] = signing_style
+  context[:allow_provisioning_updates] = prtf_truthy_env?("IOS_ALLOW_PROVISIONING_UPDATES", default: true)
 
   if signing_style == "manual"
     context[:provisioning_profile_specifier] = prtf_required_env!("IOS_PROVISIONING_PROFILE_SPECIFIER", "signing")
@@ -184,7 +239,8 @@ def prtf_preflight_validation(context)
   end
 
   UI.message(
-    "[PR_TESTFLIGHT][PRECHECK] project=#{xcodeproj} scheme=#{scheme} signing=#{signing_style} dry_run=#{dry_run}"
+    "[PR_TESTFLIGHT][PRECHECK] project=#{xcodeproj} scheme=#{scheme} signing=#{signing_style} " \
+    "allow_provisioning_updates=#{context[:allow_provisioning_updates]} dry_run=#{dry_run}"
   )
 
   context
@@ -216,6 +272,18 @@ def prtf_version_build_prep(context)
   if context[:signing_style] == "manual"
     xcargs << "PROVISIONING_PROFILE_SPECIFIER=#{context[:provisioning_profile_specifier]}"
     xcargs << "CODE_SIGN_IDENTITY=#{context[:code_sign_identity]}"
+  elsif context[:allow_provisioning_updates]
+    context = prtf_prepare_signing_auth_key!(context)
+    xcargs << "-allowProvisioningUpdates"
+
+    if context[:xcode_auth_key_path]
+      xcargs << "-authenticationKeyPath #{Shellwords.escape(context[:xcode_auth_key_path])}"
+      xcargs << "-authenticationKeyID #{context[:api_key_id]}"
+      xcargs << "-authenticationKeyIssuerID #{context[:issuer_id]}"
+      UI.message("[PR_TESTFLIGHT][SIGNING] Automatic signing includes xcodebuild auth key flags")
+    else
+      UI.important("[PR_TESTFLIGHT][SIGNING] Automatic signing uses -allowProvisioningUpdates without auth key flags")
+    end
   end
 
   context[:xcargs] = xcargs.join(" ")
@@ -348,6 +416,8 @@ platform :ios do
       category = prtf_classify_error(error, fallback: "build")
       UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
       UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
+    ensure
+      prtf_cleanup(context)
     end
   end
 end
