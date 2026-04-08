@@ -173,6 +173,7 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 - `signing`: verify team ID, signing style, certs, and provisioning profile mapping.
 - `signing` invalid-style error (`IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`): if GitHub variable is unset/blank, ensure lane normalizes blank to `automatic` or set repository variable `IOS_SIGNING_STYLE=automatic`.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
+- `build` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): CI runner lacks a usable signing profile/certificate path for archive. Configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) or provide an automatic-signing path that can create profiles in CI.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.
 - CI preflight secret-name failure (before Fastlane lane starts): look for `Missing required CI secret/env keys: ...` in the `Preflight CI secret presence check` step.
 
