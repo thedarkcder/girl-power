@@ -223,8 +223,18 @@ protocol PendingAnonymousSessionStoring {
     func clear()
 }
 
+struct CurrentDeviceLinkResult: Equatable {
+    let status: String
+    let mergedDemoQuotaSnapshot: DemoQuotaStateMachine.RemoteSnapshot?
+}
+
+struct PostAuthenticationSyncResult: Equatable {
+    let profile: Profile?
+    let mergedDemoQuotaSnapshot: DemoQuotaStateMachine.RemoteSnapshot?
+}
+
 protocol AnonymousSessionLinking {
-    func linkPendingSession(with authSession: AuthSession) async -> Bool
+    func linkCurrentDevice(with authSession: AuthSession) async -> CurrentDeviceLinkResult?
 }
 
 @MainActor
@@ -237,6 +247,7 @@ protocol AuthServicing: ObservableObject {
     func requireAuthentication(context: AuthRequirementContext, message: String) async
     func dismissFailure() async
     func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession?
+    func synchronizeAuthenticatedContext(for session: AuthSession) async -> PostAuthenticationSyncResult?
     func signIn(email: String, password: String, context: AuthRequirementContext) async
     func signUp(email: String, password: String, context: AuthRequirementContext) async
     func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async
@@ -321,32 +332,32 @@ final class UserDefaultsPendingAnonymousSessionStore: PendingAnonymousSessionSto
     }
 }
 
-struct AnonymousSessionLinkResult: Decodable {
+private struct AnonymousSessionLinkResult: Decodable {
     let status: String
+    let snapshot: AuthenticatedQuotaSnapshotPayload?
 }
 
 final class SupabaseAnonymousSessionLinker: AnonymousSessionLinking {
     private let configuration: SupabaseProjectConfiguration
     private let urlSession: URLSession
     private let pendingStore: PendingAnonymousSessionStoring
-    private let deviceIdentityStorage: KeychainPersisting
+    private let deviceIdentityProvider: DeviceIdentityProviding
 
     init(
         configuration: SupabaseProjectConfiguration,
         urlSession: URLSession = .shared,
         pendingStore: PendingAnonymousSessionStoring,
-        deviceIdentityStorage: KeychainPersisting = KeychainDeviceIdentityStorage()
+        deviceIdentityProvider: DeviceIdentityProviding = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage())
     ) {
         self.configuration = configuration
         self.urlSession = urlSession
         self.pendingStore = pendingStore
-        self.deviceIdentityStorage = deviceIdentityStorage
+        self.deviceIdentityProvider = deviceIdentityProvider
     }
 
-    func linkPendingSession(with authSession: AuthSession) async -> Bool {
-        guard let pendingSessionID = pendingStore.load(),
-              let deviceID = try? deviceIdentityStorage.readUUID() else {
-            return true
+    func linkCurrentDevice(with authSession: AuthSession) async -> CurrentDeviceLinkResult? {
+        guard let deviceID = try? await deviceIdentityProvider.deviceID() else {
+            return nil
         }
 
         var request = URLRequest(url: configuration.linkAnonymousSessionURL)
@@ -355,42 +366,108 @@ final class SupabaseAnonymousSessionLinker: AnonymousSessionLinking {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(configuration.anonKey, forHTTPHeaderField: "apikey")
         request.setValue("Bearer \(authSession.accessToken)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try? JSONEncoder().encode(LinkPayload(deviceID: deviceID.uuidString, anonSessionID: pendingSessionID.uuidString))
+        request.httpBody = try? JSONEncoder().encode(
+            LinkPayload(
+                deviceID: deviceID.uuidString,
+                anonSessionID: pendingStore.load()?.uuidString
+            )
+        )
 
         do {
             let (data, response) = try await urlSession.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
-                return false
+                return nil
             }
 
-            switch httpResponse.statusCode {
-            case 200, 201, 204:
-                pendingStore.clear()
-                return true
-            case 409, 412:
-                pendingStore.clear()
-                return true
-            default:
-                if !data.isEmpty,
-                   let result = try? JSONDecoder().decode(AnonymousSessionLinkResult.self, from: data),
-                   ["duplicate", "stale_session"].contains(result.status) {
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let result = try decoder.decode(AnonymousSessionLinkResult.self, from: data)
+
+            if 200..<300 ~= httpResponse.statusCode {
+                if pendingStore.load() != nil {
                     pendingStore.clear()
-                    return true
                 }
-                return false
+                return CurrentDeviceLinkResult(
+                    status: result.status,
+                    mergedDemoQuotaSnapshot: result.snapshot?.makeRemoteSnapshot()
+                )
             }
+
+            if httpResponse.statusCode == 409, result.status == "relink_rejected" {
+                return CurrentDeviceLinkResult(
+                    status: result.status,
+                    mergedDemoQuotaSnapshot: nil
+                )
+            }
+
+            return nil
         } catch {
-            return false
+            return nil
         }
     }
 
     private struct LinkPayload: Encodable {
         let deviceID: String
-        let anonSessionID: String
+        let anonSessionID: String?
 
         enum CodingKeys: String, CodingKey {
             case deviceID = "device_id"
             case anonSessionID = "anon_session_id"
+        }
+    }
+}
+
+private struct AuthenticatedQuotaSnapshotPayload: Decodable {
+    let attemptsUsed: Int
+    let activeAttemptIndex: Int?
+    let lastDecision: AuthenticatedQuotaDecisionPayload?
+    let serverLockReason: String?
+    let lastSyncAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case attemptsUsed = "attempts_used"
+        case activeAttemptIndex = "active_attempt_index"
+        case lastDecision = "last_decision"
+        case serverLockReason = "server_lock_reason"
+        case lastSyncAt = "last_sync_at"
+    }
+
+    func makeRemoteSnapshot() -> DemoQuotaStateMachine.RemoteSnapshot {
+        let decision = lastDecision?.makeDecision()
+        return DemoQuotaStateMachine.RemoteSnapshot(
+            attemptsUsed: attemptsUsed,
+            activeAttemptIndex: activeAttemptIndex,
+            lastDecision: decision,
+            serverLockReason: serverLockReason.flatMap { DemoQuotaStateMachine.LockReason(storageValue: $0) },
+            lastSyncAt: lastSyncAt
+        )
+    }
+}
+
+private struct AuthenticatedQuotaDecisionPayload: Decodable {
+    let type: String
+    let message: String?
+    let timestamp: Date
+
+    enum CodingKeys: String, CodingKey {
+        case type
+        case message
+        case timestamp = "ts"
+    }
+
+    func makeDecision() -> DemoQuotaStateMachine.DemoEvaluationDecision? {
+        switch type {
+        case "allow":
+            return .allowSecondAttempt(timestamp: timestamp)
+        case "deny":
+            return .deny(
+                lockReason: .evaluationDenied(message: message),
+                timestamp: timestamp
+            )
+        case "timeout":
+            return .timeout(timestamp: timestamp)
+        default:
+            return nil
         }
     }
 }
@@ -505,9 +582,11 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     private let anonymousSessionStore: PendingAnonymousSessionStoring
     private let linker: AnonymousSessionLinking
     private let profileService: any ProfileServicing
+    private let deviceIdentityProvider: DeviceIdentityProviding
     private var continuations: [UUID: AsyncStream<AuthState>.Continuation] = [:]
     private var sessionRecoveryTask: Task<AuthSession?, Never>?
-    private var postAuthenticationTask: Task<Void, Never>?
+    fileprivate var postAuthenticationTask: Task<PostAuthenticationSyncEnvelope, Never>?
+    fileprivate var latestPostAuthenticationSync: PostAuthenticationSyncEnvelope?
     private var sessionRecoveryContext: AuthRequirementContext?
     private let logger = Logger(subsystem: "com.route25.GirlPower", category: "Auth")
 
@@ -516,13 +595,15 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         sessionStore: AuthSessionStoring = KeychainAuthSessionStore(),
         anonymousSessionStore: PendingAnonymousSessionStoring = UserDefaultsPendingAnonymousSessionStore(),
         linker: AnonymousSessionLinking,
-        profileService: any ProfileServicing = DisabledProfileService()
+        profileService: any ProfileServicing = DisabledProfileService(),
+        deviceIdentityProvider: DeviceIdentityProviding = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage())
     ) {
         self.api = api
         self.sessionStore = sessionStore
         self.anonymousSessionStore = anonymousSessionStore
         self.linker = linker
         self.profileService = profileService
+        self.deviceIdentityProvider = deviceIdentityProvider
         self.state = .anonymousEligible
     }
 
@@ -540,6 +621,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func restoreSession() async {
+        await prepareDeviceIdentityIfNeeded()
         _ = await restoreOrJoinExistingRecovery()
     }
 
@@ -555,6 +637,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func requireAuthentication(context: AuthRequirementContext, message: String) async {
+        await prepareDeviceIdentityIfNeeded()
         apply(.requireAuthentication(context: context, message: message))
     }
 
@@ -563,11 +646,13 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
     }
 
     func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? {
+        await prepareDeviceIdentityIfNeeded()
         switch state {
         case .authenticated(let session):
             if session.shouldRefreshSoon {
                 return await refreshOrJoin(session: session, context: context)
             }
+            _ = await synchronizeAuthenticatedContext(for: session)
             return session
         case .refreshing(let session, let refreshingContext):
             if let task = sessionRecoveryTask {
@@ -583,6 +668,15 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
             apply(.requireAuthentication(context: context, message: context.defaultMessage))
             return nil
         }
+    }
+
+    func synchronizeAuthenticatedContext(for session: AuthSession) async -> PostAuthenticationSyncResult? {
+        if let latestPostAuthenticationSync, latestPostAuthenticationSync.matches(session) {
+            return latestPostAuthenticationSync.result
+        }
+        guard let postAuthenticationTask else { return nil }
+        let envelope = await postAuthenticationTask.value
+        return envelope.matches(session) ? envelope.result : nil
     }
 
     func signIn(email: String, password: String, context: AuthRequirementContext) async {
@@ -608,6 +702,7 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
 
     func signOut() async {
         postAuthenticationTask?.cancel()
+        latestPostAuthenticationSync = nil
         try? sessionStore.clear()
         anonymousSessionStore.clear()
         apply(.signOut)
@@ -745,16 +840,52 @@ final class SupabaseAuthService: ObservableObject, AuthServicing {
         let linker = self.linker
         let logger = self.logger
         postAuthenticationTask = Task {
+            var profile: Profile?
             do {
-                _ = try await profileService.upsertProfile(using: session)
+                profile = try await profileService.upsertProfile(using: session)
             } catch {
                 logger.warning("Profile sync after authentication failed: \(error.localizedDescription, privacy: .public)")
             }
-            guard Task.isCancelled == false else { return }
-            let linked = await linker.linkPendingSession(with: session)
-            if linked == false, let linkFailureMessage {
+            guard Task.isCancelled == false else {
+                let envelope = PostAuthenticationSyncEnvelope(
+                    accessToken: session.accessToken,
+                    userID: session.user.id,
+                    result: PostAuthenticationSyncResult(
+                        profile: profile,
+                        mergedDemoQuotaSnapshot: nil
+                    )
+                )
+                self.latestPostAuthenticationSync = envelope
+                return envelope
+            }
+            let linkResult = await linker.linkCurrentDevice(with: session)
+            if linkResult == nil, let linkFailureMessage {
                 logger.warning("\(linkFailureMessage, privacy: .public)")
             }
+            let envelope = PostAuthenticationSyncEnvelope(
+                accessToken: session.accessToken,
+                userID: session.user.id,
+                result: PostAuthenticationSyncResult(
+                    profile: profile,
+                    mergedDemoQuotaSnapshot: linkResult?.mergedDemoQuotaSnapshot
+                )
+            )
+            self.latestPostAuthenticationSync = envelope
+            return envelope
+        }
+    }
+
+    private func prepareDeviceIdentityIfNeeded() async {
+        _ = try? await deviceIdentityProvider.deviceID()
+    }
+
+    fileprivate struct PostAuthenticationSyncEnvelope {
+        let accessToken: String
+        let userID: String
+        let result: PostAuthenticationSyncResult
+
+        func matches(_ session: AuthSession) -> Bool {
+            accessToken == session.accessToken && userID == session.user.id
         }
     }
 
@@ -805,6 +936,7 @@ final class DisabledAuthService: ObservableObject, AuthServicing {
     func requireAuthentication(context: AuthRequirementContext, message: String) async {}
     func dismissFailure() async {}
     func ensureValidSession(for context: AuthRequirementContext) async -> AuthSession? { nil }
+    func synchronizeAuthenticatedContext(for session: AuthSession) async -> PostAuthenticationSyncResult? { nil }
     func signIn(email: String, password: String, context: AuthRequirementContext) async {}
     func signUp(email: String, password: String, context: AuthRequirementContext) async {}
     func signInWithApple(identityToken: String, nonce: String, context: AuthRequirementContext) async {}

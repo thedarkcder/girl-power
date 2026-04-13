@@ -29,13 +29,16 @@ struct GirlPowerApp: App {
         }
         let authService: any AuthServicing
         let profileService: any ProfileServicing
+        let profileEntitlementSync: any ProfileEntitlementSyncing
         if arguments.contains("-uiTesting") {
             profileService = DisabledProfileService()
+            profileEntitlementSync = DisabledProfileEntitlementSyncService()
             authService = DisabledAuthService()
         } else {
             let configuration = SupabaseProjectConfiguration.live()
             let anonymousSessionStore = UserDefaultsPendingAnonymousSessionStore()
             profileService = SupabaseProfileService(configuration: configuration)
+            profileEntitlementSync = SupabaseProfileEntitlementSyncService(configuration: configuration)
             authService = SupabaseAuthService(
                 api: SupabaseAuthRESTAPI(configuration: configuration),
                 anonymousSessionStore: anonymousSessionStore,
@@ -53,7 +56,10 @@ struct GirlPowerApp: App {
         if arguments.contains("-returningUser") {
             repository.markCompleted()
         }
-        let entitlementService = StoreKitEntitlementService(productIDs: ["com.girlpower.app.pro.monthly"])
+        let entitlementService = StoreKitEntitlementService(
+            productIDs: ["com.girlpower.app.pro.monthly"],
+            profileEntitlementSync: profileEntitlementSync
+        )
         self.quotaCoordinator = coordinator
         _entitlementService = StateObject(wrappedValue: entitlementService)
         _viewModel = StateObject(

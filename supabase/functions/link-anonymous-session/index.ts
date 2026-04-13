@@ -4,7 +4,7 @@ import { responseForLinkStatus } from './linker.ts';
 
 const RequestSchema = z.object({
   device_id: z.string().uuid('device_id must be a UUID'),
-  anon_session_id: z.string().uuid('anon_session_id must be a UUID'),
+  anon_session_id: z.string().uuid('anon_session_id must be a UUID').optional(),
 });
 
 class HttpError extends Error {
@@ -33,18 +33,28 @@ Deno.serve(async (req) => {
 
     const parsed = RequestSchema.parse(await parseBody(req));
     const authUser = await authenticatedUser(accessToken);
-    const { data, error } = await supabase.rpc('link_anonymous_session', {
+    const { data, error } = await supabase.rpc('link_authenticated_device', {
       p_device_id: parsed.device_id,
-      p_anon_session_id: parsed.anon_session_id,
       p_auth_user_id: authUser.id,
+      p_anon_session_id: parsed.anon_session_id ?? null,
     });
 
     if (error) {
-      throw new HttpError(500, 'Failed to link anonymous session');
+      throw new HttpError(500, 'Failed to link authenticated device');
     }
 
-    const response = responseForLinkStatus(String(data ?? ''));
-    return jsonResponse({ status: response.status }, response.httpStatus);
+    const payload = Array.isArray(data) ? data[0] : data;
+    const response = responseForLinkStatus(String(payload?.status ?? ''));
+    return jsonResponse({
+      status: response.status,
+      snapshot: payload ? {
+        attempts_used: payload.attempts_used,
+        active_attempt_index: payload.active_attempt_index,
+        last_decision: payload.last_decision,
+        server_lock_reason: payload.server_lock_reason,
+        last_sync_at: payload.last_sync_at,
+      } : null,
+    }, response.httpStatus);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return jsonResponse({ error: 'invalid_body', details: error.issues }, 400);

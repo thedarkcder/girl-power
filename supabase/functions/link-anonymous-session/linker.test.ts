@@ -5,12 +5,12 @@ Deno.test('responseForLinkStatus maps linked to 200', () => {
   assertEquals(responseForLinkStatus('linked'), { httpStatus: 200, status: 'linked' });
 });
 
-Deno.test('responseForLinkStatus maps duplicate to 409', () => {
-  assertEquals(responseForLinkStatus('duplicate'), { httpStatus: 409, status: 'duplicate' });
+Deno.test('responseForLinkStatus maps already_linked to 200', () => {
+  assertEquals(responseForLinkStatus('already_linked'), { httpStatus: 200, status: 'already_linked' });
 });
 
-Deno.test('responseForLinkStatus maps stale_session to 412', () => {
-  assertEquals(responseForLinkStatus('stale_session'), { httpStatus: 412, status: 'stale_session' });
+Deno.test('responseForLinkStatus maps relink_rejected to 409', () => {
+  assertEquals(responseForLinkStatus('relink_rejected'), { httpStatus: 409, status: 'relink_rejected' });
 });
 
 Deno.test('responseForLinkStatus rejects unknown states', () => {

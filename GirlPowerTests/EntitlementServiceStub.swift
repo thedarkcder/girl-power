@@ -6,6 +6,7 @@ final class EntitlementServiceStub: ObservableObject, EntitlementServicing {
     @Published var state: EntitlementState
     var isPro: Bool
     private(set) var loadCallCount = 0
+    private(set) var authenticatedProfile: Profile?
     private let stream: AsyncStream<EntitlementState>
     private let continuation: AsyncStream<EntitlementState>.Continuation
 
@@ -25,6 +26,12 @@ final class EntitlementServiceStub: ObservableObject, EntitlementServicing {
     }
     func purchase() async {}
     func restore() async {}
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {
+        authenticatedProfile = profile
+        if let profile {
+            isPro = profile.isPro
+        }
+    }
 
     func observeStates() -> AsyncStream<EntitlementState> {
         stream
@@ -44,6 +51,7 @@ final class AuthServiceStub: ObservableObject, AuthServicing {
     var ensuredSession: AuthSession?
     var pendingAnonymousSessionID: UUID?
     private(set) var handleAppDidBecomeActiveCallCount = 0
+    var synchronizedContextResult: PostAuthenticationSyncResult?
     private let stream: AsyncStream<AuthState>
     private let continuation: AsyncStream<AuthState>.Continuation
 
@@ -78,6 +86,10 @@ final class AuthServiceStub: ObservableObject, AuthServicing {
         }
         send(.authRequired(context: context, message: context.defaultMessage))
         return nil
+    }
+
+    func synchronizeAuthenticatedContext(for session: AuthSession) async -> PostAuthenticationSyncResult? {
+        synchronizedContextResult
     }
 
     func signIn(email: String, password: String, context: AuthRequirementContext) async {
