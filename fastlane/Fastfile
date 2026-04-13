@@ -161,6 +161,9 @@ def prtf_classify_error(error, fallback:)
   return "signing" if [
     "code signing",
     "provisioning profile",
+    "no profiles for",
+    "automatic signing is disabled",
+    "cloud signing permission error",
     "no signing certificate",
     "signing certificate",
     "codesign",
@@ -183,6 +186,52 @@ def prtf_classify_error(error, fallback:)
   ].any? { |token| text.include?(token) }
 
   fallback.to_s
+end
+
+def prtf_latest_gym_log_excerpt(max_files: 2, tail_bytes: 24_576)
+  gym_logs_root = File.expand_path("~/Library/Logs/gym")
+  return "" unless Dir.exist?(gym_logs_root)
+
+  log_paths = Dir.glob(File.join(gym_logs_root, "**", "*.log"))
+  return "" if log_paths.empty?
+
+  excerpts = log_paths
+    .sort_by { |path| File.mtime(path) }
+    .reverse
+    .take(max_files)
+    .map do |path|
+      contents = File.binread(path)
+      excerpt = if contents.bytesize > tail_bytes
+        contents.byteslice(contents.bytesize - tail_bytes, tail_bytes)
+      else
+        contents
+      end
+
+      "[#{File.basename(path)}]\n#{excerpt.encode("UTF-8", invalid: :replace, undef: :replace, replace: "")}"
+    rescue StandardError
+      nil
+    end
+    .compact
+
+  excerpts.join("\n")
+rescue StandardError
+  ""
+end
+
+def prtf_refined_error_category(error, fallback:)
+  initial_category = prtf_classify_error(error, fallback: fallback)
+  return initial_category unless initial_category == "build"
+
+  gym_excerpt = prtf_latest_gym_log_excerpt
+  return initial_category if gym_excerpt.strip.empty?
+
+  refined_category = prtf_classify_error("#{error}\n#{gym_excerpt}", fallback: fallback)
+  if refined_category != initial_category
+    UI.important(
+      "[PR_TESTFLIGHT][CLASSIFIER] category_refined=#{initial_category}->#{refined_category} via gym log scan"
+    )
+  end
+  refined_category
 end
 
 def prtf_validate_signing_style!(style)
@@ -344,7 +393,8 @@ def prtf_archive_build(context)
 rescue PrTestflightError
   raise
 rescue StandardError => error
-  raise PrTestflightError.new(prtf_classify_error(error, fallback: "build"), "Archive/build failed: #{error.message}")
+  category = prtf_refined_error_category(error, fallback: "build")
+  raise PrTestflightError.new(category, "Archive/build failed: #{error.message}")
 end
 
 def prtf_upload_testflight(context)
@@ -413,7 +463,7 @@ platform :ios do
       UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
       UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{error.category}] #{error.message}")
     rescue StandardError => error
-      category = prtf_classify_error(error, fallback: "build")
+      category = prtf_refined_error_category(error, fallback: "build")
       UI.error("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
       UI.user_error!("[PR_TESTFLIGHT][FAILED][CATEGORY=#{category}] #{error.message}")
     ensure

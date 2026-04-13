@@ -147,6 +147,25 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686.log`
   - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686-metadata.json`
 
+## CI PR-Triggered Validation on Latest Recorded PR-26 Run (Observed)
+
+- PR: https://github.com/thedarkcder/girl-power/pull/26
+- Workflow: `PR TestFlight`
+- Run ID: `24154242938`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24154242938
+- Trigger: `pull_request` synchronize on `feature/GP-186` to `main`
+- Job start/end: `2026-04-08T19:32:40Z` -> `2026-04-08T19:33:36Z`
+- Conclusion: `failure`
+- Observed metadata evidence:
+  - Job `Build and Upload (Fastlane pr_testflight)` failed at step `Archive/build and upload with Fastlane`.
+  - Step `Preflight CI secret presence check` completed successfully.
+- Interpretation:
+  - PR-trigger path remains active and reaches the Fastlane archive/upload step.
+  - Success criteria is still blocked by build/signing execution after preflight.
+- Log/metadata captures in repo:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24154242938-metadata.json`
+  - Detailed raw step log for this run was not retrievable in this environment without authenticated Actions log download; the latest in-repo detailed log remains `24154089686`.
+
 ## CI Concurrency Guardrail Evidence (Observed)
 
 - Workflow: `PR TestFlight`
@@ -165,7 +184,8 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
 ## Local Lane Evidence (Observed)
 
 Environment used for local validation in this run:
-- Ruby: `/opt/homebrew/opt/ruby@2.7/bin/ruby` (`2.7.8`)
+- Timestamp: `2026-04-13`
+- Ruby: `ruby` (`2.7.8`)
 - Bundler: `2.4.22`
 
 ### Local success-path-equivalent (dry run)
@@ -178,25 +198,90 @@ APP_STORE_CONNECT_ISSUER_ID=dummy_issuer \
 APP_STORE_CONNECT_API_KEY_BASE64=ZHVtbXk= \
 APPLE_TEAM_ID=DUMMYTEAMID \
 PR_TESTFLIGHT_DRY_RUN=1 \
-BUNDLE_PATH=vendor/bundle-ruby27 \
-bundle _2.4.22_ exec fastlane pr_testflight
+bundle exec fastlane pr_testflight
 ```
 
-Observed markers in `local-pr-testflight-dry-run-ruby27.log`:
+Observed markers in `local-pr-testflight-dry-run-20260413.log`:
+- `[PR_TESTFLIGHT][PRECHECK] ... signing=automatic allow_provisioning_updates=true dry_run=true`
 - `[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)`
 - `[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)`
-- `[PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604081900 scheme=GirlPower`
+- `[PR_TESTFLIGHT][COMPLETE] version=1.0 build=202604131843 scheme=GirlPower`
 
 ### Local failure-path verification
 
 Command executed without `APP_STORE_CONNECT_API_KEY_ID`.
 
-Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
+Observed markers in `local-pr-testflight-missing-auth-key-20260413.log`:
 - `[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID`
-- Exit code recorded in `local-missing-auth-exit-code-ruby27.txt`: `1`
+- Exit code recorded in `local-missing-auth-exit-code-20260413.txt`: `1`
+
+### Local classifier-refinement verification
+
+Command executed:
+
+```bash
+ruby <<'RUBY'
+module UI
+  def self.important(message) = puts(message)
+  def self.success(_message); end
+  def self.message(_message); end
+  def self.error(_message); end
+  def self.user_error!(message) = raise(message)
+end
+
+def fastlane_version(*); end
+def default_platform(*); end
+def platform(*); end
+def desc(*); end
+def lane(*); end
+
+load "fastlane/Fastfile"
+category = prtf_refined_error_category(StandardError.new("Error packaging up the application"), fallback: "build")
+puts "category=#{category}"
+RUBY
+```
+
+Fixture source before the command:
+- `~/Library/Logs/gym/gp-186/classifier-fixture.log`
+  - `error: exportArchive Cloud signing permission error`
+  - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
+
+Observed markers in `local-classifier-refinement-20260413.log`:
+- `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan`
+- `category=signing`
+
+### Local Xcode project metadata verification
+
+Command executed:
+
+```bash
+xcodebuild -list -project GirlPower.xcodeproj
+```
+
+Observed output markers in `local-xcodebuild-list-20260413.log`:
+- Target list includes `GirlPower`, `GirlPowerTests`, `GirlPowerUITests`
+- Scheme list includes `GirlPower`
+
+### Local lane inventory verification
+
+Command executed:
+
+```bash
+bundle exec fastlane lanes
+```
+
+Observed output markers in `local-fastlane-lanes-20260413.log`:
+- `fastlane ios pr_testflight`
 
 ## Local Artifacts Produced
 
+- `docs/test-artifacts/GP-186/local-bundle-install-20260413.log`
+- `docs/test-artifacts/GP-186/local-classifier-refinement-20260413.log`
+- `docs/test-artifacts/GP-186/local-fastlane-lanes-20260413.log`
+- `docs/test-artifacts/GP-186/local-pr-testflight-dry-run-20260413.log`
+- `docs/test-artifacts/GP-186/local-pr-testflight-missing-auth-key-20260413.log`
+- `docs/test-artifacts/GP-186/local-missing-auth-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/local-xcodebuild-list-20260413.log`
 - `docs/test-artifacts/GP-186/local-bundle-install-ruby27.log`
 - `docs/test-artifacts/GP-186/local-pr-testflight-dry-run-ruby27.log`
 - `docs/test-artifacts/GP-186/local-pr-testflight-missing-auth-key-ruby27.log`
@@ -218,6 +303,7 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154059288-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24154242938-metadata.json`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -232,8 +318,14 @@ Observed markers in `local-pr-testflight-missing-auth-key-ruby27.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Current blocker marker from latest run (`24154089686`):
-  - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
-  - `error: exportArchive Cloud signing permission error`
-  - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
+- Current blocker from latest recorded PR-26 run (`24154242938`):
+  - Step-level failure at `Archive/build and upload with Fastlane` after preflight checks pass.
+  - Latest detailed in-repo marker set (`24154089686`) remains:
+    - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
+    - `error: exportArchive Cloud signing permission error`
+    - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
+- Expected marker behavior on the next PR-triggered run after this remediation:
+  - Cloud-signing/profile failures above should classify as `[CATEGORY=signing]` for direct triage routing.
+  - When gym returns a generic archive exception, lane should emit:
+    - `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan`
 - Next required remediation: grant/confirm cloud-signing permission for the App Store Connect key/team path (or provide manual cert/profile installation path) and re-run PR workflow.

@@ -20,6 +20,7 @@ The lane executes an explicit state flow:
 5. `completion`
 
 Any failure exits non-zero and emits a Fastlane category marker: `auth`, `signing`, `build`, or `upload`.
+When archive failures bubble up as generic gym errors, the lane scans recent gym logs and refines category classification so signing-profile/cloud-signing failures still report as `signing`.
 
 ## Prerequisites
 
@@ -111,13 +112,16 @@ Configure the following repository-level CI values before non-dry-run uploads:
 | `APP_STORE_CONNECT_ISSUER_ID` | Secret | Yes | App Store Connect issuer ID. |
 | `APP_STORE_CONNECT_API_KEY_BASE64` | Secret | Yes | Base64-encoded App Store Connect `.p8` content. |
 | `APPLE_TEAM_ID` | Secret | Yes | Apple Developer Team ID used for signing. |
-| `IOS_SIGNING_STYLE` | Variable | No (defaults `automatic`) | `automatic` or `manual`. |
-| `IOS_ALLOW_PROVISIONING_UPDATES` | Variable | No (defaults `1`) | Enables/disables automatic provisioning updates for `xcodebuild` when signing style is `automatic`. |
+| `IOS_SIGNING_STYLE` | Variable | No (defaults `automatic`) | `automatic` or `manual`. Workflow env normalizes unset values to `automatic`. |
+| `IOS_ALLOW_PROVISIONING_UPDATES` | Variable | No (defaults `1`) | Enables/disables automatic provisioning updates for `xcodebuild` when signing style is `automatic`. Workflow env normalizes unset values to `1`. |
 | `IOS_PROVISIONING_PROFILE_SPECIFIER` | Secret | Manual only | Provisioning profile specifier for manual signing. |
 | `IOS_CODE_SIGN_IDENTITY` | Secret | Manual only | Code signing identity for manual signing. |
 | `APP_STORE_CONNECT_TEAM_ID` | Secret | No | Optional App Store Connect team ID for multi-team accounts. |
 
-The workflow has a preflight shell check that fails fast when required CI key names are missing.
+The workflow has a preflight shell check that fails fast when required CI key names are missing or the signing toggle values are invalid.
+It emits redacted markers:
+- `[CI_PRECHECK] Required secret/env key presence validated (values redacted).`
+- `[CI_PRECHECK] signing_style=<automatic|manual> allow_provisioning_updates=<normalized-value>`
 
 `APP_STORE_CONNECT_API_KEY_BASE64` should contain base64-encoded `.p8` contents. The lane now retries raw-PEM interpretation on null-byte parse failures, but canonical configuration remains base64. Example (macOS):
 
@@ -177,9 +181,10 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 - `auth` null-byte preflight error (`Preflight failed: string contains null byte`): secret value is usually malformed base64. Recreate `APP_STORE_CONNECT_API_KEY_BASE64` as single-line base64 of the `.p8` file.
 - `signing`: verify team ID, signing style, certs, and provisioning profile mapping.
 - `signing` invalid-style error (`IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`): if GitHub variable is unset/blank, ensure lane normalizes blank to `automatic` or set repository variable `IOS_SIGNING_STYLE=automatic`.
+- `signing` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): verify automatic provisioning is enabled (`IOS_ALLOW_PROVISIONING_UPDATES` not set to `0`) and App Store Connect key values are valid. If CI still cannot provision profiles, configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) with matching certificate/profile assets.
+- `signing` export permission error (`error: exportArchive Cloud signing permission error`): App Store Connect API key role/team is insufficient for cloud signing/profile export; update account permissions or switch to a manual cert/profile installation path.
+- classifier-refinement marker: `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan` indicates a generic gym exception was remapped using recent `~/Library/Logs/gym/*.log` evidence.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
-- `build` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): verify automatic provisioning is enabled (`IOS_ALLOW_PROVISIONING_UPDATES` not set to `0`) and App Store Connect key values are valid. If CI still cannot provision profiles, configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) with matching certificate/profile assets.
-- `build` export permission error (`error: exportArchive Cloud signing permission error`): App Store Connect API key role/team is insufficient for cloud signing/profile export; update account permissions or switch to a manual cert/profile installation path.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.
 - CI preflight secret-name failure (before Fastlane lane starts): look for `Missing required CI secret/env keys: ...` in the `Preflight CI secret presence check` step.
 
