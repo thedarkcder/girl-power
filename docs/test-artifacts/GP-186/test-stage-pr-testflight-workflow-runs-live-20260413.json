@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-04-13T19:34:59Z",
+  "source": "https://github.com/thedarkcder/girl-power/actions/workflows/pr-testflight.yml?query=branch%3Afeature%2FGP-186",
+  "captureMethod": "public-html-scrape",
+  "note": "GitHub REST workflow-runs API returned HTTP 403 (rate limit) in this environment; summary captured from public run and job pages.",
+  "latestRun": {
+    "id": 24362649675,
+    "run_number": 15,
+    "status": "completed",
+    "conclusion": "failure",
+    "event": "pull_request",
+    "pull_request": 26,
+    "created_at": "2026-04-13T19:29:17Z",
+    "updated_at": "2026-04-13T19:32:33Z",
+    "html_url": "https://github.com/thedarkcder/girl-power/actions/runs/24362649675",
+    "head_branch": "feature/GP-186",
+    "head_sha": "e060d801e21bb1d1e0d7262c967f48a62e110b18",
+    "job": {
+      "id": 71146111358,
+      "name": "Build and Upload (Fastlane pr_testflight)",
+      "conclusion": "failure",
+      "steps": [
+        {"number": 1, "name": "Set up job", "conclusion": "success", "started_at": "2026-04-13T19:29:23Z", "completed_at": "2026-04-13T19:29:25Z"},
+        {"number": 2, "name": "Checkout", "conclusion": "success", "started_at": "2026-04-13T19:29:25Z", "completed_at": "2026-04-13T19:29:28Z"},
+        {"number": 3, "name": "Setup Ruby and Bundler", "conclusion": "success", "started_at": "2026-04-13T19:29:28Z", "completed_at": "2026-04-13T19:29:33Z"},
+        {"number": 4, "name": "Preflight CI secret presence check", "conclusion": "success", "started_at": "2026-04-13T19:29:33Z", "completed_at": "2026-04-13T19:29:33Z"},
+        {"number": 5, "name": "Install dependencies", "conclusion": "success", "started_at": "2026-04-13T19:29:33Z", "completed_at": "2026-04-13T19:29:33Z"},
+        {"number": 6, "name": "Archive/build and upload with Fastlane", "conclusion": "failure", "started_at": "2026-04-13T19:29:33Z", "completed_at": "2026-04-13T19:32:31Z"},
+        {"number": 7, "name": "Collect logs for diagnostics", "conclusion": "success", "started_at": "2026-04-13T19:32:31Z", "completed_at": "2026-04-13T19:32:31Z"},
+        {"number": 8, "name": "Upload CI artifacts", "conclusion": "success", "started_at": "2026-04-13T19:32:31Z", "completed_at": "2026-04-13T19:32:33Z"}
+      ]
+    }
+  },
+  "historicalReference": "docs/test-artifacts/GP-186/test-stage-pr26-run-summary-20260413.json"
+}

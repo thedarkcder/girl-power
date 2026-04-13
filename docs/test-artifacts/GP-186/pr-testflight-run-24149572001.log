@@ -1,0 +1,743 @@
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	﻿2026-04-08T17:36:30.4209030Z Current runner version: '2.333.1'
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4225670Z ##[group]Runner Image Provisioner
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4226320Z Hosted Compute Agent
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4226670Z Version: 20260213.493
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4227050Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4227510Z Build Date: 2026-02-13T00:28:41Z
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4227990Z Worker ID: {64d5bc23-29f6-4120-ae03-08823071c1ca}
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4228560Z Azure Region: westus
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4228980Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4229890Z ##[group]Operating System
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4230370Z macOS
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4230650Z 15.7.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4230940Z 24G517
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4231220Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4231600Z ##[group]Runner Image
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4231980Z Image: macos-15-arm64
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4232400Z Version: 20260330.0243.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4233270Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260330.0243/images/macos/macos-15-arm64-Readme.md
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4234240Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260330.0243
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4234840Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4235630Z ##[group]GITHUB_TOKEN Permissions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4236910Z Contents: read
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4237290Z Metadata: read
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4237600Z Packages: read
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4237970Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4239450Z Secret source: Actions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4239850Z Prepare workflow directory
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4698940Z Prepare all required actions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.4729530Z Getting action download info
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:30.7993420Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:31.1653720Z Download action repository 'ruby/setup-ruby@v1' (SHA:e65c17d16e57e481586a6a5a0282698790062f92)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.4901440Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7235420Z Complete job name: Build and Upload (Fastlane pr_testflight)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7662090Z ##[group]Run actions/checkout@v4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7662670Z with:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7662990Z   repository: thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7663570Z   token: ***
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7663860Z   ssh-strict: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7664160Z   ssh-user: git
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7664450Z   persist-credentials: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7664790Z   clean: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7665090Z   sparse-checkout-cone-mode: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7665440Z   fetch-depth: 1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7665730Z   fetch-tags: false
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7666030Z   show-progress: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7666340Z   lfs: false
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7666620Z   submodules: false
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7666930Z   set-safe-directory: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7667380Z env:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7667960Z   APP_STORE_CONNECT_API_KEY_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7668410Z   APP_STORE_CONNECT_ISSUER_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7668880Z   APP_STORE_CONNECT_API_KEY_BASE64: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7669310Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7669680Z   APPLE_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7670010Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7670360Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7670760Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7671190Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7671560Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7671900Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7672530Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7672940Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7673330Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:32.7673670Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2352470Z Syncing repository: thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2354580Z ##[group]Getting Git version info
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2355220Z Working directory is '/Users/runner/work/girl-power/girl-power'
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2356750Z [command]/opt/homebrew/bin/git version
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2798820Z git version 2.53.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2832130Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2845580Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/bfb5313f-fa28-4f27-bd67-e62c783b6eb6/.gitconfig'
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2847460Z Temporarily overriding HOME='/Users/runner/work/_temp/bfb5313f-fa28-4f27-bd67-e62c783b6eb6' before making global git config changes
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2848990Z Adding repository directory to the temporary git global config as a safe directory
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.2850380Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3130830Z Deleting the contents of '/Users/runner/work/girl-power/girl-power'
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3152270Z ##[group]Initializing the repository
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3153630Z [command]/opt/homebrew/bin/git init /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3450020Z hint: Using 'master' as the name for the initial branch. This default branch name
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3472930Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3476060Z hint: to use in all of your new repositories, which will suppress this warning,
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3477220Z hint: call:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3477650Z hint:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3478230Z hint: 	git config --global init.defaultBranch <name>
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3478930Z hint:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3479570Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3481790Z hint: 'development'. The just-created branch can be renamed via this command:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3482720Z hint:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3483120Z hint: 	git branch -m <name>
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3483620Z hint:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3484370Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3485900Z Initialized empty Git repository in /Users/runner/work/girl-power/girl-power/.git/
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3584270Z [command]/opt/homebrew/bin/git remote add origin https://github.com/thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3687470Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3688570Z ##[group]Disabling automatic garbage collection
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3689510Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3730340Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3732760Z ##[group]Setting up auth
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3743520Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.3870810Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.5454550Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.5570850Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.6565560Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.6633310Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.8356150Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.8457930Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.8458640Z ##[group]Fetching the repository
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:33.8460490Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +ddc62b9e373b3df3c2828aa63ff42a19a8a9709a:refs/remotes/pull/24/merge
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8010480Z From https://github.com/thedarkcder/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8014250Z  * [new ref]         ddc62b9e373b3df3c2828aa63ff42a19a8a9709a -> pull/24/merge
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8133420Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8134760Z ##[group]Determining the checkout info
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8135570Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8137250Z [command]/opt/homebrew/bin/git sparse-checkout disable
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8217290Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8282450Z ##[group]Checking out the ref
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8283680Z [command]/opt/homebrew/bin/git checkout --progress --force refs/remotes/pull/24/merge
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8765670Z HEAD is now at ddc62b9 Merge 5b1409a317427549b8172a27142ca88cfebca5d0 into b68e86755e3bc6c7f477e4167292fe42920f4872
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8775490Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8872640Z [command]/opt/homebrew/bin/git log -1 --format=%H
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.8947460Z ddc62b9e373b3df3c2828aa63ff42a19a8a9709a
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9206780Z ##[group]Run ruby/setup-ruby@v1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9207420Z with:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9207900Z   ruby-version: 3.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9208420Z   bundler-cache: true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9209190Z   token: ***
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9209750Z env:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9210350Z   APP_STORE_CONNECT_API_KEY_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9210980Z   APP_STORE_CONNECT_ISSUER_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9211630Z   APP_STORE_CONNECT_API_KEY_BASE64: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9212300Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9212890Z   APPLE_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9213390Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9213970Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9214720Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9215310Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9215960Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9216600Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9217370Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9218040Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9218540Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:34.9219080Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4145310Z ##[group]Modifying PATH
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4146090Z Entries removed from PATH to avoid conflicts with default Ruby:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4152470Z   /opt/homebrew/lib/ruby/gems/3.3.0/bin
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4156190Z   /opt/homebrew/opt/ruby@3.3/bin
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4167580Z Entries added to PATH to use selected Ruby:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4168090Z   /Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4170830Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4188500Z ##[group]Downloading Ruby
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:35.4190380Z https://github.com/ruby/ruby-builder/releases/download/ruby-3.1.7/ruby-3.1.7-darwin-arm64.tar.gz
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.0187590Z Took   0.60 seconds
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.0188440Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.0188860Z ##[group]Extracting  Ruby
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.0248270Z [command]/usr/bin/tar -xz -C /Users/runner/hostedtoolcache/Ruby/3.1.7 -f /Users/runner/work/_temp/40a1af44-a39c-4d12-a46a-4bb04e73d5e2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.6694890Z Took   0.65 seconds
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.6696110Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.6698580Z ##[group]Print Ruby version
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.6743950Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/ruby --version
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7016590Z ruby 3.1.7p261 (2025-03-26 revision 0a3704f218) [arm64-darwin23]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7038470Z Took   0.03 seconds
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7040900Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7041660Z ##[group]Installing Bundler
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7042580Z Using Bundler 2.4.22 from Gemfile.lock BUNDLED WITH 2.4.22
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:36.7047340Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/gem install bundler -v 2.4.22
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2446270Z Successfully installed bundler-2.4.22
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2457280Z 1 gem installed
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2483540Z Took   0.54 seconds
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2501090Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2505660Z > bundle install
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2506360Z Setting BUNDLER_VERSION=2.4.22 for "bundle config|lock" commands below to ensure Bundler 2.4.22 is used
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.2514610Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle config set --local path /Users/runner/work/girl-power/girl-power/vendor/bundle
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.3583730Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle config set --local deployment true
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.4987580Z ##[group]Print lockfile
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5089210Z [command]/bin/cat Gemfile.lock
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5150380Z GEM
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5162120Z   remote: https://rubygems.org/
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5162580Z   specs:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5165340Z     CFPropertyList (3.0.9)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5165700Z     addressable (2.9.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5256560Z       public_suffix (>= 2.0.2, < 8.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5258660Z     artifactory (3.0.17)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5258930Z     atomos (0.1.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5259220Z     aws-eventstream (1.4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5260190Z     aws-partitions (1.1235.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5260910Z     aws-sdk-core (3.244.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5261720Z       aws-eventstream (~> 1, >= 1.3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5262190Z       aws-partitions (~> 1, >= 1.992.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5262540Z       aws-sigv4 (~> 1.9)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5266650Z       base64
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5267250Z       bigdecimal
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5267720Z       jmespath (~> 1, >= 1.6.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5270380Z       logger
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5270750Z     aws-sdk-kms (1.123.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5271320Z       aws-sdk-core (~> 3, >= 3.244.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5272160Z       aws-sigv4 (~> 1.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5273490Z     aws-sdk-s3 (1.218.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5274740Z       aws-sdk-core (~> 3, >= 3.244.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5275150Z       aws-sdk-kms (~> 1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5275400Z       aws-sigv4 (~> 1.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5275620Z     aws-sigv4 (1.12.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5275780Z       aws-eventstream (~> 1, >= 1.0.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276040Z     babosa (1.0.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276290Z     base64 (0.3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276430Z     bigdecimal (4.1.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276640Z     claide (1.1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276800Z     colored (1.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5276980Z     colored2 (3.1.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5277700Z     commander (4.6.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5277910Z       highline (~> 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5278110Z     declarative (0.0.20)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5278300Z     digest-crc (0.7.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5278490Z       rake (>= 12.0.0, < 14.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5278700Z     domain_name (0.6.20240107)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5278890Z     dotenv (2.8.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5279060Z     emoji_regex (3.2.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5279240Z     excon (0.112.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5279410Z     faraday (1.10.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5279600Z       faraday-em_http (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5279840Z       faraday-em_synchrony (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5280080Z       faraday-excon (~> 1.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5280310Z       faraday-httpclient (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5280560Z       faraday-multipart (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5280760Z       faraday-net_http (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5281040Z       faraday-net_http_persistent (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5281340Z       faraday-patron (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5281580Z       faraday-rack (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5281770Z       faraday-retry (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5281990Z       ruby2_keywords (>= 0.0.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5282220Z     faraday-cookie_jar (0.0.8)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5282450Z       faraday (>= 0.8.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5282660Z       http-cookie (>= 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5282860Z     faraday-em_http (1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5283100Z     faraday-em_synchrony (1.0.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5283310Z     faraday-excon (1.1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5283530Z     faraday-httpclient (1.0.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5283750Z     faraday-multipart (1.2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5283950Z       multipart-post (~> 2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5284170Z     faraday-net_http (1.0.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5289040Z     faraday-net_http_persistent (1.2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5289320Z     faraday-patron (1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5289580Z     faraday-rack (1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5290280Z     faraday-retry (1.0.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5290490Z     faraday_middleware (1.2.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5290710Z       faraday (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5290930Z     fastimage (2.4.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5291180Z     fastlane (2.226.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5291380Z       CFPropertyList (>= 2.3, < 4.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5291630Z       addressable (>= 2.8, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5291850Z       artifactory (~> 3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5292040Z       aws-sdk-s3 (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5292270Z       babosa (>= 1.0.3, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5292490Z       bundler (>= 1.12.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5292710Z       colored (~> 1.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5292890Z       commander (~> 4.6)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5293080Z       dotenv (>= 2.1.1, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5293540Z       emoji_regex (>= 0.1, < 4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5293780Z       excon (>= 0.71.0, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5294140Z       faraday (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5294360Z       faraday-cookie_jar (~> 0.0.6)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5295440Z       faraday_middleware (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5298450Z       fastimage (>= 2.1.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5298710Z       fastlane-sirp (>= 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5298930Z       gh_inspector (>= 1.1.2, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5299200Z       google-apis-androidpublisher_v3 (~> 0.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5299520Z       google-apis-playcustomapp_v1 (~> 0.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5299730Z       google-cloud-env (>= 1.6.0, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300000Z       google-cloud-storage (~> 1.31)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300230Z       highline (~> 2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300430Z       http-cookie (~> 1.0.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300630Z       json (< 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300830Z       jwt (>= 2.1.0, < 3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5300990Z       mini_magick (>= 4.9.4, < 5.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5301540Z       multipart-post (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5301810Z       naturally (~> 2.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5301970Z       optparse (>= 0.1.1, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5302220Z       plist (>= 3.1.0, < 4.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5302450Z       rubyzip (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5302650Z       security (= 0.1.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5303400Z       simctl (~> 1.6.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5303900Z       terminal-notifier (>= 2.0.0, < 3.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5304150Z       terminal-table (~> 3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5304360Z       tty-screen (>= 0.6.3, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5304620Z       tty-spinner (>= 0.8.0, < 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5304840Z       word_wrap (~> 1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5305070Z       xcodeproj (>= 1.13.0, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5305300Z       xcpretty (~> 0.4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5305530Z       xcpretty-travis-formatter (>= 0.0.3, < 2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5305800Z     fastlane-sirp (1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5306010Z       sysrandom (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5306220Z     gh_inspector (1.1.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5306460Z     google-apis-androidpublisher_v3 (0.54.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5306750Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5307530Z     google-apis-core (0.11.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5307760Z       addressable (~> 2.5, >= 2.5.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5308800Z       googleauth (>= 0.16.2, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5309120Z       httpclient (>= 2.8.1, < 3.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5309360Z       mini_mime (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5309540Z       representable (~> 3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5309790Z       retriable (>= 2.0, < 4.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5310090Z       rexml
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5310290Z     google-apis-iamcredentials_v1 (0.17.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5310590Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5312000Z     google-apis-playcustomapp_v1 (0.13.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5312790Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5313440Z     google-apis-storage_v1 (0.31.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5321620Z       google-apis-core (>= 0.11.0, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5321860Z     google-cloud-core (1.7.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5322060Z       google-cloud-env (>= 1.0, < 3.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323000Z       google-cloud-errors (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323200Z     google-cloud-env (1.6.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323410Z       faraday (>= 0.17.3, < 3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323610Z     google-cloud-errors (1.4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323790Z     google-cloud-storage (1.47.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5323960Z       addressable (~> 2.8)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5324110Z       digest-crc (~> 0.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5324310Z       google-apis-iamcredentials_v1 (~> 0.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5324520Z       google-apis-storage_v1 (~> 0.31.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5324730Z       google-cloud-core (~> 1.6)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5324920Z       googleauth (>= 0.16.2, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5325090Z       mini_mime (~> 1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5325490Z     googleauth (1.8.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5325800Z       faraday (>= 0.17.3, < 3.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5325990Z       jwt (>= 1.4, < 3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326140Z       multi_json (~> 1.11)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326290Z       os (>= 0.9, < 2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326430Z       signet (>= 0.16, < 2.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326580Z     highline (2.0.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326740Z     http-cookie (1.0.8)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5326900Z       domain_name (~> 0.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5327060Z     httpclient (2.9.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5327540Z       mutex_m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5327700Z     jmespath (1.6.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5327940Z     json (2.19.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328100Z     jwt (2.10.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328230Z       base64
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328350Z     logger (1.7.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328530Z     mini_magick (4.13.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328700Z     mini_mime (1.1.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328830Z     multi_json (1.15.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5328990Z     multipart-post (2.4.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329140Z     mutex_m (0.3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329260Z     nanaimo (0.4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329380Z     naturally (2.3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329510Z     optparse (0.8.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329640Z     os (1.1.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329760Z     plist (3.7.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5329900Z     public_suffix (5.1.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330100Z     rake (13.3.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330310Z     representable (3.2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330470Z       declarative (< 0.1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330640Z       trailblazer-option (>= 0.1.1, < 0.2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330820Z       uber (< 0.2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5330950Z     retriable (3.4.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331200Z     rexml (3.4.4)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331320Z     rouge (3.28.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331450Z     ruby2_keywords (0.0.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331590Z     rubyzip (2.4.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331710Z     security (0.1.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5331850Z     signet (0.19.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5332250Z       addressable (~> 2.8)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5332440Z       faraday (>= 0.17.5, < 3.a)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5332610Z       jwt (>= 1.5, < 3.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5332890Z       multi_json (~> 1.10)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333040Z     simctl (1.6.10)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333170Z       CFPropertyList
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333340Z       naturally
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333500Z     sysrandom (1.0.5)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333740Z     terminal-notifier (2.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5333930Z     terminal-table (3.0.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334100Z       unicode-display_width (>= 1.1.1, < 3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334300Z     trailblazer-option (0.1.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334460Z     tty-cursor (0.7.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334650Z     tty-screen (0.8.2)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334830Z     tty-spinner (0.9.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5334990Z       tty-cursor (~> 0.7)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5335150Z     uber (0.1.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5335300Z     unicode-display_width (2.6.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5335500Z     word_wrap (1.0.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5335660Z     xcodeproj (1.27.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5335840Z       CFPropertyList (>= 2.3.3, < 4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5336050Z       atomos (~> 0.1.3)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5336200Z       claide (>= 1.0.2, < 2.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5336760Z       colored2 (~> 3.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5336930Z       nanaimo (~> 0.4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5337860Z       rexml (>= 3.3.6, < 4.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5338630Z     xcpretty (0.4.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5339050Z       rouge (~> 3.28.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5339490Z     xcpretty-travis-formatter (1.0.1)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5340010Z       xcpretty (~> 0.2, >= 0.0.7)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5340340Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5340520Z PLATFORMS
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5340840Z   ruby
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5341020Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5341170Z DEPENDENCIES
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5341520Z   fastlane (~> 2.226.0)
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5341790Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5341950Z BUNDLED WITH
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5342270Z    2.4.22
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5343250Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5345820Z Cache key: setup-ruby-bundler-cache-v6-macos-15-arm64-ruby-3.1.7-wd-/Users/runner/work/girl-power/girl-power-with--without--only--Gemfile.lock-e81430f8585442f0152c8700705771a22c1e86d8a7c3170271cd00968c492072
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:37.5705290Z [command]/Users/runner/hostedtoolcache/Ruby/3.1.7/arm64/bin/bundle install --jobs 3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.1936490Z Fetching gem metadata from https://rubygems.org/........
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.2537830Z Fetching rake 13.3.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3191850Z Installing rake 13.3.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3391930Z Fetching CFPropertyList 3.0.9
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3469020Z Fetching public_suffix 5.1.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3472140Z Fetching artifactory 3.0.17
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3723050Z Installing CFPropertyList 3.0.9
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3811690Z Installing artifactory 3.0.17
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3858390Z Installing public_suffix 5.1.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.3930110Z Fetching atomos 0.1.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4120430Z Fetching aws-eventstream 1.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4287830Z Installing atomos 0.1.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4348140Z Fetching aws-partitions 1.1235.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4488390Z Installing aws-eventstream 1.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4604330Z Fetching base64 0.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.4762150Z Fetching bigdecimal 4.1.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5008810Z Installing aws-partitions 1.1235.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5056270Z Installing base64 0.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5149020Z Fetching jmespath 1.6.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5521940Z Fetching logger 1.7.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5639040Z Installing bigdecimal 4.1.1 with native extensions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5683180Z Installing jmespath 1.6.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.5873640Z Installing logger 1.7.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.6079710Z Fetching babosa 1.0.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.6528400Z Fetching claide 1.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.6681920Z Installing babosa 1.0.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.8769640Z Installing claide 1.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.8904360Z Fetching colored 1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9236430Z Fetching colored2 3.1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9394050Z Installing colored 1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9510700Z Fetching highline 2.0.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9615280Z Installing colored2 3.1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9759020Z Fetching declarative 0.0.20
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:43.9966010Z Installing highline 2.0.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.0175160Z Installing declarative 0.0.20
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.0383920Z Fetching digest-crc 0.7.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.0810980Z Installing digest-crc 0.7.0 with native extensions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.1072620Z Fetching domain_name 0.6.20240107
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.1531780Z Installing domain_name 0.6.20240107
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.1735740Z Fetching dotenv 2.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.2024750Z Installing dotenv 2.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.2230730Z Fetching emoji_regex 3.2.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.4236410Z Installing emoji_regex 3.2.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.4347170Z Fetching excon 0.112.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.4685450Z Installing excon 0.112.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.4919430Z Fetching faraday-em_http 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.5125500Z Installing faraday-em_http 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.5196290Z Fetching faraday-em_synchrony 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.5678930Z Installing faraday-em_synchrony 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.5731010Z Fetching faraday-excon 1.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.6033190Z Installing faraday-excon 1.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.6131380Z Fetching faraday-httpclient 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.6489220Z Installing faraday-httpclient 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.6612850Z Fetching multipart-post 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.6945990Z Installing multipart-post 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.7163660Z Fetching faraday-net_http 1.0.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.7399990Z Installing faraday-net_http 1.0.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.7503490Z Fetching faraday-net_http_persistent 1.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.7823510Z Installing faraday-net_http_persistent 1.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.7934010Z Fetching faraday-patron 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.8277820Z Installing faraday-patron 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.8379900Z Fetching faraday-rack 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.8858250Z Installing faraday-rack 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.8952190Z Fetching faraday-retry 1.0.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.9209630Z Installing faraday-retry 1.0.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.9253850Z Fetching fastimage 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.9519240Z Installing fastimage 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.9604060Z Fetching sysrandom 1.0.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:44.9801170Z Installing sysrandom 1.0.5 with native extensions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.3592630Z Fetching gh_inspector 1.1.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.4768770Z Installing gh_inspector 1.1.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.5004200Z Fetching multi_json 1.15.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.7030190Z Installing multi_json 1.15.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.7241270Z Fetching os 1.1.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.7871820Z Installing os 1.1.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.7954900Z Fetching mutex_m 0.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.8129920Z Installing mutex_m 0.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.8248260Z Fetching mini_mime 1.1.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.8493100Z Installing mini_mime 1.1.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.8787320Z Fetching trailblazer-option 0.1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9056320Z Installing trailblazer-option 0.1.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9185630Z Fetching uber 0.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9391220Z Installing uber 0.1.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9518260Z Fetching retriable 3.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9670820Z Installing retriable 3.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:49.9828250Z Fetching rexml 3.4.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:50.0111540Z Installing rexml 3.4.4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:50.0480180Z Fetching google-cloud-errors 1.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:50.0733450Z Installing google-cloud-errors 1.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:50.0836760Z Fetching json 2.19.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:50.1058370Z Installing json 2.19.3 with native extensions
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.3014020Z Fetching mini_magick 4.13.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.3398550Z Installing mini_magick 4.13.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.3504420Z Fetching naturally 2.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.3876280Z Installing naturally 2.3.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.3977630Z Fetching optparse 0.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.5232790Z Installing optparse 0.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.5837120Z Fetching plist 3.7.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.6156670Z Installing plist 3.7.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.6258510Z Fetching rubyzip 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.6632410Z Installing rubyzip 2.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.6914580Z Fetching security 0.1.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.7085260Z Installing security 0.1.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.7173520Z Fetching terminal-notifier 2.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.7724150Z Installing terminal-notifier 2.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8129410Z Fetching unicode-display_width 2.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8317270Z Installing unicode-display_width 2.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8418360Z Fetching tty-screen 0.8.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8632290Z Installing tty-screen 0.8.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8713610Z Fetching tty-cursor 0.7.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8876380Z Installing tty-cursor 0.7.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.8996420Z Fetching word_wrap 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.9315720Z Installing word_wrap 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.9532390Z Fetching nanaimo 0.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.9837980Z Installing nanaimo 0.4.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:57.9939460Z Fetching rouge 3.28.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.0595150Z Installing rouge 3.28.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.3615270Z Fetching addressable 2.9.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.3925550Z Installing addressable 2.9.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.4158590Z Fetching aws-sigv4 1.12.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.4494530Z Installing aws-sigv4 1.12.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.4622260Z Fetching jwt 2.10.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.4942710Z Installing jwt 2.10.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.5480690Z Fetching commander 4.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.5864280Z Installing commander 4.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.6590180Z Fetching http-cookie 1.0.8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.6987390Z Fetching faraday-multipart 1.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7089460Z Installing http-cookie 1.0.8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7163440Z Installing faraday-multipart 1.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7279670Z Fetching fastlane-sirp 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7289190Z Fetching httpclient 2.9.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7631840Z Installing fastlane-sirp 1.0.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7840490Z Fetching representable 3.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.7904640Z Installing httpclient 2.9.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.8566810Z Installing representable 3.2.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.8740310Z Fetching simctl 1.6.10
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.9027010Z Fetching terminal-table 3.0.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.9270270Z Installing simctl 1.6.10
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.9480880Z Installing terminal-table 3.0.2
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.9733320Z Fetching tty-spinner 0.9.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:58.9892380Z Fetching xcodeproj 1.27.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.0094830Z Installing tty-spinner 0.9.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.0206120Z Fetching aws-sdk-core 3.244.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.0314330Z Installing xcodeproj 1.27.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.0751090Z Fetching xcpretty 0.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.1026520Z Installing aws-sdk-core 3.244.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.1860540Z Installing xcpretty 0.4.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.7941310Z Fetching faraday 1.10.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.8074070Z Fetching xcpretty-travis-formatter 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.8388880Z Installing xcpretty-travis-formatter 1.0.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.8475920Z Fetching aws-sdk-kms 1.123.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.8628600Z Installing faraday 1.10.5
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.8829410Z Installing aws-sdk-kms 1.123.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.9291160Z Fetching aws-sdk-s3 1.218.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:36:59.9655580Z Fetching faraday-cookie_jar 0.0.8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.0189010Z Installing faraday-cookie_jar 0.0.8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.0324120Z Installing aws-sdk-s3 1.218.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.0526310Z Fetching faraday_middleware 1.2.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1021030Z Installing faraday_middleware 1.2.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1073120Z Fetching signet 0.19.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1367560Z Installing signet 0.19.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1611670Z Fetching google-cloud-env 1.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1866830Z Installing google-cloud-env 1.6.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.1988630Z Fetching googleauth 1.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.2203700Z Fetching google-cloud-core 1.7.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.2919420Z Installing google-cloud-core 1.7.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.2954640Z Installing googleauth 1.8.1
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.3216980Z Fetching google-apis-core 0.11.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.3500890Z Installing google-apis-core 0.11.3
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.3741850Z Fetching google-apis-androidpublisher_v3 0.54.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.3742470Z Fetching google-apis-playcustomapp_v1 0.13.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.4122700Z Installing google-apis-playcustomapp_v1 0.13.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.4229690Z Installing google-apis-androidpublisher_v3 0.54.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.4564050Z Fetching google-apis-iamcredentials_v1 0.17.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.4618860Z Fetching google-apis-storage_v1 0.31.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.5130160Z Installing google-apis-iamcredentials_v1 0.17.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:00.5181550Z Installing google-apis-storage_v1 0.31.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:06.8657690Z Fetching google-cloud-storage 1.47.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:06.9118760Z Installing google-cloud-storage 1.47.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:06.9664980Z Fetching fastlane 2.226.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.0479180Z Installing fastlane 2.226.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3183310Z Bundle complete! 1 Gemfile dependency, 92 gems now installed.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3184360Z Bundled gems are installed into `./vendor/bundle`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3185210Z Post-install message from rubyzip:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3185820Z RubyZip 3.0 is coming!
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3186430Z **********************
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3186720Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3187220Z The public API of some Rubyzip classes has been modernized to use named
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3188320Z parameters for optional arguments. Please check your usage of the
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3191320Z following classes:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3202600Z   * `Zip::File`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3203110Z   * `Zip::Entry`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3203600Z   * `Zip::InputStream`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3204280Z   * `Zip::OutputStream`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3204780Z   * `Zip::DOSTime`
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3205030Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3205490Z Run your test suite with the `RUBYZIP_V3_API_WARN` environment
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3206460Z variable set to see warnings about usage of the old API. This will
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3207590Z help you to identify any changes that you need to make to your code.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3208740Z See https://github.com/rubyzip/rubyzip/wiki/Updating-to-version-3.x for
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3209610Z more information.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3209950Z 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3211840Z Please ensure that your Gemfiles and .gemspecs are suitably restrictive
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3212950Z to avoid an unexpected breakage when 3.0 is released (e.g. ~> 2.3.0).
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3215090Z See https://github.com/rubyzip/rubyzip for details. The Changelog also
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3217170Z lists other enhancements and bugfixes that have been implemented since
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.3219290Z version 2.3.0.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.5717400Z Saving cache
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:07.6479140Z [command]/opt/homebrew/bin/gtar --posix -cf cache.tzst --exclude cache.tzst -P -C /Users/runner/work/girl-power/girl-power --files-from manifest.txt --delay-directory-restore --use-compress-program zstdmt
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.6947050Z Sent 14059488 of 14059488 (100.0%), 29.0 MBs/sec
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.7983740Z Took  31.55 seconds
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8333530Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8333890Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8334060Z [36;1mrequired_vars=([0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8334290Z [36;1m  APP_STORE_CONNECT_API_KEY_ID[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8334500Z [36;1m  APP_STORE_CONNECT_ISSUER_ID[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8334710Z [36;1m  APP_STORE_CONNECT_API_KEY_BASE64[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8334980Z [36;1m  APPLE_TEAM_ID[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8335210Z [36;1m)[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8335380Z [36;1mmissing_vars=()[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8335600Z [36;1mfor key in "${required_vars[@]}"; do[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8335850Z [36;1m  if [[ -z "${!key:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8336050Z [36;1m    missing_vars+=("$key")[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8336270Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8336480Z [36;1mdone[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8336650Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8336870Z [36;1msigning_style="${IOS_SIGNING_STYLE:-automatic}"[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8337320Z [36;1msigning_style="$(echo "${signing_style}" | tr '[:upper:]' '[:lower:]')"[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8337800Z [36;1mif [[ "${signing_style}" != "automatic" && "${signing_style}" != "manual" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8338240Z [36;1m  echo "::error::IOS_SIGNING_STYLE must be 'automatic' or 'manual'."[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8338610Z [36;1m  exit 1[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8338790Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8338960Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8339220Z [36;1mif [[ "${signing_style}" == "manual" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8339550Z [36;1m  if [[ -z "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8339930Z [36;1m    missing_vars+=("IOS_PROVISIONING_PROFILE_SPECIFIER")[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8340270Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8340500Z [36;1m  if [[ -z "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8340820Z [36;1m    missing_vars+=("IOS_CODE_SIGN_IDENTITY")[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8341120Z [36;1m  fi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8341300Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8341460Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8341700Z [36;1mif (( ${#missing_vars[@]} > 0 )); then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8342110Z [36;1m  echo "::error::Missing required CI secret/env keys: ${missing_vars[*]}"[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8342440Z [36;1m  exit 1[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8342620Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8342830Z [36;1m[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8343150Z [36;1mecho "[CI_PRECHECK] Required secret/env key presence validated (values redacted)."[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8397570Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8397900Z env:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8398130Z   APP_STORE_CONNECT_API_KEY_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8398360Z   APP_STORE_CONNECT_ISSUER_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8398590Z   APP_STORE_CONNECT_API_KEY_BASE64: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8398870Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8399080Z   APPLE_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8399260Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8399510Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8399760Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8399990Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8400270Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8400480Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8400740Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8400990Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8401180Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8402550Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.8403940Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9469920Z ##[error]Missing required CI secret/env keys: APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_BASE64 APPLE_TEAM_ID
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9481820Z ##[error]Process completed with exit code 1.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9556180Z ##[group]Run set -euo pipefail
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9557240Z [36;1mset -euo pipefail[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9557990Z [36;1mmkdir -p ci-artifacts/fastlane[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9558710Z [36;1mif [[ -f fastlane/report.xml ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9559630Z [36;1m  cp fastlane/report.xml ci-artifacts/fastlane/report.xml[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9560540Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9561080Z [36;1mif [[ -d "$HOME/Library/Logs/gym" ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9561950Z [36;1m  cp -R "$HOME/Library/Logs/gym" ci-artifacts/fastlane/gym-logs[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9562850Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9563350Z [36;1mif [[ -d build ]]; then[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9564580Z [36;1m  find build -maxdepth 3 -type f \( -name "*.ipa" -o -name "*.log" \) -print > ci-artifacts/logs/build-files.txt || true[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9565750Z [36;1mfi[0m
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9646720Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9647540Z env:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9648100Z   APP_STORE_CONNECT_API_KEY_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9648720Z   APP_STORE_CONNECT_ISSUER_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9649330Z   APP_STORE_CONNECT_API_KEY_BASE64: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9650080Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9650650Z   APPLE_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9651150Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9652060Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9652690Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9653280Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9654010Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9654570Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9655290Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9655970Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9656480Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9660040Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:08.9664510Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408030Z ##[group]Run actions/upload-artifact@v4
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408250Z with:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408390Z   name: pr-testflight-24-24149572001
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408600Z   path: ci-artifacts
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408740Z   if-no-files-found: warn
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0408910Z   retention-days: 14
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409050Z   compression-level: 6
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409190Z   overwrite: false
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409380Z   include-hidden-files: false
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409550Z env:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409670Z   APP_STORE_CONNECT_API_KEY_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0409860Z   APP_STORE_CONNECT_ISSUER_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410030Z   APP_STORE_CONNECT_API_KEY_BASE64: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410220Z   APP_STORE_CONNECT_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410390Z   APPLE_TEAM_ID: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410520Z   IOS_SIGNING_STYLE: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410690Z   IOS_PROVISIONING_PROFILE_SPECIFIER: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0410920Z   IOS_CODE_SIGN_IDENTITY: 
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0411140Z   IOS_XCODEPROJ: GirlPower.xcodeproj
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0411320Z   IOS_SCHEME: GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0411530Z   IOS_APP_IDENTIFIER: com.route25.GirlPower
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0411730Z   IOS_EXPORT_METHOD: app-store
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0411920Z   LC_ALL: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0412050Z   LANG: en_US.UTF-8
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0413320Z   PATH: /Users/runner/.local/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.0414660Z ##[endgroup]
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.6073290Z ##[warning]No files were found with the provided path: ci-artifacts. No artifacts will be uploaded.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.6533730Z Post job cleanup.
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8540700Z [command]/opt/homebrew/bin/git version
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8868520Z git version 2.53.0
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8931920Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/8f071b63-2a84-419a-953f-3b7ba31bb76f/.gitconfig'
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8958990Z Temporarily overriding HOME='/Users/runner/work/_temp/8f071b63-2a84-419a-953f-3b7ba31bb76f' before making global git config changes
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8965150Z Adding repository directory to the temporary git global config as a safe directory
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.8996300Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/girl-power/girl-power
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.9170330Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:09.9248920Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.0803690Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.0842370Z http.https://github.com/.extraheader
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.0869080Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.0984950Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.2771260Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.2979090Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:10.4703900Z Cleaning up orphan processes
+Build and Upload (Fastlane pr_testflight)	UNKNOWN STEP	2026-04-08T17:37:11.0134890Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/upload-artifact@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

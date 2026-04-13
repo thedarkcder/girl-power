@@ -1,0 +1,2 @@
+[CI_PRECHECK] Required secret/env key presence validated (values redacted).
+[CI_PRECHECK] signing_style=automatic allow_provisioning_updates=1 manual_fallback=true

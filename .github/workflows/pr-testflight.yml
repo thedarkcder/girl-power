@@ -29,7 +29,8 @@ jobs:
       APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
       APP_STORE_CONNECT_TEAM_ID: ${{ secrets.APP_STORE_CONNECT_TEAM_ID }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      IOS_SIGNING_STYLE: ${{ vars.IOS_SIGNING_STYLE }}
+      IOS_SIGNING_STYLE: ${{ vars.IOS_SIGNING_STYLE || 'automatic' }}
+      IOS_ALLOW_PROVISIONING_UPDATES: ${{ vars.IOS_ALLOW_PROVISIONING_UPDATES || '1' }}
       IOS_PROVISIONING_PROFILE_SPECIFIER: ${{ secrets.IOS_PROVISIONING_PROFILE_SPECIFIER }}
       IOS_CODE_SIGN_IDENTITY: ${{ secrets.IOS_CODE_SIGN_IDENTITY }}
       IOS_XCODEPROJ: GirlPower.xcodeproj
@@ -66,11 +67,22 @@ jobs:
           done
 
           signing_style="${IOS_SIGNING_STYLE:-automatic}"
-          signing_style="$(echo "${signing_style}" | tr '[:upper:]' '[:lower:]')"
+          signing_style="$(echo "${signing_style}" | tr '[:upper:]' '[:lower:]' | xargs)"
           if [[ "${signing_style}" != "automatic" && "${signing_style}" != "manual" ]]; then
             echo "::error::IOS_SIGNING_STYLE must be 'automatic' or 'manual'."
             exit 1
           fi
+
+          allow_provisioning_updates="${IOS_ALLOW_PROVISIONING_UPDATES:-1}"
+          allow_provisioning_updates="$(echo "${allow_provisioning_updates}" | tr '[:upper:]' '[:lower:]' | xargs)"
+          case "${allow_provisioning_updates}" in
+            1|0|true|false|yes|no|on|off)
+              ;;
+            *)
+              echo "::error::IOS_ALLOW_PROVISIONING_UPDATES must be one of: 1, 0, true, false, yes, no, on, off."
+              exit 1
+              ;;
+          esac
 
           if [[ "${signing_style}" == "manual" ]]; then
             if [[ -z "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then
@@ -79,6 +91,20 @@ jobs:
             if [[ -z "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
               missing_vars+=("IOS_CODE_SIGN_IDENTITY")
             fi
+          else
+            manual_profile_present=0
+            manual_identity_present=0
+            if [[ -n "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then
+              manual_profile_present=1
+            fi
+            if [[ -n "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
+              manual_identity_present=1
+            fi
+
+            if [[ "${manual_profile_present}" -ne "${manual_identity_present}" ]]; then
+              echo "::error::When automatic signing fallback inputs are provided, both IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY must be set together."
+              exit 1
+            fi
           fi
 
           if (( ${#missing_vars[@]} > 0 )); then
@@ -86,7 +112,13 @@ jobs:
             exit 1
           fi
 
+          manual_fallback_ready=false
+          if [[ -n "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" && -n "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
+            manual_fallback_ready=true
+          fi
+
           echo "[CI_PRECHECK] Required secret/env key presence validated (values redacted)."
+          echo "[CI_PRECHECK] signing_style=${signing_style} allow_provisioning_updates=${allow_provisioning_updates} manual_fallback=${manual_fallback_ready}"
 
       - name: Install dependencies
         shell: bash

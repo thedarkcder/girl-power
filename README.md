@@ -33,4 +33,8 @@ Fastlane automation for PR TestFlight delivery is documented in [`docs/ios-testf
 bundle exec fastlane pr_testflight
 ```
 
+`bundle exec fastlane ios pr_build` is not a valid lane in this repository.
+
+Verification evidence for GP-186 is tracked in [`docs/test-artifacts/GP-186/README.md`](docs/test-artifacts/GP-186/README.md).
+
 GitHub PR automation for this lane is defined in [`.github/workflows/pr-testflight.yml`](.github/workflows/pr-testflight.yml).
