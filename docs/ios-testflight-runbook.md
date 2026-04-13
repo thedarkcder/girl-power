@@ -175,6 +175,20 @@ For each CI run, download artifact `pr-testflight-<PR_NUMBER>-<RUN_ID>` from Git
 - `ci-artifacts/fastlane/gym-logs/*` (when present)
 - `ci-artifacts/logs/build-files.txt` (when build outputs exist)
 
+To persist a deterministic metadata snapshot for a run in this repository:
+
+```bash
+scripts/collect-pr-testflight-run-metadata.sh <RUN_ID> docs/test-artifacts/GP-186
+```
+
+To capture the latest workflow-wide status summary (success/failure counts + run list):
+
+```bash
+curl -sSfL 'https://api.github.com/repos/thedarkcder/girl-power/actions/workflows/pr-testflight.yml/runs?per_page=100' \
+  | jq '{capturedAt: (now | todateiso8601), totalCount: .total_count, successCount: ([.workflow_runs[] | select(.conclusion == "success")] | length), runs: [.workflow_runs[] | {databaseId: .id, runNumber: .run_number, event, status, conclusion, headBranch: .head_branch, headSha: .head_sha, createdAt: .created_at, updatedAt: .updated_at, url: .html_url}]}' \
+  > docs/test-artifacts/GP-186/pr-testflight-workflow-runs-snapshot-YYYYMMDD.json
+```
+
 ## Triage Guide
 
 - `auth`: verify API key ID, issuer ID, and key content are configured and valid.

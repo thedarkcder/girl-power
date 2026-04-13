@@ -181,6 +181,60 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24154059288.log`
   - `docs/test-artifacts/GP-186/pr-testflight-run-24154059288-metadata.json`
 
+## CI Workflow Status Snapshot (2026-04-13, Authoritative API Pull)
+
+- Snapshot artifact:
+  - `docs/test-artifacts/GP-186/pr-testflight-workflow-runs-snapshot-20260413.json`
+- Captured at: `2026-04-13T19:02:53Z`
+- Observed totals:
+  - `totalCount=14`
+  - `successCount=0`
+- Latest run in workflow history:
+  - Run ID: `24359004345`
+  - Branch: `feature/GP-125`
+  - Conclusion: `failure`
+  - Failed step: `Archive/build and upload with Fastlane`
+  - Metadata capture: `docs/test-artifacts/GP-186/pr-testflight-run-24359004345-metadata.json`
+- Interpretation:
+  - There is still no successful `PR TestFlight` run on any active PR path.
+  - PR #26 remains unsatisfied on success criteria until a non-dry-run CI run reaches `[PR_TESTFLIGHT][COMPLETE]` with successful archive/upload.
+
+## Test-Stage Validation Refresh (2026-04-13)
+
+### Fastlane lane and state-flow checks
+
+- Command: `bundle exec fastlane lanes`
+  - Evidence: `docs/test-artifacts/GP-186/test-stage-fastlane-lanes-20260413.log`
+  - Result: lane inventory includes `ios pr_testflight`.
+- Command: dry-run lane with required env names
+  - Evidence: `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-20260413.log`
+  - Result markers:
+    - `[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)`
+    - `[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)`
+    - `[PR_TESTFLIGHT][COMPLETE] ...`
+- Command: missing-auth negative path (omit `APP_STORE_CONNECT_API_KEY_ID`)
+  - Evidence: `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-20260413.log`
+  - Exit code: `docs/test-artifacts/GP-186/test-stage-missing-auth-exit-code-20260413.txt` (`1`)
+  - Marker: `[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID`
+
+### Workflow parity checks
+
+- CI precheck valid/invalid input simulation:
+  - Valid evidence: `docs/test-artifacts/GP-186/test-stage-ci-precheck-valid-20260413.log`
+  - Invalid evidence: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-20260413.log`
+  - Invalid exit code: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-exit-code-20260413.txt` (`1`)
+- Classifier refinement simulation:
+  - Evidence: `docs/test-artifacts/GP-186/test-stage-classifier-refinement-20260413.log`
+  - Marker: `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan`
+
+### Current authoritative status refresh
+
+- Metadata refresh command output:
+  - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.log`
+  - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.err`
+- Snapshot refresh copy:
+  - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
+
 ## Local Lane Evidence (Observed)
 
 Environment used for local validation in this run:
@@ -222,11 +276,15 @@ Command executed:
 ```bash
 ruby <<'RUBY'
 module UI
-  def self.important(message) = puts(message)
+  def self.important(message)
+    puts(message)
+  end
   def self.success(_message); end
   def self.message(_message); end
   def self.error(_message); end
-  def self.user_error!(message) = raise(message)
+  def self.user_error!(message)
+    raise(message)
+  end
 end
 
 def fastlane_version(*); end
@@ -304,6 +362,21 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686.log`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154089686-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154242938-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24359004345-metadata.json`
+- `docs/test-artifacts/GP-186/pr-testflight-workflow-runs-snapshot-20260413.json`
+- `docs/test-artifacts/GP-186/test-stage-bundle-install-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-fastlane-lanes-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-missing-auth-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-valid-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/test-stage-classifier-refinement-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-xcodebuild-list-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.err`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -318,6 +391,7 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
+- Workflow-level status snapshot (`pr-testflight-workflow-runs-snapshot-20260413.json`) confirms `successCount=0` across all recorded `PR TestFlight` runs as of `2026-04-13T19:02:53Z`.
 - Current blocker from latest recorded PR-26 run (`24154242938`):
   - Step-level failure at `Archive/build and upload with Fastlane` after preflight checks pass.
   - Latest detailed in-repo marker set (`24154089686`) remains:
