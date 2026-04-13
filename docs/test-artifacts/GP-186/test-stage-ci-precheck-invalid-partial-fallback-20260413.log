@@ -1,0 +1,1 @@
+::error::When automatic signing fallback inputs are provided, both IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY must be set together.

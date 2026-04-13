@@ -166,6 +166,29 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
   - `docs/test-artifacts/GP-186/pr-testflight-run-24154242938-metadata.json`
   - Detailed raw step log for this run was not retrievable in this environment without authenticated Actions log download; the latest in-repo detailed log remains `24154089686`.
 
+## CI PR-Triggered Validation After Pushing `e060d80` to PR #26 (Observed)
+
+- PR: https://github.com/thedarkcder/girl-power/pull/26
+- Workflow: `PR TestFlight`
+- Run ID: `24362649675`
+- Run URL: https://github.com/thedarkcder/girl-power/actions/runs/24362649675
+- Trigger: `pull_request` synchronize on `feature/GP-186` to `main`
+- Commit under test: `e060d801e21bb1d1e0d7262c967f48a62e110b18`
+- Run status: `Failure` (duration shown by GitHub UI: `3m 20s`)
+- Observed job/step evidence (from job page `71146111358`):
+  - Job `Build and Upload (Fastlane pr_testflight)` concluded `failure`.
+  - Step `Preflight CI secret presence check` concluded `success`.
+  - Step `Archive/build and upload with Fastlane` concluded `failure` (`started_at=2026-04-13T19:29:33Z`, `completed_at=2026-04-13T19:32:31Z`).
+  - Steps `Collect logs for diagnostics` and `Upload CI artifacts` both concluded `success`.
+- Interpretation:
+  - PR-trigger path is still active on the current head commit and advances through CI preflight.
+  - Acceptance criteria remains unmet because archive/upload still fails on the live PR-triggered run.
+- Log/metadata captures in repo:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675.html`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675-job-71146111358.html`
+  - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-live-20260413.json`
+  - `docs/test-artifacts/GP-186/test-stage-pr26-run-summary-20260413.json`
+
 ## CI Concurrency Guardrail Evidence (Observed)
 
 - Workflow: `PR TestFlight`
@@ -198,6 +221,12 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
 - Interpretation:
   - There is still no successful `PR TestFlight` run on any active PR path.
   - PR #26 remains unsatisfied on success criteria until a non-dry-run CI run reaches `[PR_TESTFLIGHT][COMPLETE]` with successful archive/upload.
+- Supplemental update (`2026-04-13T19:33Z`, public HTML scrape due REST API `403` rate-limit in this environment):
+  - Latest PR-26 run is now `24362649675` on commit `e060d80...`, and it also concluded `failure`.
+  - Evidence artifacts:
+    - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675.html`
+    - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675-job-71146111358.html`
+    - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-live-20260413.json`
 
 ## Dev-Stage Remediation Refresh (2026-04-13, Attempt 5)
 
@@ -257,28 +286,39 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
     - `[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] dry-run (no archive executed)`
     - `[PR_TESTFLIGHT][TESTFLIGHT_UPLOAD_COMPLETE] dry-run (no upload executed)`
     - `[PR_TESTFLIGHT][COMPLETE] ...`
+- Command: dry-run lane with manual-fallback inputs armed
+  - Evidence: `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-fallback-armed-20260413.log`
+  - Exit code: `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-fallback-armed-exit-20260413.txt` (`0`)
+  - Result markers:
+    - `[PR_TESTFLIGHT][SIGNING] Manual-signing fallback is armed for signing-category archive failures`
+    - `[PR_TESTFLIGHT][PRECHECK] ... manual_fallback=true ...`
+    - `[PR_TESTFLIGHT][COMPLETE] ...`
 - Command: missing-auth negative path (omit `APP_STORE_CONNECT_API_KEY_ID`)
   - Evidence: `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-20260413.log`
-  - Exit code: `docs/test-artifacts/GP-186/test-stage-missing-auth-exit-code-20260413.txt` (`1`)
+  - Exit code: `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-exit-20260413.txt` (`1`)
   - Marker: `[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID`
 
 ### Workflow parity checks
 
 - CI precheck valid/invalid input simulation:
   - Valid evidence: `docs/test-artifacts/GP-186/test-stage-ci-precheck-valid-20260413.log`
-  - Invalid evidence: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-20260413.log`
-  - Invalid exit code: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-exit-code-20260413.txt` (`1`)
+  - Invalid (partial fallback pair) evidence: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-partial-fallback-20260413.log`
+  - Invalid exit code: `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-partial-fallback-exit-20260413.txt` (`1`)
 - Classifier refinement simulation:
   - Evidence: `docs/test-artifacts/GP-186/test-stage-classifier-refinement-20260413.log`
   - Marker: `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan`
 
 ### Current authoritative status refresh
 
-- Metadata refresh command output:
-  - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.log`
-  - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.err`
-- Snapshot refresh copy:
-  - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
+- PR-26 run summary refresh:
+  - `docs/test-artifacts/GP-186/test-stage-pr26-run-summary-20260413.json`
+  - Includes pushed-head run `24362649675` (`head_sha=e060d80...`) with `conclusion=failure`.
+- Live run metadata refresh (public HTML scrape):
+  - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-live-20260413.json`
+  - Captures step-level results for job `71146111358`.
+- Run/job capture pages:
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675.html`
+  - `docs/test-artifacts/GP-186/pr-testflight-run-24362649675-job-71146111358.html`
 
 ## Local Lane Evidence (Observed)
 
@@ -427,16 +467,26 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 - `docs/test-artifacts/GP-186/test-stage-bundle-install-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-fastlane-lanes-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-fallback-armed-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-fallback-armed-exit-20260413.txt`
 - `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-missing-auth-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-missing-auth-exit-20260413.txt`
 - `docs/test-artifacts/GP-186/test-stage-ci-precheck-valid-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-valid-exit-20260413.txt`
 - `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-partial-fallback-20260413.log`
+- `docs/test-artifacts/GP-186/test-stage-ci-precheck-invalid-partial-fallback-exit-20260413.txt`
 - `docs/test-artifacts/GP-186/test-stage-classifier-refinement-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-xcodebuild-list-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-metadata-capture-24359004345-20260413.err`
 - `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
+- `docs/test-artifacts/GP-186/test-stage-pr-testflight-workflow-runs-live-20260413.json`
+- `docs/test-artifacts/GP-186/test-stage-pr26-run-summary-20260413.json`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24362649675.html`
+- `docs/test-artifacts/GP-186/pr-testflight-run-24362649675-job-71146111358.html`
 - `docs/test-artifacts/GP-186/workflow-pause-resume-check.txt`
 
 ## Pause / Re-enable Verification (Observed)
@@ -451,10 +501,17 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Workflow-level status snapshot (`pr-testflight-workflow-runs-snapshot-20260413.json`) confirms `successCount=0` across all recorded `PR TestFlight` runs as of `2026-04-13T19:14:51Z`.
-- Current blocker from latest recorded PR-26 run (`24154242938`):
+- Workflow-level status snapshot (`pr-testflight-workflow-runs-snapshot-20260413.json`) confirms `successCount=0` across recorded `PR TestFlight` runs as of `2026-04-13T19:14:51Z`.
+- Fresh PR-26 run after pushing `feature/GP-186` head `e060d80`:
+  - Run `24362649675` (triggered `2026-04-13T19:29:17Z`) concluded `failure`.
+  - Step-level outcome from job `71146111358`:
+    - `Preflight CI secret presence check` -> `success`
+    - `Archive/build and upload with Fastlane` -> `failure`
+    - `Collect logs for diagnostics` -> `success`
+    - `Upload CI artifacts` -> `success`
+- Current blocker from latest PR-26 run (`24362649675`):
   - Step-level failure at `Archive/build and upload with Fastlane` after preflight checks pass.
-  - Latest detailed in-repo marker set (`24154089686`) remains:
+  - Latest detailed in-repo marker set with category text remains `24154089686` (new run logs require authenticated download):
     - `[PR_TESTFLIGHT][FAILED][CATEGORY=build] Archive/build failed: Error packaging up the application`
     - `error: exportArchive Cloud signing permission error`
     - `error: exportArchive No profiles for 'com.route25.GirlPower' were found`
@@ -465,4 +522,4 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
   - If manual-signing fallback inputs are configured, lane should emit:
     - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Automatic signing failed with category=signing; retrying archive with manual inputs`
     - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Archive succeeded using manual-signing fallback` (success case)
-- Next required remediation: push the fallback changes to `feature/GP-186`, trigger a new PR #26 workflow run, and validate one non-dry-run `success` run with upload/completion markers.
+- Next required remediation: configure account-side signing/upload capability so PR #26 can complete one non-dry-run run with `[PR_TESTFLIGHT][COMPLETE]` (or upload the run artifact logs for `24362649675` to confirm the exact terminal Fastlane category in this attempt).
