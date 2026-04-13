@@ -281,15 +281,32 @@ def prtf_preflight_validation(context)
   context[:team_id] = team_id
   context[:signing_style] = signing_style
   context[:allow_provisioning_updates] = prtf_truthy_env?("IOS_ALLOW_PROVISIONING_UPDATES", default: true)
+  context[:manual_signing_fallback_ready] = false
 
   if signing_style == "manual"
     context[:provisioning_profile_specifier] = prtf_required_env!("IOS_PROVISIONING_PROFILE_SPECIFIER", "signing")
     context[:code_sign_identity] = prtf_required_env!("IOS_CODE_SIGN_IDENTITY", "signing")
+  else
+    fallback_profile = ENV["IOS_PROVISIONING_PROFILE_SPECIFIER"].to_s.strip
+    fallback_identity = ENV["IOS_CODE_SIGN_IDENTITY"].to_s.strip
+
+    if !fallback_profile.empty? && !fallback_identity.empty?
+      context[:fallback_provisioning_profile_specifier] = fallback_profile
+      context[:fallback_code_sign_identity] = fallback_identity
+      context[:manual_signing_fallback_ready] = true
+      UI.message("[PR_TESTFLIGHT][SIGNING] Manual-signing fallback is armed for signing-category archive failures")
+    elsif !fallback_profile.empty? || !fallback_identity.empty?
+      UI.important(
+        "[PR_TESTFLIGHT][SIGNING] Ignoring partial manual fallback inputs; set both " \
+        "IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY"
+      )
+    end
   end
 
   UI.message(
     "[PR_TESTFLIGHT][PRECHECK] project=#{xcodeproj} scheme=#{scheme} signing=#{signing_style} " \
-    "allow_provisioning_updates=#{context[:allow_provisioning_updates]} dry_run=#{dry_run}"
+    "allow_provisioning_updates=#{context[:allow_provisioning_updates]} " \
+    "manual_fallback=#{context[:manual_signing_fallback_ready]} dry_run=#{dry_run}"
   )
 
   context
@@ -309,20 +326,54 @@ def prtf_version_build_prep(context)
   context[:version] = version
   context[:build_number] = build_number
 
-  xcargs = [
+  context[:xcargs_common] = [
     "MARKETING_VERSION=#{version}",
     "CURRENT_PROJECT_VERSION=#{build_number}",
     "INFOPLIST_KEY_CFBundleShortVersionString=#{version}",
     "INFOPLIST_KEY_CFBundleVersion=#{build_number}",
-    "DEVELOPMENT_TEAM=#{context[:team_id]}",
-    "CODE_SIGN_STYLE=#{context[:signing_style].capitalize}"
+    "DEVELOPMENT_TEAM=#{context[:team_id]}"
   ]
 
-  if context[:signing_style] == "manual"
-    xcargs << "PROVISIONING_PROFILE_SPECIFIER=#{context[:provisioning_profile_specifier]}"
-    xcargs << "CODE_SIGN_IDENTITY=#{context[:code_sign_identity]}"
-  elsif context[:allow_provisioning_updates]
+  if context[:signing_style] == "automatic" && context[:allow_provisioning_updates]
     context = prtf_prepare_signing_auth_key!(context)
+  end
+
+  UI.message("[PR_TESTFLIGHT][VERSION_BUILD_PREP] version=#{version} build=#{build_number}")
+
+  context
+rescue PrTestflightError
+  raise
+rescue StandardError => error
+  raise PrTestflightError.new(prtf_classify_error(error, fallback: "build"), "Version/build prep failed: #{error.message}")
+end
+
+def prtf_signing_inputs_for_mode!(context, signing_style)
+  return {} unless signing_style == "manual"
+
+  profile = context[:provisioning_profile_specifier] || context[:fallback_provisioning_profile_specifier]
+  identity = context[:code_sign_identity] || context[:fallback_code_sign_identity]
+
+  if profile.nil? || profile.strip.empty? || identity.nil? || identity.strip.empty?
+    raise PrTestflightError.new(
+      "signing",
+      "Manual signing requires IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY"
+    )
+  end
+
+  {
+    provisioning_profile_specifier: profile,
+    code_sign_identity: identity
+  }
+end
+
+def prtf_xcargs_for_signing_mode(context, signing_style, signing_inputs)
+  xcargs = context[:xcargs_common].dup
+  xcargs << "CODE_SIGN_STYLE=#{signing_style.capitalize}"
+
+  if signing_style == "manual"
+    xcargs << "PROVISIONING_PROFILE_SPECIFIER=#{signing_inputs[:provisioning_profile_specifier]}"
+    xcargs << "CODE_SIGN_IDENTITY=#{signing_inputs[:code_sign_identity]}"
+  elsif context[:allow_provisioning_updates]
     xcargs << "-allowProvisioningUpdates"
 
     if context[:xcode_auth_key_path]
@@ -335,15 +386,52 @@ def prtf_version_build_prep(context)
     end
   end
 
-  context[:xcargs] = xcargs.join(" ")
+  xcargs.join(" ")
+end
 
-  UI.message("[PR_TESTFLIGHT][VERSION_BUILD_PREP] version=#{version} build=#{build_number}")
+def prtf_export_options_for_signing_mode(context, signing_style, signing_inputs)
+  export_options = {
+    method: context[:export_method],
+    signingStyle: signing_style,
+    teamID: context[:team_id]
+  }
 
+  if signing_style == "manual"
+    export_options[:provisioningProfiles] = {
+      context[:app_identifier] => signing_inputs[:provisioning_profile_specifier]
+    }
+  end
+
+  export_options
+end
+
+def prtf_archive_with_signing_mode(context, signing_style)
+  signing_inputs = prtf_signing_inputs_for_mode!(context, signing_style)
+  xcargs = prtf_xcargs_for_signing_mode(context, signing_style, signing_inputs)
+  export_options = prtf_export_options_for_signing_mode(context, signing_style, signing_inputs)
+
+  UI.message("[PR_TESTFLIGHT][ARCHIVE_BUILD] signing_style=#{signing_style}")
+
+  gym(
+    project: context[:xcodeproj],
+    scheme: context[:scheme],
+    configuration: "Release",
+    clean: true,
+    export_method: context[:export_method],
+    export_options: export_options,
+    output_directory: context[:build_output_dir],
+    output_name: "#{context[:scheme]}-#{context[:build_number]}.ipa",
+    xcargs: xcargs
+  )
+
+  ipa_path = lane_context[SharedValues::IPA_OUTPUT_PATH]
+  if ipa_path.nil? || ipa_path.strip.empty?
+    raise PrTestflightError.new("build", "Archive/build did not produce an IPA output path")
+  end
+
+  context[:ipa_path] = ipa_path
+  context[:archive_signing_style] = signing_style
   context
-rescue PrTestflightError
-  raise
-rescue StandardError => error
-  raise PrTestflightError.new(prtf_classify_error(error, fallback: "build"), "Version/build prep failed: #{error.message}")
 end
 
 def prtf_archive_build(context)
@@ -356,44 +444,36 @@ def prtf_archive_build(context)
     return context
   end
 
-  export_options = {
-    method: context[:export_method],
-    signingStyle: context[:signing_style],
-    teamID: context[:team_id]
-  }
+  context = prtf_archive_with_signing_mode(context, context[:signing_style])
 
-  if context[:signing_style] == "manual"
-    export_options[:provisioningProfiles] = {
-      context[:app_identifier] => context[:provisioning_profile_specifier]
-    }
-  end
-
-  gym(
-    project: context[:xcodeproj],
-    scheme: context[:scheme],
-    configuration: "Release",
-    clean: true,
-    export_method: context[:export_method],
-    export_options: export_options,
-    output_directory: context[:build_output_dir],
-    output_name: "#{context[:scheme]}-#{context[:build_number]}.ipa",
-    xcargs: context[:xcargs]
-  )
-
-  ipa_path = lane_context[SharedValues::IPA_OUTPUT_PATH]
-  if ipa_path.nil? || ipa_path.strip.empty?
-    raise PrTestflightError.new("build", "Archive/build did not produce an IPA output path")
-  end
-
-  context[:ipa_path] = ipa_path
-
-  UI.success("[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] ipa=#{ipa_path}")
+  UI.success("[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] ipa=#{context[:ipa_path]}")
 
   context
 rescue PrTestflightError
   raise
 rescue StandardError => error
   category = prtf_refined_error_category(error, fallback: "build")
+
+  if category == "signing" && context[:signing_style] == "automatic" && context[:manual_signing_fallback_ready]
+    UI.important(
+      "[PR_TESTFLIGHT][SIGNING][FALLBACK] Automatic signing failed with category=signing; retrying archive with manual inputs"
+    )
+
+    begin
+      context = prtf_archive_with_signing_mode(context, "manual")
+      UI.success("[PR_TESTFLIGHT][SIGNING][FALLBACK] Archive succeeded using manual-signing fallback")
+      UI.success("[PR_TESTFLIGHT][ARCHIVE_BUILD_COMPLETE] ipa=#{context[:ipa_path]}")
+      return context
+    rescue StandardError => fallback_error
+      fallback_category = prtf_refined_error_category(fallback_error, fallback: "build")
+      raise PrTestflightError.new(
+        fallback_category,
+        "Archive/build failed after automatic->manual signing retry: " \
+        "automatic=#{error.message}; manual=#{fallback_error.message}"
+      )
+    end
+  end
+
   raise PrTestflightError.new(category, "Archive/build failed: #{error.message}")
 end
 
@@ -421,7 +501,8 @@ end
 
 def prtf_completion(context)
   UI.success(
-    "[PR_TESTFLIGHT][COMPLETE] version=#{context[:version]} build=#{context[:build_number]} scheme=#{context[:scheme]}"
+    "[PR_TESTFLIGHT][COMPLETE] version=#{context[:version]} build=#{context[:build_number]} " \
+    "scheme=#{context[:scheme]} signing=#{context[:archive_signing_style] || context[:signing_style]}"
   )
 
   context

@@ -185,7 +185,7 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
 
 - Snapshot artifact:
   - `docs/test-artifacts/GP-186/pr-testflight-workflow-runs-snapshot-20260413.json`
-- Captured at: `2026-04-13T19:02:53Z`
+- Captured at: `2026-04-13T19:14:51Z`
 - Observed totals:
   - `totalCount=14`
   - `successCount=0`
@@ -198,6 +198,51 @@ Purpose: traceable evidence for PR-to-TestFlight documentation and validation.
 - Interpretation:
   - There is still no successful `PR TestFlight` run on any active PR path.
   - PR #26 remains unsatisfied on success criteria until a non-dry-run CI run reaches `[PR_TESTFLIGHT][COMPLETE]` with successful archive/upload.
+
+## Dev-Stage Remediation Refresh (2026-04-13, Attempt 5)
+
+### Fastlane fallback hardening checks
+
+- Command: `ruby -c fastlane/Fastfile`
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-fastfile-syntax-20260413.log`
+  - Result: `Syntax OK`.
+- Command: `bundle exec fastlane lanes`
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-fastlane-lanes-20260413.log`
+  - Result: lane inventory includes `ios pr_testflight`.
+- Command: dry-run lane with required env names
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-pr-testflight-dry-run-20260413.log`
+  - Result markers include:
+    - `[PR_TESTFLIGHT][PRECHECK] ... manual_fallback=false ...`
+    - `[PR_TESTFLIGHT][COMPLETE] ... signing=automatic`
+- Command: dry-run lane with fallback inputs armed
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-pr-testflight-dry-run-fallback-armed-20260413.log`
+  - Result markers include:
+    - `[PR_TESTFLIGHT][SIGNING] Manual-signing fallback is armed for signing-category archive failures`
+    - `[PR_TESTFLIGHT][PRECHECK] ... manual_fallback=true ...`
+- Command: missing-auth negative path (omit `APP_STORE_CONNECT_API_KEY_ID`)
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-pr-testflight-missing-auth-20260413.log`
+  - Exit code: `docs/test-artifacts/GP-186/dev-stage-missing-auth-exit-code-20260413.txt` (`1`)
+  - Marker: `[PR_TESTFLIGHT][FAILED][CATEGORY=auth] Missing required environment variable: APP_STORE_CONNECT_API_KEY_ID`
+
+### CI precheck parity checks (manual-fallback validation)
+
+- Valid input simulation:
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-ci-precheck-valid-20260413.log`
+  - Marker: `[CI_PRECHECK] ... manual_fallback=false`
+- Invalid partial-fallback simulation (`IOS_PROVISIONING_PROFILE_SPECIFIER` set without `IOS_CODE_SIGN_IDENTITY`):
+  - Evidence: `docs/test-artifacts/GP-186/dev-stage-ci-precheck-invalid-20260413.log`
+  - Exit code: `docs/test-artifacts/GP-186/dev-stage-ci-precheck-invalid-exit-code-20260413.txt` (`1`)
+  - Marker: `::error::When automatic signing fallback inputs are provided, both IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY must be set together.`
+
+### Authoritative metadata refresh
+
+- Snapshot refresh copy:
+  - `docs/test-artifacts/GP-186/dev-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
+- Metadata refresh command outputs:
+  - `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24154242938-20260413.log`
+  - `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24154242938-20260413.err`
+  - `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24359004345-20260413.log`
+  - `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24359004345-20260413.err`
 
 ## Test-Stage Validation Refresh (2026-04-13)
 
@@ -364,6 +409,21 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 - `docs/test-artifacts/GP-186/pr-testflight-run-24154242938-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-run-24359004345-metadata.json`
 - `docs/test-artifacts/GP-186/pr-testflight-workflow-runs-snapshot-20260413.json`
+- `docs/test-artifacts/GP-186/dev-stage-bundle-install-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-fastfile-syntax-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-fastlane-lanes-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-pr-testflight-dry-run-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-pr-testflight-dry-run-fallback-armed-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-pr-testflight-missing-auth-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-missing-auth-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/dev-stage-ci-precheck-valid-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-ci-precheck-invalid-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-ci-precheck-invalid-exit-code-20260413.txt`
+- `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24154242938-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24154242938-20260413.err`
+- `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24359004345-20260413.log`
+- `docs/test-artifacts/GP-186/dev-stage-metadata-capture-24359004345-20260413.err`
+- `docs/test-artifacts/GP-186/dev-stage-pr-testflight-workflow-runs-snapshot-20260413.json`
 - `docs/test-artifacts/GP-186/test-stage-bundle-install-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-fastlane-lanes-20260413.log`
 - `docs/test-artifacts/GP-186/test-stage-pr-testflight-dry-run-20260413.log`
@@ -391,7 +451,7 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
 ## PR-Triggered Success Evidence (Current State)
 
 - No successful PR-triggered TestFlight upload has completed yet for GP-186.
-- Workflow-level status snapshot (`pr-testflight-workflow-runs-snapshot-20260413.json`) confirms `successCount=0` across all recorded `PR TestFlight` runs as of `2026-04-13T19:02:53Z`.
+- Workflow-level status snapshot (`pr-testflight-workflow-runs-snapshot-20260413.json`) confirms `successCount=0` across all recorded `PR TestFlight` runs as of `2026-04-13T19:14:51Z`.
 - Current blocker from latest recorded PR-26 run (`24154242938`):
   - Step-level failure at `Archive/build and upload with Fastlane` after preflight checks pass.
   - Latest detailed in-repo marker set (`24154089686`) remains:
@@ -402,4 +462,7 @@ Observed output markers in `local-fastlane-lanes-20260413.log`:
   - Cloud-signing/profile failures above should classify as `[CATEGORY=signing]` for direct triage routing.
   - When gym returns a generic archive exception, lane should emit:
     - `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan`
-- Next required remediation: grant/confirm cloud-signing permission for the App Store Connect key/team path (or provide manual cert/profile installation path) and re-run PR workflow.
+  - If manual-signing fallback inputs are configured, lane should emit:
+    - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Automatic signing failed with category=signing; retrying archive with manual inputs`
+    - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Archive succeeded using manual-signing fallback` (success case)
+- Next required remediation: push the fallback changes to `feature/GP-186`, trigger a new PR #26 workflow run, and validate one non-dry-run `success` run with upload/completion markers.

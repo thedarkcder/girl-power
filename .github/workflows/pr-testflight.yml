@@ -91,6 +91,20 @@ jobs:
             if [[ -z "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
               missing_vars+=("IOS_CODE_SIGN_IDENTITY")
             fi
+          else
+            manual_profile_present=0
+            manual_identity_present=0
+            if [[ -n "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" ]]; then
+              manual_profile_present=1
+            fi
+            if [[ -n "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
+              manual_identity_present=1
+            fi
+
+            if [[ "${manual_profile_present}" -ne "${manual_identity_present}" ]]; then
+              echo "::error::When automatic signing fallback inputs are provided, both IOS_PROVISIONING_PROFILE_SPECIFIER and IOS_CODE_SIGN_IDENTITY must be set together."
+              exit 1
+            fi
           fi
 
           if (( ${#missing_vars[@]} > 0 )); then
@@ -98,8 +112,13 @@ jobs:
             exit 1
           fi
 
+          manual_fallback_ready=false
+          if [[ -n "${IOS_PROVISIONING_PROFILE_SPECIFIER:-}" && -n "${IOS_CODE_SIGN_IDENTITY:-}" ]]; then
+            manual_fallback_ready=true
+          fi
+
           echo "[CI_PRECHECK] Required secret/env key presence validated (values redacted)."
-          echo "[CI_PRECHECK] signing_style=${signing_style} allow_provisioning_updates=${allow_provisioning_updates}"
+          echo "[CI_PRECHECK] signing_style=${signing_style} allow_provisioning_updates=${allow_provisioning_updates} manual_fallback=${manual_fallback_ready}"
 
       - name: Install dependencies
         shell: bash

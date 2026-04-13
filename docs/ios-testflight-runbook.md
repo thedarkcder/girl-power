@@ -21,6 +21,7 @@ The lane executes an explicit state flow:
 
 Any failure exits non-zero and emits a Fastlane category marker: `auth`, `signing`, `build`, or `upload`.
 When archive failures bubble up as generic gym errors, the lane scans recent gym logs and refines category classification so signing-profile/cloud-signing failures still report as `signing`.
+When `IOS_SIGNING_STYLE=automatic`, the lane can retry archive once with manual signing if both manual-signing inputs are present (`IOS_PROVISIONING_PROFILE_SPECIFIER` + `IOS_CODE_SIGN_IDENTITY`) and the first archive failure classifies as `signing`.
 
 ## Prerequisites
 
@@ -64,8 +65,8 @@ bundle exec fastlane pr_testflight
 | `APP_STORE_CONNECT_API_KEY_BASE64` | Yes | Base64-encoded `.p8` key content. |
 | `APPLE_TEAM_ID` | Yes | Apple Developer team ID used for signing. |
 | `IOS_SIGNING_STYLE` | No (defaults `automatic`) | `automatic` or `manual`. |
-| `IOS_PROVISIONING_PROFILE_SPECIFIER` | Manual only | Provisioning profile name/specifier for manual signing. |
-| `IOS_CODE_SIGN_IDENTITY` | Manual only | Signing identity for manual signing. |
+| `IOS_PROVISIONING_PROFILE_SPECIFIER` | Manual only (or automatic fallback) | Provisioning profile name/specifier for manual signing. |
+| `IOS_CODE_SIGN_IDENTITY` | Manual only (or automatic fallback) | Signing identity for manual signing. |
 
 ## Optional Environment Variables
 
@@ -114,14 +115,16 @@ Configure the following repository-level CI values before non-dry-run uploads:
 | `APPLE_TEAM_ID` | Secret | Yes | Apple Developer Team ID used for signing. |
 | `IOS_SIGNING_STYLE` | Variable | No (defaults `automatic`) | `automatic` or `manual`. Workflow env normalizes unset values to `automatic`. |
 | `IOS_ALLOW_PROVISIONING_UPDATES` | Variable | No (defaults `1`) | Enables/disables automatic provisioning updates for `xcodebuild` when signing style is `automatic`. Workflow env normalizes unset values to `1`. |
-| `IOS_PROVISIONING_PROFILE_SPECIFIER` | Secret | Manual only | Provisioning profile specifier for manual signing. |
-| `IOS_CODE_SIGN_IDENTITY` | Secret | Manual only | Code signing identity for manual signing. |
+| `IOS_PROVISIONING_PROFILE_SPECIFIER` | Secret | Manual only (or automatic fallback) | Provisioning profile specifier for manual signing. |
+| `IOS_CODE_SIGN_IDENTITY` | Secret | Manual only (or automatic fallback) | Code signing identity for manual signing. |
 | `APP_STORE_CONNECT_TEAM_ID` | Secret | No | Optional App Store Connect team ID for multi-team accounts. |
 
 The workflow has a preflight shell check that fails fast when required CI key names are missing or the signing toggle values are invalid.
 It emits redacted markers:
 - `[CI_PRECHECK] Required secret/env key presence validated (values redacted).`
-- `[CI_PRECHECK] signing_style=<automatic|manual> allow_provisioning_updates=<normalized-value>`
+- `[CI_PRECHECK] signing_style=<automatic|manual> allow_provisioning_updates=<normalized-value> manual_fallback=<true|false>`
+
+When `IOS_SIGNING_STYLE=automatic`, the workflow also fails fast if only one manual-signing fallback key is set. Both manual fallback keys must be present together, or both omitted.
 
 `APP_STORE_CONNECT_API_KEY_BASE64` should contain base64-encoded `.p8` contents. The lane now retries raw-PEM interpretation on null-byte parse failures, but canonical configuration remains base64. Example (macOS):
 
@@ -197,6 +200,9 @@ curl -sSfL 'https://api.github.com/repos/thedarkcder/girl-power/actions/workflow
 - `signing` invalid-style error (`IOS_SIGNING_STYLE must be either 'automatic' or 'manual'`): if GitHub variable is unset/blank, ensure lane normalizes blank to `automatic` or set repository variable `IOS_SIGNING_STYLE=automatic`.
 - `signing` provisioning-profile error (`No profiles for 'com.route25.GirlPower' were found`): verify automatic provisioning is enabled (`IOS_ALLOW_PROVISIONING_UPDATES` not set to `0`) and App Store Connect key values are valid. If CI still cannot provision profiles, configure manual-signing secrets (`IOS_PROVISIONING_PROFILE_SPECIFIER`, `IOS_CODE_SIGN_IDENTITY`) with matching certificate/profile assets.
 - `signing` export permission error (`error: exportArchive Cloud signing permission error`): App Store Connect API key role/team is insufficient for cloud signing/profile export; update account permissions or switch to a manual cert/profile installation path.
+- automatic-to-manual fallback marker: when automatic signing fails in `signing` category and fallback inputs exist, lane prints:
+  - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Automatic signing failed with category=signing; retrying archive with manual inputs`
+  - `[PR_TESTFLIGHT][SIGNING][FALLBACK] Archive succeeded using manual-signing fallback` (on success)
 - classifier-refinement marker: `[PR_TESTFLIGHT][CLASSIFIER] category_refined=build->signing via gym log scan` indicates a generic gym exception was remapped using recent `~/Library/Logs/gym/*.log` evidence.
 - `build`: inspect `xcodebuild` compile/archive output in Fastlane and gym logs.
 - `upload`: inspect `pilot`/transporter output and App Store Connect processing state.
