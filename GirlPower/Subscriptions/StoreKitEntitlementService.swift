@@ -30,6 +30,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     private var cachedSnapshot: EntitlementSnapshot?
     private var revalidationGraceDeadline: Date?
     private var authenticatedSession: AuthSession?
+    private var authenticatedProfile: Profile?
     private let nowProvider: () -> Date
     private let revalidationGracePeriod: TimeInterval
     private let logger = Logger(subsystem: "com.girlpower.app", category: "Entitlements")
@@ -123,8 +124,9 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
         }
     }
 
-    func updateAuthenticatedContext(session: AuthSession?, profile _: Profile?) async {
+    func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {
         authenticatedSession = session
+        authenticatedProfile = session == nil ? nil : profile
         refreshIsPro()
     }
 
@@ -326,7 +328,8 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
             hasValidatedSnapshot: cachedSnapshot?.isPro == true,
             revalidationGraceDeadline: revalidationGraceDeadline
         )
-        let effective = policy.effectiveIsPro(now: nowProvider())
+        let effectiveFromProfile = authenticatedSession != nil && authenticatedProfile?.isPro == true
+        let effective = policy.effectiveIsPro(now: nowProvider()) || effectiveFromProfile
         if isPro != effective {
             isPro = effective
         }

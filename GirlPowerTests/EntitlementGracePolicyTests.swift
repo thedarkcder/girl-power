@@ -65,3 +65,80 @@ final class EntitlementGracePolicyTests: XCTestCase {
         XCTAssertEqual(deadline, now.addingTimeInterval(12))
     }
 }
+
+@MainActor
+final class StoreKitAuthContextTests: XCTestCase {
+    func testAuthenticatedProfileFallbackSetsIsProWhenProfileReportsPro() async {
+        let service = StoreKitEntitlementService(
+            productIDs: ["girlpower.pro.monthly"],
+            snapshotStore: InMemoryEntitlementSnapshotStore()
+        )
+
+        XCTAssertFalse(service.isPro)
+
+        await service.updateAuthenticatedContext(session: .fixture, profile: .proFixture)
+
+        XCTAssertTrue(service.isPro)
+    }
+
+    func testClearingAuthenticatedSessionRemovesProfileFallback() async {
+        let service = StoreKitEntitlementService(
+            productIDs: ["girlpower.pro.monthly"],
+            snapshotStore: InMemoryEntitlementSnapshotStore()
+        )
+
+        await service.updateAuthenticatedContext(session: .fixture, profile: .proFixture)
+        XCTAssertTrue(service.isPro)
+
+        await service.updateAuthenticatedContext(session: nil, profile: nil)
+
+        XCTAssertFalse(service.isPro)
+    }
+}
+
+private final class InMemoryEntitlementSnapshotStore: EntitlementSnapshotPersisting {
+    private var snapshot: EntitlementSnapshot?
+
+    init(snapshot: EntitlementSnapshot? = nil) {
+        self.snapshot = snapshot
+    }
+
+    func load() -> EntitlementSnapshot? {
+        snapshot
+    }
+
+    func save(_ snapshot: EntitlementSnapshot) {
+        self.snapshot = snapshot
+    }
+
+    func clear() {
+        snapshot = nil
+    }
+}
+
+private extension AuthSession {
+    static var fixture: AuthSession {
+        AuthSession(
+            accessToken: "access-token",
+            refreshToken: "refresh-token",
+            expiresAt: Date(timeIntervalSinceNow: 3600),
+            user: AuthUser(id: "user-1", email: "member@example.com")
+        )
+    }
+}
+
+private extension Profile {
+    static var proFixture: Profile {
+        let now = Date(timeIntervalSince1970: 1)
+        return Profile(
+            id: "user-1",
+            email: "member@example.com",
+            createdAt: now,
+            updatedAt: now,
+            isPro: true,
+            proPlatform: .apple,
+            onboardingCompleted: false,
+            lastLoginAt: now
+        )
+    }
+}
