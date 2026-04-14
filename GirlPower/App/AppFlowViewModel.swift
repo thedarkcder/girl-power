@@ -173,7 +173,9 @@ final class AppFlowViewModel: ObservableObject {
 
     func handleAppDidBecomeActive() {
         Task {
-            await authService.handleAppDidBecomeActive()
+            async let authRefresh: Void = authService.handleAppDidBecomeActive()
+            async let entitlementRefresh: Void = entitlementService.load()
+            _ = await (authRefresh, entitlementRefresh)
         }
     }
 

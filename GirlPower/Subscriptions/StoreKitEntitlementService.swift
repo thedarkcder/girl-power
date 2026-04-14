@@ -26,28 +26,36 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     private let profileEntitlementSync: any ProfileEntitlementSyncing
     private var continuations: [UUID: AsyncStream<EntitlementState>.Continuation] = [:]
     private var updatesTask: Task<Void, Never>?
-    private var cachedIsPro: Bool
-    private var profileIsPro: Bool
+    private var graceExpiryTask: Task<Void, Never>?
+    private var cachedSnapshot: EntitlementSnapshot?
+    private var revalidationGraceDeadline: Date?
     private var authenticatedSession: AuthSession?
+    private var authenticatedProfile: Profile?
+    private let nowProvider: () -> Date
+    private let revalidationGracePeriod: TimeInterval
     private let logger = Logger(subsystem: "com.girlpower.app", category: "Entitlements")
 
     init(
         productIDs: [String],
         snapshotStore: EntitlementSnapshotPersisting = UserDefaultsEntitlementSnapshotStore(),
-        profileEntitlementSync: any ProfileEntitlementSyncing = DisabledProfileEntitlementSyncService()
+        profileEntitlementSync: any ProfileEntitlementSyncing = DisabledProfileEntitlementSyncService(),
+        revalidationGracePeriod: TimeInterval = 12,
+        nowProvider: @escaping () -> Date = Date.init
     ) {
         self.productIDs = productIDs
         self.snapshotStore = snapshotStore
         self.profileEntitlementSync = profileEntitlementSync
+        self.revalidationGracePeriod = revalidationGracePeriod
+        self.nowProvider = nowProvider
         self.state = .loading
         let snapshot = snapshotStore.load()
-        self.cachedIsPro = snapshot?.isPro ?? false
-        self.profileIsPro = false
+        self.cachedSnapshot = snapshot
         self.isPro = snapshot?.isPro ?? false
     }
 
     deinit {
         updatesTask?.cancel()
+        graceExpiryTask?.cancel()
     }
 
     func observeStates() -> AsyncStream<EntitlementState> {
@@ -67,6 +75,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     func load() async {
+        beginRevalidationGraceWindow()
         await loadProductsIfNeeded()
         await refreshCurrentEntitlements()
         startTransactionListenerIfNeeded()
@@ -108,10 +117,6 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
             }
             if !restored {
                 clearSnapshot()
-                if profileIsPro, let product = await currentPaywallProduct() {
-                    updateState(.ready(product: product))
-                    return
-                }
                 apply(.restoreFailed(message: "No active subscription found."))
             }
         } catch {
@@ -121,17 +126,7 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
 
     func updateAuthenticatedContext(session: AuthSession?, profile: Profile?) async {
         authenticatedSession = session
-        profileIsPro = profile?.isPro ?? false
-        if profile?.isPro == true {
-            cachedIsPro = true
-            snapshotStore.save(
-                EntitlementSnapshot(
-                    isPro: true,
-                    productID: snapshotStore.load()?.productID,
-                    lastUpdated: Date()
-                )
-            )
-        }
+        authenticatedProfile = session == nil ? nil : profile
         refreshIsPro()
     }
 
@@ -165,8 +160,11 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
                 clearSnapshot()
                 refreshIsPro()
             }
+            endRevalidationGraceWindow()
         } catch {
             logger.error("Failed to refresh current entitlements: \(error.localizedDescription)")
+            // Keep the last validated entitlement only until the active grace window expires.
+            refreshIsPro()
         }
     }
 
@@ -258,16 +256,54 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     private func persistSnapshot(for info: SubscriptionInfo, signedTransactionInfo: String) {
-        let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: Date())
+        let snapshot = EntitlementSnapshot(isPro: true, productID: info.product.id, lastUpdated: nowProvider())
         snapshotStore.save(snapshot)
-        cachedIsPro = true
+        cachedSnapshot = snapshot
         refreshIsPro()
         persistProfileEntitlementIfNeeded(signedTransactionInfo: signedTransactionInfo)
     }
 
     private func clearSnapshot() {
         snapshotStore.clear()
-        cachedIsPro = false
+        cachedSnapshot = nil
+    }
+
+    private func beginRevalidationGraceWindow() {
+        guard let deadline = EntitlementGracePolicy.graceDeadline(
+            hasValidatedSnapshot: cachedSnapshot?.isPro == true,
+            now: nowProvider(),
+            gracePeriod: revalidationGracePeriod
+        ) else {
+            endRevalidationGraceWindow()
+            return
+        }
+        revalidationGraceDeadline = deadline
+        scheduleGraceWindowExpiry(for: deadline)
+        refreshIsPro()
+    }
+
+    private func endRevalidationGraceWindow() {
+        revalidationGraceDeadline = nil
+        graceExpiryTask?.cancel()
+        graceExpiryTask = nil
+        refreshIsPro()
+    }
+
+    private func scheduleGraceWindowExpiry(for deadline: Date) {
+        graceExpiryTask?.cancel()
+        let delay = max(0, deadline.timeIntervalSince(nowProvider()))
+        graceExpiryTask = Task { [weak self] in
+            if delay > 0 {
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
+            await MainActor.run {
+                guard let self else { return }
+                guard self.revalidationGraceDeadline == deadline else { return }
+                self.revalidationGraceDeadline = nil
+                self.graceExpiryTask = nil
+                self.refreshIsPro()
+            }
+        }
     }
 
     private func apply(_ event: EntitlementStateMachine.Event) {
@@ -287,7 +323,13 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
     }
 
     private func refreshIsPro() {
-        let effective = cachedIsPro || profileIsPro || state.isSubscribed
+        let policy = EntitlementGracePolicy(
+            isSubscribed: state.isSubscribed,
+            hasValidatedSnapshot: cachedSnapshot?.isPro == true,
+            revalidationGraceDeadline: revalidationGraceDeadline
+        )
+        let effectiveFromProfile = authenticatedSession != nil && authenticatedProfile?.isPro == true
+        let effective = policy.effectiveIsPro(now: nowProvider()) || effectiveFromProfile
         if isPro != effective {
             isPro = effective
         }
@@ -298,12 +340,10 @@ final class StoreKitEntitlementService: ObservableObject, EntitlementServicing {
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                let profile = try await profileEntitlementSync.markPro(
+                _ = try await profileEntitlementSync.markPro(
                     signedTransactionInfo: signedTransactionInfo,
                     using: authenticatedSession
                 )
-                profileIsPro = profile.isPro
-                refreshIsPro()
             } catch {
                 logger.warning("Profile entitlement persistence failed: \(error.localizedDescription, privacy: .public)")
             }
