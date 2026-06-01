@@ -83,10 +83,31 @@ final class AppFlowStateMachineTests: XCTestCase {
         let next = stateMachine.transition(from: .demoCTA, event: .showPaywall)
         XCTAssertEqual(next, .paywall)
     }
+
+    func testDefaultOnboardingSlidesRemainExactlyThree() {
+        XCTAssertEqual(OnboardingSlide.defaultSlides.count, 3)
+        XCTAssertEqual(OnboardingSlide.defaultSlides.map(\.id), [0, 1, 2])
+    }
 }
 
 @MainActor
 final class AppFlowViewModelTests: XCTestCase {
+    func testCompleteOnboardingBeforeLastSlideDoesNotPersistOrAdvance() {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: EntitlementServiceStub()
+        )
+
+        viewModel.handleSplashFinished()
+        viewModel.completeOnboarding()
+
+        XCTAssertEqual(viewModel.state, .onboarding(index: 0))
+        XCTAssertEqual(repository.markCompletedCallCount, 0)
+        XCTAssertFalse(repository.hasCompletedOnboarding)
+    }
+
     func testCompleteOnboardingPersistsFlagAndMovesToCTA() {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
         let viewModel = AppFlowViewModel(
