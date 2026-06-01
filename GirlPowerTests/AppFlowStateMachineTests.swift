@@ -88,6 +88,16 @@ final class AppFlowStateMachineTests: XCTestCase {
         XCTAssertEqual(OnboardingSlide.defaultSlides.count, 3)
         XCTAssertEqual(OnboardingSlide.defaultSlides.map(\.id), [0, 1, 2])
     }
+
+    func testDefaultOnboardingSlidesDescribeLiveSquatCoachingFlow() {
+        let slides = OnboardingSlide.defaultSlides
+        XCTAssertEqual(slides.count, 3)
+        XCTAssertTrue(slides[0].title.localizedCaseInsensitiveContains("squat"))
+        XCTAssertTrue(slides[0].subtitle.localizedCaseInsensitiveContains("real-time"))
+        XCTAssertTrue(slides[1].subtitle.localizedCaseInsensitiveContains("tempo"))
+        XCTAssertTrue(slides[2].title.localizedCaseInsensitiveContains("demo"))
+        XCTAssertTrue(slides[2].subtitle.localizedCaseInsensitiveContains("Start Free Demo"))
+    }
 }
 
 @MainActor
