@@ -66,9 +66,12 @@ final class GirlPowerUITests: XCTestCase {
         let startDemo = app.buttons["Start Free Demo"]
         XCTAssertTrue(startDemo.waitForExistence(timeout: 2))
         startDemo.tap()
+        XCTAssertTrue(app.staticTexts["Demo Preview"].waitForExistence(timeout: 2))
         let backButton = app.buttons["demo_toolbar_back_button"]
         XCTAssertTrue(backButton.waitForExistence(timeout: 3))
         backButton.tap()
+        XCTAssertFalse(app.alerts["Session Error"].waitForExistence(timeout: 1))
+        XCTAssertTrue(startDemo.waitForExistence(timeout: 2))
     }
 
     private func relaunchAndExpectCTA() {
