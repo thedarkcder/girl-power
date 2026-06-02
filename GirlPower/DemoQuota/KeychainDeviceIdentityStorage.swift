@@ -1,19 +1,49 @@
 import Foundation
 import Security
 
+protocol KeychainSecurityClient {
+    func copyMatching(_ query: [String: Any]) -> (status: OSStatus, data: Data?)
+    func add(_ query: [String: Any]) -> OSStatus
+    func update(_ query: [String: Any], attributes: [String: Any]) -> OSStatus
+    func delete(_ query: [String: Any]) -> OSStatus
+}
+
+struct LiveKeychainSecurityClient: KeychainSecurityClient {
+    func copyMatching(_ query: [String: Any]) -> (status: OSStatus, data: Data?) {
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        return (status, result as? Data)
+    }
+
+    func add(_ query: [String: Any]) -> OSStatus {
+        SecItemAdd(query as CFDictionary, nil)
+    }
+
+    func update(_ query: [String: Any], attributes: [String: Any]) -> OSStatus {
+        SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+    }
+
+    func delete(_ query: [String: Any]) -> OSStatus {
+        SecItemDelete(query as CFDictionary)
+    }
+}
+
 final class KeychainDeviceIdentityStorage: KeychainPersisting {
     private let service: String
     private let account: String
     private let accessGroup: String?
+    private let securityClient: KeychainSecurityClient
 
     init(
         service: String = "com.route25.GirlPower.deviceid",
         account: String = "device-id",
-        accessGroup: String? = nil
+        accessGroup: String? = nil,
+        securityClient: KeychainSecurityClient = LiveKeychainSecurityClient()
     ) {
         self.service = service
         self.account = account
         self.accessGroup = accessGroup
+        self.securityClient = securityClient
     }
 
     func readUUID() throws -> UUID? {
@@ -27,7 +57,7 @@ final class KeychainDeviceIdentityStorage: KeychainPersisting {
         }
 
         try store(uuid: legacyUUID)
-        SecItemDelete(legacyQuery as CFDictionary)
+        _ = securityClient.delete(legacyQuery)
         return legacyUUID
     }
 
@@ -35,9 +65,9 @@ final class KeychainDeviceIdentityStorage: KeychainPersisting {
         let query = baseQuery(returnData: false)
         let data = uuid.uuidString.data(using: .utf8)!
 
-        var status = SecItemAdd(query.merging([kSecValueData as String: data]) { _, new in new } as CFDictionary, nil)
+        var status = securityClient.add(query.merging([kSecValueData as String: data]) { _, new in new })
         if status == errSecDuplicateItem {
-            status = SecItemUpdate(query as CFDictionary, [kSecValueData as String: data] as CFDictionary)
+            status = securityClient.update(query, attributes: [kSecValueData as String: data])
         }
         guard status == errSecSuccess else {
             throw DeviceIdentityError.keychainUnavailable
@@ -45,13 +75,13 @@ final class KeychainDeviceIdentityStorage: KeychainPersisting {
     }
 
     private func readUUID(query: [String: Any]) throws -> UUID? {
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        let result = securityClient.copyMatching(query)
+        let status = result.status
         guard status != errSecItemNotFound else { return nil }
         guard status == errSecSuccess else {
             throw DeviceIdentityError.keychainUnavailable
         }
-        guard let data = result as? Data,
+        guard let data = result.data,
               let uuidString = String(data: data, encoding: .utf8),
               let uuid = UUID(uuidString: uuidString) else {
             throw DeviceIdentityError.unableToGenerate

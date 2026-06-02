@@ -411,11 +411,21 @@ final class DemoQuotaTestIdentityProvider: DeviceIdentityProviding {
 final class DeviceIdentityProviderTests: XCTestCase {
     func testDeviceIDPersistsAcrossReinstallStyleKeychainStorage() async throws {
         let service = "com.route25.GirlPower.deviceid.tests.\(UUID().uuidString)"
-        defer { deleteKeychainItem(service: service) }
-        let firstProvider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let securityClient = DemoQuotaTestSecurityClient()
+        let firstProvider = DeviceIdentityProvider(
+            keychain: KeychainDeviceIdentityStorage(
+                service: service,
+                securityClient: securityClient
+            )
+        )
         let originalID = try await firstProvider.deviceID()
 
-        let relaunchedProvider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let relaunchedProvider = DeviceIdentityProvider(
+            keychain: KeychainDeviceIdentityStorage(
+                service: service,
+                securityClient: securityClient
+            )
+        )
         let restoredID = try await relaunchedProvider.deviceID()
 
         XCTAssertEqual(restoredID, originalID)
@@ -444,30 +454,22 @@ final class DeviceIdentityProviderTests: XCTestCase {
     func testMigratesLegacyKeychainDeviceIDIntoScopedQuery() async throws {
         let service = "com.route25.GirlPower.deviceid.tests.\(UUID().uuidString)"
         let originalID = UUID()
-        defer { deleteKeychainItem(service: service) }
+        let securityClient = DemoQuotaTestSecurityClient()
+        securityClient.seedLegacyUUID(originalID, service: service)
 
-        let legacyQuery: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
-            kSecValueData as String: originalID.uuidString.data(using: .utf8)!
-        ]
-        XCTAssertEqual(SecItemAdd(legacyQuery as CFDictionary, nil), errSecSuccess)
-
-        let provider = DeviceIdentityProvider(keychain: KeychainDeviceIdentityStorage(service: service))
+        let provider = DeviceIdentityProvider(
+            keychain: KeychainDeviceIdentityStorage(
+                service: service,
+                securityClient: securityClient
+            )
+        )
         let restoredID = try await provider.deviceID()
         let secondRead = try await provider.deviceID()
 
         XCTAssertEqual(restoredID, originalID)
         XCTAssertEqual(secondRead, originalID)
-    }
-
-    private func deleteKeychainItem(service: String) {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service
-        ]
-        SecItemDelete(query as CFDictionary)
+        XCTAssertTrue(securityClient.containsScopedUUID(originalID, service: service, account: "device-id"))
+        XCTAssertFalse(securityClient.containsLegacyUUID(service: service))
     }
 }
 
@@ -505,6 +507,68 @@ final class DemoQuotaTestKeychain: KeychainPersisting {
 
     func store(uuid: UUID) throws {
         storedUUID = uuid
+    }
+}
+
+final class DemoQuotaTestSecurityClient: KeychainSecurityClient {
+    private struct QueryKey: Hashable {
+        let service: String
+        let account: String?
+    }
+
+    private var storage: [QueryKey: Data] = [:]
+
+    func copyMatching(_ query: [String : Any]) -> (status: OSStatus, data: Data?) {
+        let key = makeKey(from: query)
+        guard let data = storage[key] else {
+            return (errSecItemNotFound, nil)
+        }
+        return (errSecSuccess, data)
+    }
+
+    func add(_ query: [String : Any]) -> OSStatus {
+        let key = makeKey(from: query)
+        guard storage[key] == nil else {
+            return errSecDuplicateItem
+        }
+        storage[key] = query[kSecValueData as String] as? Data
+        return errSecSuccess
+    }
+
+    func update(_ query: [String : Any], attributes: [String : Any]) -> OSStatus {
+        let key = makeKey(from: query)
+        guard storage[key] != nil else {
+            return errSecItemNotFound
+        }
+        storage[key] = attributes[kSecValueData as String] as? Data
+        return errSecSuccess
+    }
+
+    func delete(_ query: [String : Any]) -> OSStatus {
+        let key = makeKey(from: query)
+        if storage.removeValue(forKey: key) == nil {
+            return errSecItemNotFound
+        }
+        return errSecSuccess
+    }
+
+    func seedLegacyUUID(_ uuid: UUID, service: String) {
+        storage[QueryKey(service: service, account: nil)] = uuid.uuidString.data(using: .utf8)
+    }
+
+    func containsScopedUUID(_ uuid: UUID, service: String, account: String) -> Bool {
+        storage[QueryKey(service: service, account: account)] == uuid.uuidString.data(using: .utf8)
+    }
+
+    func containsLegacyUUID(service: String) -> Bool {
+        storage[QueryKey(service: service, account: nil)] != nil
+    }
+
+    private func makeKey(from query: [String: Any]) -> QueryKey {
+        QueryKey(
+            service: query[kSecAttrService as String] as? String ?? "",
+            account: query[kSecAttrAccount as String] as? String
+        )
     }
 }
 
