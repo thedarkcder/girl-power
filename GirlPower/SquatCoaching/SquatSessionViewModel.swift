@@ -11,6 +11,7 @@ final class SquatSessionViewModel: ObservableObject {
 
     let coordinator: SquatSessionCoordinator
     private var sessionStartDate: Date?
+    private var suppressSessionErrors = false
 
     init(coordinator: SquatSessionCoordinator = SquatSessionCoordinator()) {
         self.coordinator = coordinator
@@ -19,11 +20,14 @@ final class SquatSessionViewModel: ObservableObject {
 
     func start() {
         error = nil
+        suppressSessionErrors = false
         sessionStartDate = Date()
         coordinator.start()
     }
 
     func stop() {
+        suppressSessionErrors = true
+        error = nil
         coordinator.stop()
         sessionStartDate = nil
     }
@@ -33,6 +37,7 @@ final class SquatSessionViewModel: ObservableObject {
     }
 
     func makeSummaryInput(attemptIndex: Int) -> SessionSummaryInput {
+        suppressSessionErrors = true
         let snapshot = coordinator.captureSummarySnapshot()
         let now = Date()
         let duration = now.timeIntervalSince(sessionStartDate ?? now)
@@ -70,6 +75,7 @@ extension SquatSessionViewModel: SquatSessionCoordinatorOutput {
     }
 
     func squatSessionCoordinator(_ coordinator: SquatSessionCoordinator, didEncounter error: SquatSessionError) {
+        guard suppressSessionErrors == false else { return }
         self.error = error
         statusText = "Session error"
     }

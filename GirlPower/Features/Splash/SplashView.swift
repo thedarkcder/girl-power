@@ -30,6 +30,7 @@ struct SplashView: View {
             .accessibilityHint("Splash screen appears briefly before onboarding begins")
         }
         .ignoresSafeArea()
+        .accessibilityIdentifier("splash_screen")
         .onAppear(perform: triggerFinish)
     }
 

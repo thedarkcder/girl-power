@@ -13,21 +13,21 @@ struct OnboardingSlide: Identifiable, Equatable {
     static let defaultSlides: [OnboardingSlide] = [
         OnboardingSlide(
             id: 0,
-            title: "Celebrate Every Win",
-            subtitle: "Girl Power spotlights progress with encouraging nudges to keep the momentum going.",
-            symbolName: "sparkles"
+            title: "Meet Your Live Squat Coach",
+            subtitle: "Get real-time cues while you squat so every rep feels safer, stronger, and more confident.",
+            symbolName: "figure.strengthtraining.traditional"
         ),
         OnboardingSlide(
             id: 1,
-            title: "Set Bold Goals",
-            subtitle: "Plan big moves with focused missions, milestones, and transparent accountability.",
+            title: "Track Form In Every Set",
+            subtitle: "See tempo, depth, and coaching notes after each attempt to understand where to improve next.",
             symbolName: "target"
         ),
         OnboardingSlide(
             id: 2,
-            title: "Rally Your Crew",
-            subtitle: "Invite teammates, share updates, and stay aligned with collaborative rituals.",
-            symbolName: "person.3.fill"
+            title: "Start Your Free Demo",
+            subtitle: "Complete onboarding, tap Start Free Demo, and jump straight into the guided squat flow.",
+            symbolName: "play.circle.fill"
         )
     ]
 }

@@ -6,18 +6,15 @@ struct DemoAttemptFlowView: View {
     let onExit: () -> Void
     @StateObject private var squatViewModel = SquatSessionViewModel()
     @State private var isCompletingSummary = false
+    private let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
 
     var body: some View {
-        SquatSessionView(
-            viewModel: squatViewModel,
-            attemptIndex: attemptIndex,
-            onAttemptComplete: handleAttemptCompletion(input:)
-        )
+        content
             .navigationTitle("Squat Coaching")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button(action: onExit) {
+                    Button(action: handleExit) {
                         Image(systemName: "chevron.left")
                         Text("Exit")
                     }
@@ -27,6 +24,19 @@ struct DemoAttemptFlowView: View {
                 }
             }
             .navigationBarBackButtonHidden(true)
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if isUITesting {
+            DemoEntryStubView()
+        } else {
+            SquatSessionView(
+                viewModel: squatViewModel,
+                attemptIndex: attemptIndex,
+                onAttemptComplete: handleAttemptCompletion(input:)
+            )
+        }
     }
 
     private func handleAttemptCompletion(input: SessionSummaryInput) {
@@ -39,6 +49,35 @@ struct DemoAttemptFlowView: View {
                 isCompletingSummary = false
             }
         }
+    }
+
+    private func handleExit() {
+        squatViewModel.stop()
+        onExit()
+    }
+}
+
+private struct DemoEntryStubView: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            Spacer()
+            Image(systemName: "figure.strengthtraining.traditional")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 96, height: 96)
+                .foregroundColor(.white)
+            Text("Demo Preview")
+                .font(.largeTitle.bold())
+                .foregroundColor(.white)
+            Text("This deterministic stub confirms the onboarding CTA routed into the guided squat coaching entry flow.")
+                .font(.body)
+                .foregroundColor(.white.opacity(0.85))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityIdentifier("demo_stub_screen")
     }
 }
 

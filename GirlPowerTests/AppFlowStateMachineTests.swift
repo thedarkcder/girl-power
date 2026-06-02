@@ -83,10 +83,41 @@ final class AppFlowStateMachineTests: XCTestCase {
         let next = stateMachine.transition(from: .demoCTA, event: .showPaywall)
         XCTAssertEqual(next, .paywall)
     }
+
+    func testDefaultOnboardingSlidesRemainExactlyThree() {
+        XCTAssertEqual(OnboardingSlide.defaultSlides.count, 3)
+        XCTAssertEqual(OnboardingSlide.defaultSlides.map(\.id), [0, 1, 2])
+    }
+
+    func testDefaultOnboardingSlidesDescribeLiveSquatCoachingFlow() {
+        let slides = OnboardingSlide.defaultSlides
+        XCTAssertEqual(slides.count, 3)
+        XCTAssertTrue(slides[0].title.localizedCaseInsensitiveContains("squat"))
+        XCTAssertTrue(slides[0].subtitle.localizedCaseInsensitiveContains("real-time"))
+        XCTAssertTrue(slides[1].subtitle.localizedCaseInsensitiveContains("tempo"))
+        XCTAssertTrue(slides[2].title.localizedCaseInsensitiveContains("demo"))
+        XCTAssertTrue(slides[2].subtitle.localizedCaseInsensitiveContains("Start Free Demo"))
+    }
 }
 
 @MainActor
 final class AppFlowViewModelTests: XCTestCase {
+    func testCompleteOnboardingBeforeLastSlideDoesNotPersistOrAdvance() {
+        let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
+        let viewModel = AppFlowViewModel(
+            repository: repository,
+            demoQuotaCoordinator: DemoQuotaCoordinatorDisabled(),
+            entitlementService: EntitlementServiceStub()
+        )
+
+        viewModel.handleSplashFinished()
+        viewModel.completeOnboarding()
+
+        XCTAssertEqual(viewModel.state, .onboarding(index: 0))
+        XCTAssertEqual(repository.markCompletedCallCount, 0)
+        XCTAssertFalse(repository.hasCompletedOnboarding)
+    }
+
     func testCompleteOnboardingPersistsFlagAndMovesToCTA() {
         let repository = FakeOnboardingCompletionRepository(hasCompleted: false)
         let viewModel = AppFlowViewModel(
